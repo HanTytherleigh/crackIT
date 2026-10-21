@@ -24,14 +24,15 @@ export function FocusTimer() {
 
   return (
     <div className="focus-timer">
+      {/* The visible time is part of the accessible name, so voice control can target it. */}
       <button
         type="button"
         className="timer-btn"
         onClick={() => (done ? (setRemaining(minutes * 60), setRunning(true)) : setRunning(!running))}
-        aria-label={done ? 'Restart focus timer' : running ? `Pause focus timer, ${mm} minutes ${ss} seconds left` : `Start ${minutes} minute focus timer`}
       >
-        <span aria-hidden="true">{done ? 'Restart' : `${mm}:${ss}`}</span>
+        <span>{done ? 'Restart' : `${mm}:${ss}`}</span>
         {!done && <span aria-hidden="true" className="timer-state">{running ? '❙❙' : '▶'}</span>}
+        <span className="visually-hidden">{done ? ' focus timer' : running ? ' left. Pause focus timer' : ' focus timer. Start'}</span>
       </button>
       <span role="status" className="visually-hidden">{done ? 'Focus time is up. A short break helps it stick.' : ''}</span>
     </div>
