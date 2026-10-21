@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "modules": [
+    {
+      "id": "dsa",
+      "title": "Data structures and algorithms",
+      "description": "Big O, the core structures, and the patterns behind most technical interview questions.",
+      "status": "available",
+      "covers": [],
+      "topics": [
+        { "id": "big-o", "title": "Big O", "summary": "How work grows as the input grows." },
+        { "id": "arrays-strings", "title": "Arrays and strings", "summary": "Contiguous memory, indexing, shifting, two pointers." },
+        { "id": "hash-maps-sets", "title": "Hash maps and sets", "summary": "Constant-time lookup, hashing, collisions, resizing." },
+        { "id": "linked-lists", "title": "Linked lists", "summary": "Nodes, pointers, and rewiring them safely." },
+        { "id": "stacks-queues", "title": "Stacks and queues", "summary": "LIFO, FIFO, and spotting the hidden stack." },
+        { "id": "recursion", "title": "Recursion", "summary": "Base cases, the call stack, and repeated work." },
+        { "id": "trees-bfs-dfs", "title": "Trees, BFS and DFS", "summary": "Traversal orders and the stack or queue behind them." },
+        { "id": "heaps", "title": "Heaps", "summary": "Priority queues, sift up and down, top-k." },
+        { "id": "graphs", "title": "Graphs", "summary": "Representations, traversal, and shortest paths." },
+        { "id": "dynamic-programming", "title": "Dynamic programming", "summary": "Overlapping subproblems and filling the table." }
+      ]
+    },
+    {
+      "id": "oop",
+      "title": "Object-oriented programming and design",
+      "description": "Explain the pillars, defend a design, and recognise common patterns.",
+      "status": "locked",
+      "covers": ["The four pillars", "SOLID", "Composition versus inheritance", "Common design patterns", "Interfaces and abstraction"],
+      "topics": []
+    },
+    {
+      "id": "databases",
+      "title": "Databases and SQL",
+      "description": "Write the common queries and explain what the database does with them.",
+      "status": "locked",
+      "covers": ["Joins", "Indexes", "Normalisation", "Transactions and ACID", "SQL versus NoSQL", "Common queries"],
+      "topics": []
+    },
+    {
+      "id": "operating-systems",
+      "title": "Operating systems",
+      "description": "What the OS does for your program, and what goes wrong with concurrency.",
+      "status": "locked",
+      "covers": ["Processes versus threads", "Scheduling", "Memory and virtual memory", "Concurrency", "Race conditions and deadlock", "Synchronisation"],
+      "topics": []
+    },
+    {
+      "id": "networking",
+      "title": "Networking and the web",
+      "description": "From typing a URL to a rendered page, layer by layer.",
+      "status": "locked",
+      "covers": ["OSI and TCP/IP models", "TCP versus UDP", "DNS", "HTTP and HTTPS", "REST", "Status codes", "CORS"],
+      "topics": []
+    },
+    {
+      "id": "software-engineering",
+      "title": "Software engineering practice",
+      "description": "How teams actually ship code, and how to talk about it.",
+      "status": "locked",
+      "covers": ["Git workflows", "Unit, integration and TDD", "CI/CD", "Agile and Scrum", "Code review", "Clean code"],
+      "topics": []
+    },
+    {
+      "id": "security",
+      "title": "Security fundamentals",
+      "description": "The attacks every developer should be able to name and prevent.",
+      "status": "locked",
+      "covers": ["Authentication versus authorisation", "Hashing versus encryption", "OWASP Top 10", "SQL injection", "XSS and CSRF", "HTTPS and certificates"],
+      "topics": []
+    },
+    {
+      "id": "system-design",
+      "title": "System design basics",
+      "description": "Reason out loud about scaling a simple service.",
+      "status": "locked",
+      "covers": ["Client-server", "Load balancing", "Caching", "Scaling", "CAP theorem", "APIs and queues", "Design X walkthroughs"],
+      "topics": []
+    },
+    {
+      "id": "architecture",
+      "title": "Computer architecture and fundamentals",
+      "description": "How code actually runs, from bits to the CPU.",
+      "status": "locked",
+      "covers": ["Binary and number representation", "The CPU", "Memory hierarchy", "Compilation versus interpretation"],
+      "topics": []
+    },
+    {
+      "id": "discrete-maths",
+      "title": "Discrete maths and theory",
+      "description": "The theory you might be asked to discuss, at a conversational level.",
+      "status": "locked",
+      "covers": ["Logic", "Sets", "Recursion and induction", "P versus NP"],
+      "topics": []
+    },
+    {
+      "id": "behavioural",
+      "title": "Behavioural and professional prep",
+      "description": "Tell your story clearly and know what assessment centres look for.",
+      "status": "locked",
+      "covers": ["STAR answers", "Explaining your projects", "Ethics and professional practice", "UK graduate scheme formats"],
+      "topics": []
+    }
+  ]
+}
