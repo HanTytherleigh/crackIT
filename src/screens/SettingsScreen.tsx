@@ -1,6 +1,15 @@
 import { useState } from 'react'
 import { useSettings, type SnippetLanguage, type ThemeChoice } from '../state/settings'
 import { useProgress } from '../state/progress'
+import { usePwa } from '../lib/pwa'
+
+const checkMessage = {
+  idle: '',
+  checking: 'Checking…',
+  'up-to-date': 'You have the latest version.',
+  'update-ready': 'A new version is ready.',
+  unavailable: "Couldn't check right now. Updates are also checked automatically when you open the app.",
+} as const
 
 const themeOptions: { value: ThemeChoice; label: string }[] = [
   { value: 'system', label: 'System' },
@@ -37,6 +46,7 @@ function Segmented<T extends string>({ legend, name, value, options, onChange }:
 export function SettingsScreen() {
   const s = useSettings()
   const resetProgress = useProgress((p) => p.resetAll)
+  const pwa = usePwa()
   const [confirmReset, setConfirmReset] = useState(false)
   const [resetDone, setResetDone] = useState(false)
 
@@ -92,6 +102,21 @@ export function SettingsScreen() {
           </div>
         )}
         <p role="status" className="muted">{resetDone ? 'All data on this device was reset.' : ''}</p>
+      </section>
+
+      <section className="card stack section-gap" aria-labelledby="version-heading">
+        <h2 id="version-heading">App version</h2>
+        <p className="muted">
+          You are on version {__APP_VERSION__}. New versions download in the background, and you choose when to switch.
+        </p>
+        <div className="button-row">
+          {pwa.needRefresh ? (
+            <button type="button" className="btn btn-primary" onClick={pwa.applyUpdate}>Update now</button>
+          ) : (
+            <button type="button" className="btn" disabled={pwa.lastCheck === 'checking'} onClick={() => void pwa.checkNow()}>Check for updates</button>
+          )}
+        </div>
+        <p role="status" className="small muted">{checkMessage[pwa.lastCheck]}</p>
       </section>
 
       <p className="muted about">crackIT runs entirely on your device. No accounts, no tracking, no network calls after it loads.</p>

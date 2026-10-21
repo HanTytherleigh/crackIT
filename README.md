@@ -80,6 +80,10 @@ Export writes a JSON file. Import validates it with Zod and asks before overwrit
 - Keyboard-only use works throughout. Focus rings are visible, tap targets are at least 44 px, and every animation respects reduced motion.
 - About 190 KB of lesson content, about 50 KB of pattern content, and an 89 KB (gzipped) first download. Topics, widgets and secondary screens load on demand, and everything is precached for offline use.
 
+## Updates
+
+The service worker downloads each new deployment in the background, but never switches without asking. When a new version is ready, a banner offers **Update now** or **Later**. The app checks on launch and then every hour while it stays open, and Settings shows the current version with a **Check for updates** button. Updating reloads the page; progress is in `localStorage`, so nothing is lost. Bump `version` in `package.json` for each release: it is the version Settings displays.
+
 ## Deploy
 
 `.github/workflows/deploy.yml` builds and deploys to GitHub Pages on every push to `main`. In the repository settings, set **Pages → Source** to **GitHub Actions**. The base path comes from the repository name. CI (`.github/workflows/ci.yml`) runs the tests and build on every other branch and pull request.

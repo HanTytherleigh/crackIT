@@ -8,10 +8,16 @@ const base = process.env.BASE_PATH ?? '/crackIT/'
 
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // Ask before switching to a new version, rather than swapping it in silently.
+      registerType: 'prompt',
+      // The app registers the service worker itself (src/lib/pwa.ts), to show the update prompt.
+      injectRegister: false,
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'crackIT: CS Foundations',
@@ -34,6 +40,9 @@ export default defineConfig({
         // Precache everything, including lazily loaded content chunks, so the app works fully offline.
         globPatterns: ['**/*.{js,css,html,svg,png,json,woff2}'],
         navigateFallback: 'index.html',
+        // Take control on the very first visit so it works offline at once. Later versions still
+        // wait in the background until the user chooses "Update now".
+        clientsClaim: true,
       },
     }),
   ],
