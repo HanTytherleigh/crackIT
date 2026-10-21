@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSettings, type SnippetLanguage, type ThemeChoice } from '../state/settings'
+import { useProgress } from '../state/progress'
 
 const themeOptions: { value: ThemeChoice; label: string }[] = [
   { value: 'system', label: 'System' },
@@ -35,6 +36,7 @@ function Segmented<T extends string>({ legend, name, value, options, onChange }:
 
 export function SettingsScreen() {
   const s = useSettings()
+  const resetProgress = useProgress((p) => p.resetAll)
   const [confirmReset, setConfirmReset] = useState(false)
   const [resetDone, setResetDone] = useState(false)
 
@@ -43,6 +45,7 @@ export function SettingsScreen() {
       .filter((k) => k.startsWith('crackit.'))
       .forEach((k) => localStorage.removeItem(k))
     s.reset()
+    resetProgress()
     setConfirmReset(false)
     setResetDone(true)
   }

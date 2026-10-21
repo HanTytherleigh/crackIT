@@ -1,31 +1,59 @@
-// Fails the build if any file under /content does not match its schema.
-import { readFileSync } from 'node:fs'
-import { modulesFileSchema } from '../src/content/schema'
+// Fails the build if any file under /content does not match its schema,
+// or if files and the module map disagree with each other.
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import type { ZodType } from 'zod'
+import { modulesFileSchema, topicSchema, type ModulesFile } from '../src/content/schema'
 
-let failed = false
+const errors: string[] = []
 
-function check(path: string, parse: (data: unknown) => { success: boolean; error?: { issues: unknown[] } }) {
+function load<T>(path: string, schema: ZodType<T>): T | undefined {
   let data: unknown
   try {
     data = JSON.parse(readFileSync(path, 'utf8'))
   } catch (e) {
-    console.error(`✗ ${path}: invalid JSON (${(e as Error).message})`)
-    failed = true
-    return
+    errors.push(`${path}: invalid JSON (${(e as Error).message})`)
+    return undefined
   }
-  const result = parse(data)
+  const result = schema.safeParse(data)
   if (!result.success) {
-    console.error(`✗ ${path}`)
-    console.error(JSON.stringify(result.error?.issues, null, 2))
-    failed = true
-  } else {
-    console.log(`✓ ${path}`)
+    for (const issue of result.error.issues) errors.push(`${path}: ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+    return undefined
+  }
+  console.log(`✓ ${path}`)
+  return result.data
+}
+
+const map = load('content/modules.json', modulesFileSchema) as ModulesFile | undefined
+
+if (map) {
+  for (const m of map.modules) {
+    const topicIds = new Set(m.topics.map((t) => t.id))
+    const referenced = new Set<string>()
+    for (const ref of m.topics) {
+      if (!ref.file) continue
+      referenced.add(ref.file)
+      const path = join('content', m.id, ref.file)
+      if (!existsSync(path)) {
+        errors.push(`content/modules.json: topic "${ref.id}" points at missing file ${path}`)
+        continue
+      }
+      const topic = load(path, topicSchema)
+      if (!topic) continue
+      if (topic.id !== ref.id) errors.push(`${path}: id "${topic.id}" does not match the module map ("${ref.id}")`)
+      if (topic.moduleId !== m.id) errors.push(`${path}: moduleId "${topic.moduleId}" should be "${m.id}"`)
+      for (const p of topic.prerequisites)
+        if (!topicIds.has(p)) errors.push(`${path}: unknown prerequisite "${p}"`)
+    }
+    // A topic file that the map does not reference would never be shown.
+    const dir = join('content', m.id)
+    if (existsSync(dir))
+      for (const f of readdirSync(dir))
+        if (f.endsWith('.json') && !referenced.has(f)) errors.push(`${join(dir, f)}: not referenced from content/modules.json`)
   }
 }
 
-check('content/modules.json', (d) => modulesFileSchema.safeParse(d))
-
-if (failed) {
-  console.error('Content validation failed.')
+if (errors.length) {
+  console.error('\nContent validation failed:\n' + errors.map((e) => `  ✗ ${e}`).join('\n'))
   process.exit(1)
 }

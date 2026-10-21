@@ -1,10 +1,22 @@
 import { Link } from 'react-router-dom'
 import { ProgressMap } from '../components/ProgressMap'
-import { modules } from '../content/modules'
+import { getModule, modules } from '../content/modules'
+import { useProgress } from '../state/progress'
+
+const EXPORT_REMINDER_DAYS = 14
 
 export function HomeScreen() {
   const dsa = modules.find((m) => m.status === 'available')!
-  const first = dsa.topics[0]!
+  const lastLesson = useProgress((s) => s.lastLesson)
+  const lastExportedAt = useProgress((s) => s.lastExportedAt)
+  const started = useProgress((s) => Object.keys(s.topics).length)
+
+  const lastModule = getModule(lastLesson?.moduleId)
+  const lastTopic = lastModule?.topics.find((t) => t.id === lastLesson?.topicId)
+  const resume = lastModule && lastTopic ? { module: lastModule, topic: lastTopic } : { module: dsa, topic: dsa.topics[0]! }
+
+  const daysSinceExport = lastExportedAt ? (Date.now() - Date.parse(lastExportedAt)) / 86_400_000 : Infinity
+  const remindExport = started > 0 && daysSinceExport > EXPORT_REMINDER_DAYS
 
   return (
     <div className="page">
@@ -18,13 +30,23 @@ export function HomeScreen() {
       </section>
 
       <section className="card stack section-gap" aria-labelledby="continue-heading">
-        <h2 id="continue-heading">Start where it begins</h2>
+        <h2 id="continue-heading">{lastLesson ? 'Continue where you left off' : 'Start where it begins'}</h2>
         <p>
-          <strong>{first.title}</strong>
-          <span className="muted"> · {first.summary}</span>
+          <strong>{resume.topic.title}</strong>
+          <span className="muted"> · {resume.topic.summary}</span>
         </p>
-        <Link to={`/learn/${dsa.id}/${first.id}`} className="btn btn-primary">Start lesson</Link>
+        <Link to={`/learn/${resume.module.id}/${resume.topic.id}`} className="btn btn-primary">
+          {lastLesson ? 'Continue lesson' : 'Start lesson'}
+        </Link>
       </section>
+
+      {remindExport && (
+        <section className="card stack section-gap notice" aria-labelledby="backup-heading">
+          <h2 id="backup-heading">Keep a copy of your progress</h2>
+          <p className="muted">Your progress lives only on this device, and iOS can clear website data. An occasional export keeps it safe.</p>
+          <Link to="/progress" className="btn">Export progress</Link>
+        </section>
+      )}
 
       <section className="section-gap" aria-labelledby="map-heading">
         <h2 id="map-heading">Your map</h2>

@@ -8,7 +8,7 @@
       "status": "available",
       "covers": [],
       "topics": [
-        { "id": "big-o", "title": "Big O", "summary": "How work grows as the input grows." },
+        { "id": "big-o", "title": "Big O", "summary": "How work grows as the input grows.", "file": "01-big-o.json" },
         { "id": "arrays-strings", "title": "Arrays and strings", "summary": "Contiguous memory, indexing, shifting, two pointers." },
         { "id": "hash-maps-sets", "title": "Hash maps and sets", "summary": "Constant-time lookup, hashing, collisions, resizing." },
         { "id": "linked-lists", "title": "Linked lists", "summary": "Nodes, pointers, and rewiring them safely." },

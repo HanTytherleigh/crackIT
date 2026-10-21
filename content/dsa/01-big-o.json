@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "id": "big-o",
+  "moduleId": "dsa",
+  "title": "Big O",
+  "summary": "How work grows as the input grows.",
+  "estimatedMinutes": 20,
+  "prerequisites": [],
+  "recallPrompts": [
+    {
+      "id": "what-it-measures",
+      "prompt": "In your own words, what does Big O actually measure?"
+    },
+    {
+      "id": "guessing-game",
+      "prompt": "I pick a number between 1 and 1,000,000 and tell you *higher* or *lower* after each guess. Roughly how many guesses do you need, at most, and why?"
+    },
+    {
+      "id": "nested-loops",
+      "prompt": "Two nested loops both run over the same list of n items. What is the Big O, and what happens to the work when n doubles?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "Think of Big O as a question about **washing up**, not about how fast you wash. If the guest list doubles, does the washing up stay the same, double, or quadruple? A faster dishwasher changes the seconds, but it does not change that answer. Big O is that answer.",
+    "sections": [
+      {
+        "id": "work-not-seconds",
+        "heading": "Work, not seconds",
+        "body": "Big O describes **how the amount of work grows as the input grows**. It ignores the machine, the language and the constant speed-ups, because those change the seconds but not the shape of the growth.\n\nWe call the input size **n**: the length of a list, the number of nodes, the characters in a string. Then we ask what happens to the work as n gets large.\n\nDrag the slider and press *double the input* to see why the shape matters more than the starting point.",
+        "widget": "growth-plotter"
+      },
+      {
+        "id": "constant-and-linear",
+        "heading": "O(1) and O(n)",
+        "body": "**O(1), constant:** the work stays the same however big the input is. Reading `arr[5]` costs the same for a list of 10 or 10 million, because the computer jumps straight to that position.\n\n**O(n), linear:** the work grows in step with the input. Looking at every item once means twice the items, twice the work.\n\nOne loop over n items is O(n), not O(1). It is *one* loop, but it runs n times.",
+        "code": {
+          "ts": "function first(arr: number[]): number {\n  return arr[0]          // O(1): one step, whatever the length\n}\n\nfunction total(arr: number[]): number {\n  let sum = 0\n  for (const x of arr) { // O(n): runs once per item\n    sum += x\n  }\n  return sum\n}",
+          "py": "def first(arr):\n    return arr[0]        # O(1): one step, whatever the length\n\ndef total(arr):\n    s = 0\n    for x in arr:        # O(n): runs once per item\n        s += x\n    return s"
+        }
+      },
+      {
+        "id": "log-n",
+        "heading": "O(log n): halving",
+        "body": "Back to the guessing game. Each *higher or lower* answer throws away half of the numbers that are left. So the question becomes: **how many times can you halve n before you reach 1?** That count is log₂ n.\n\n| Range | Halvings to reach 1 |\n|---|---|\n| 1,000 | about 10 |\n| 1,000,000 | about 20 |\n| 1,000,000,000 | about 30 |\n\nMultiplying the input by a thousand adds only about ten guesses. That is why O(log n) feels almost free.\n\nBinary search plays the same game on a list, and it **needs sorted data**: *higher or lower* only means something if the order tells you which half to throw away.",
+        "widget": "binary-search-stepper",
+        "code": {
+          "ts": "function binarySearch(sorted: number[], target: number): number {\n  let lo = 0\n  let hi = sorted.length - 1\n  while (lo <= hi) {\n    const mid = Math.floor((lo + hi) / 2)\n    if (sorted[mid] === target) return mid\n    if (sorted[mid] < target) lo = mid + 1  // throw away the left half\n    else hi = mid - 1                       // throw away the right half\n  }\n  return -1\n}",
+          "py": "def binary_search(sorted_list, target):\n    lo, hi = 0, len(sorted_list) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if sorted_list[mid] == target:\n            return mid\n        if sorted_list[mid] < target:\n            lo = mid + 1   # throw away the left half\n        else:\n            hi = mid - 1   # throw away the right half\n    return -1"
+        }
+      },
+      {
+        "id": "n-squared",
+        "heading": "O(n²): nested loops",
+        "body": "A loop inside a loop, both over the same n items, does n × n steps: every item paired with every item.\n\nOften you only want **unique pairs**, so the inner loop starts after the outer one. That does n(n−1)/2 steps, roughly half as many. Is it still O(n²)? Watch what happens when n doubles:\n\n| n | All pairs, n × n | Unique pairs, n(n−1)/2 |\n|---|---|---|\n| 10 | 100 | 45 |\n| 20 | 400 | 190 |\n| 40 | 1,600 | 780 |\n\nBoth columns roughly **quadruple** each time n doubles. Halving the work is a constant factor of ½, and it does not change the shape, so both are O(n²).",
+        "code": {
+          "ts": "// All pairs: n × n steps\nfor (let i = 0; i < n; i++) {\n  for (let j = 0; j < n; j++) {\n    visit(i, j)\n  }\n}\n\n// Unique pairs: n(n − 1) / 2 steps, still O(n²)\nfor (let i = 0; i < n; i++) {\n  for (let j = i + 1; j < n; j++) {\n    visit(i, j)\n  }\n}",
+          "py": "# All pairs: n × n steps\nfor i in range(n):\n    for j in range(n):\n        visit(i, j)\n\n# Unique pairs: n(n - 1) / 2 steps, still O(n²)\nfor i in range(n):\n    for j in range(i + 1, n):\n        visit(i, j)"
+        }
+      },
+      {
+        "id": "drop-constants",
+        "heading": "Drop constants and smaller terms",
+        "body": "Suppose some code does `3n + 5` steps. Watch the parts as n grows:\n\n| n | 3n + 5 | Share that is the +5 |\n|---|---|---|\n| 10 | 35 | 14% |\n| 100 | 305 | 1.6% |\n| 1,000 | 3,005 | 0.17% |\n\nThe **+5** fades into nothing. The **3** never fades, but it never changes the shape either: doubling n still doubles 3n. Big O is about shape, so `3n + 5` is **O(n)**.\n\nThe same goes for bigger expressions: `2n² + 100n + 7` is O(n²), because n² dominates once n is large."
+      },
+      {
+        "id": "add-vs-multiply",
+        "heading": "Sequential adds, nested multiplies",
+        "body": "**One after another, add.** A loop over n, then another loop over n, is n + n = 2n, which is O(n). A loop over n followed by a nested pair of loops is n + n², which is O(n²), because you keep the dominant term.\n\n**One inside another, multiply.** Each outer step runs the whole inner loop, so n × n = n². Three loops nested over the same input gives n × n × n, which is **O(n³)**.\n\nIf the loops run over *different* inputs, keep both names: sequential loops over `a` and `b` are O(a + b), and nested ones are O(a × b).",
+        "code": {
+          "ts": "// Sequential: n + n = 2n → O(n)\nfor (const x of arr) log(x)\nfor (const x of arr) log(x)\n\n// Nested: n × n → O(n²)\nfor (const x of arr) {\n  for (const y of arr) log(x, y)\n}",
+          "py": "# Sequential: n + n = 2n → O(n)\nfor x in arr: log(x)\nfor x in arr: log(x)\n\n# Nested: n × n → O(n²)\nfor x in arr:\n    for y in arr:\n        log(x, y)"
+        }
+      },
+      {
+        "id": "triangular-trap",
+        "heading": "The triangular loop trap",
+        "body": "What if the inner loop's length depends on the outer one?\n\nWhen `i` is 0, `range(i)` is `range(0)`, which runs **zero** times. Then once, twice, and so on up to n − 1 times. The total is 0 + 1 + 2 + … + (n − 1) = **n(n − 1)/2**.\n\n| n | Inner steps |\n|---|---|\n| 4 | 6 |\n| 8 | 28 |\n| 16 | 120 |\n\nFrom 4 to 8 the count goes ×4.7, and from 8 to 16 it goes ×4.3, closing in on ×4. That is the n² signature again. An inner loop that isn't fixed does **not** break the n² pattern. It just halves it, and halving is a constant.",
+        "widget": "complexity-reader",
+        "code": {
+          "ts": "let steps = 0\nfor (let i = 0; i < n; i++) {\n  for (let j = 0; j < i; j++) {   // runs i times: 0, 1, 2, …, n − 1\n    steps++\n  }\n}\n// steps === n * (n - 1) / 2",
+          "py": "steps = 0\nfor i in range(n):\n    for j in range(i):   # runs i times: 0, 1, 2, ..., n - 1\n        steps += 1\n# steps == n * (n - 1) // 2"
+        }
+      },
+      {
+        "id": "process",
+        "heading": "A process for unfamiliar code",
+        "body": "When you meet code you have never seen, work through it in order:\n\n- **Identify n.** What input grows? There might be two, such as n and m.\n- **Find the constant-time work.** Index lookups, arithmetic and assignments are O(1).\n- **Sequential or nested?** Sequential blocks add. Nested blocks multiply.\n- **What does the inner range depend on?** A fixed number (like 5) is constant. Something tied to n or i is still O(n) per outer step.\n- **Look for halving.** A value that is divided by 2 each step, or a search space cut in half, means log n.\n- **Drop constants and smaller terms.** Keep the dominant term.\n\nIn an interview, say these steps out loud. The reasoning is worth more than the final answer."
+      }
+    ]
+  },
+  "widgets": [
+    "growth-plotter",
+    "binary-search-stepper",
+    "complexity-reader"
+  ],
+  "explainBack": {
+    "prompt": "Explain Big O to a friend who has never met it. Cover what it measures, why constants are dropped, where log n comes from, and how you would work out the Big O of a nested loop whose inner loop is `range(i)`.",
+    "rubric": [
+      {
+        "id": "work-not-time",
+        "point": "It measures how the work grows as the input grows, not time in seconds."
+      },
+      {
+        "id": "large-n",
+        "point": "It cares about large n, so the dominant term wins."
+      },
+      {
+        "id": "drop-constants",
+        "point": "Constants and smaller terms are dropped, because they don't change the shape of the growth."
+      },
+      {
+        "id": "log-halving",
+        "point": "O(log n) is the number of times n can be halved before reaching 1, like the guessing game."
+      },
+      {
+        "id": "add-multiply",
+        "point": "Sequential steps add, nested steps multiply."
+      },
+      {
+        "id": "triangular",
+        "point": "The range(i) inner loop totals n(n−1)/2, which is still O(n²)."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "index-lookup",
+      "kind": "choice",
+      "prompt": "What is the Big O of reading `arr[500]` from an array of n numbers?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "It depends on n"
+      ],
+      "answer": 0,
+      "explanation": "An array index is a direct jump to one memory position. The cost is the same for any n, so it is O(1).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Does the computer need to look at items 0 to 499 first?"
+        }
+      ]
+    },
+    {
+      "id": "guesses-million",
+      "kind": "number",
+      "prompt": "Guessing a number between 1 and 1,000,000 with *higher or lower* answers: at most how many guesses do you need?",
+      "answer": 20,
+      "tolerance": 1,
+      "explanation": "Each guess halves the range. 2²⁰ is 1,048,576, so about 20 halvings take a million down to one number.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many times can you halve 1,000,000 before you reach 1?"
+        },
+        {
+          "level": "pattern",
+          "text": "1,000 needs about 10 halvings, because 2¹⁰ = 1,024. A million is 1,000 × 1,000."
+        }
+      ]
+    },
+    {
+      "id": "sequential-loops",
+      "kind": "text",
+      "prompt": "What is the Big O of this function, where n is the length of `arr`?",
+      "code": {
+        "ts": "function show(arr: number[]) {\n  for (const x of arr) console.log(x)\n  for (const x of arr) console.log(x * 2)\n}",
+        "py": "def show(arr):\n    for x in arr:\n        print(x)\n    for x in arr:\n        print(x * 2)"
+      },
+      "accept": [
+        "O(n)",
+        "n"
+      ],
+      "placeholder": "e.g. O(n log n)",
+      "explanation": "The loops run one after the other, so the work adds: n + n = 2n. Drop the constant and it is O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Is the second loop inside the first, or after it?"
+        },
+        {
+          "level": "pattern",
+          "text": "Sequential steps add. What is n + n with the constant dropped?"
+        }
+      ]
+    },
+    {
+      "id": "fixed-inner-loop",
+      "kind": "choice",
+      "prompt": "The inner loop here always runs 5 times. What is the Big O?",
+      "code": {
+        "ts": "for (let i = 0; i < n; i++) {\n  for (let j = 0; j < 5; j++) {\n    work(i, j)\n  }\n}",
+        "py": "for i in range(n):\n    for j in range(5):\n        work(i, j)"
+      },
+      "options": [
+        "O(1)",
+        "O(n)",
+        "O(n²)",
+        "O(5n²)"
+      ],
+      "answer": 1,
+      "explanation": "Nested loops multiply, but here the inner loop is a fixed 5, not n. That is 5 × n steps, and dropping the constant gives O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Does the inner loop grow when n grows?"
+        }
+      ]
+    },
+    {
+      "id": "triangular-count",
+      "kind": "number",
+      "prompt": "For n = 8, how many times does the inner line run?",
+      "code": {
+        "ts": "for (let i = 0; i < n; i++) {\n  for (let j = 0; j < i; j++) {\n    count++\n  }\n}",
+        "py": "for i in range(n):\n    for j in range(i):\n        count += 1"
+      },
+      "answer": 28,
+      "tolerance": 0,
+      "explanation": "The inner loop runs 0, 1, 2, …, 7 times. 0 + 1 + … + 7 = 8 × 7 / 2 = 28. Remember that `range(0)` runs zero times.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Write out how many times the inner loop runs for i = 0, 1, 2, and so on."
+        },
+        {
+          "level": "pattern",
+          "text": "This is the triangular sum 0 + 1 + … + (n − 1)."
+        },
+        {
+          "level": "approach",
+          "text": "Use n(n − 1)/2 with n = 8."
+        }
+      ]
+    },
+    {
+      "id": "triangular-big-o",
+      "kind": "text",
+      "prompt": "And what is the Big O of that same triangular loop?",
+      "accept": [
+        "O(n^2)",
+        "n^2"
+      ],
+      "placeholder": "e.g. O(n)",
+      "explanation": "n(n − 1)/2 = ½n² − ½n. Keep the dominant term and drop the ½: O(n²). An inner loop that isn't fixed doesn't break the n² pattern.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Expand n(n − 1)/2. What is the biggest term?"
+        }
+      ]
+    },
+    {
+      "id": "simplify-expression",
+      "kind": "choice",
+      "prompt": "Some code does `3n² + 10n + 500` steps. What is its Big O?",
+      "options": [
+        "O(3n²)",
+        "O(n² + n)",
+        "O(n²)",
+        "O(500)"
+      ],
+      "answer": 2,
+      "explanation": "As n grows, n² dominates the other terms, and the constant 3 doesn't change the shape. Drop both and you get O(n²).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which term matters most when n is a million?"
+        }
+      ]
+    },
+    {
+      "id": "three-nested",
+      "kind": "text",
+      "prompt": "Three loops, each over the same n items, nested inside each other. What is the Big O?",
+      "accept": [
+        "O(n^3)",
+        "n^3"
+      ],
+      "placeholder": "e.g. O(n²)",
+      "explanation": "Nested loops multiply: n × n × n = n³.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Nested means multiply. How many factors of n?"
+        }
+      ]
+    },
+    {
+      "id": "halving-loop",
+      "kind": "choice",
+      "prompt": "What is the Big O of this loop?",
+      "code": {
+        "ts": "let i = n\nwhile (i > 1) {\n  i = Math.floor(i / 2)\n}",
+        "py": "i = n\nwhile i > 1:\n    i = i // 2"
+      },
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n / 2)"
+      ],
+      "answer": 1,
+      "explanation": "i is halved every step, so the loop runs as many times as n can be halved before reaching 1. That is log n.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How does i change each time round the loop?"
+        },
+        {
+          "level": "pattern",
+          "text": "Halving each step is the guessing game again."
+        }
+      ]
+    },
+    {
+      "id": "binary-search-sorted",
+      "kind": "choice",
+      "prompt": "Why does binary search only work on sorted data?",
+      "options": [
+        "Sorting makes each comparison faster.",
+        "Only sorted order tells you which half the target must be in, so the other half can be thrown away.",
+        "Unsorted lists cannot be indexed by position.",
+        "Binary search sorts the data as it goes."
+      ],
+      "answer": 1,
+      "explanation": "Comparing with the middle only tells you *higher or lower* when the list is ordered. That lets you discard half the list each step. Without order you would have to check every item.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "In the guessing game, what makes *higher* or *lower* useful?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write a function that counts how many **unique pairs** of positions (i < j) in a list have values that add up to zero. Use plain nested loops: no hash maps yet.\n\nThen, without running it, answer two things:\n\n- How many times does the inner comparison run for n = 4, 8 and 16?\n- What is its Big O, and why?",
+    "starter": {
+      "ts": "function countZeroPairs(nums: number[]): number {\n  // your code here\n}",
+      "py": "def count_zero_pairs(nums):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "To count each pair once, where should the inner loop start?"
+      },
+      {
+        "level": "pattern",
+        "text": "This is the unique pairs loop, a cousin of the triangular loop."
+      },
+      {
+        "level": "approach",
+        "text": "Outer i from 0 to n − 1, inner j from i + 1 to n − 1, and add one to a counter when nums[i] + nums[j] is 0. The inner loop runs (n − 1) + (n − 2) + … + 0 times in total."
+      }
+    ],
+    "reference": {
+      "ts": "function countZeroPairs(nums: number[]): number {\n  let count = 0\n  for (let i = 0; i < nums.length; i++) {\n    for (let j = i + 1; j < nums.length; j++) {\n      if (nums[i] + nums[j] === 0) count++\n    }\n  }\n  return count\n}",
+      "py": "def count_zero_pairs(nums):\n    count = 0\n    for i in range(len(nums)):\n        for j in range(i + 1, len(nums)):\n            if nums[i] + nums[j] == 0:\n                count += 1\n    return count"
+    },
+    "explanation": "The inner loop runs n − 1 times, then n − 2, down to 0. That totals n(n − 1)/2: **6** comparisons for n = 4, **28** for n = 8 and **120** for n = 16. It roughly quadruples each time n doubles, so it is **O(n²)**. A hash map gets this down to O(n), which you will meet in the hash maps topic.",
+    "selfCheck": [
+      "The inner loop starts at i + 1, so no pair is counted twice and no item is paired with itself.",
+      "I said 6, 28 and 120 for n = 4, 8 and 16.",
+      "I said O(n²) and explained that halving the pairs is only a constant factor."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Calling a single loop O(1) because there is only one of it.",
+      "fix": "Count how many times it runs, not how many loops you can see. One loop over n items is O(n)."
+    },
+    {
+      "mistake": "Thinking `range(0)` runs once.",
+      "fix": "`range(0)` is empty and runs zero times. That is why the triangular sum starts at 0 and gives n(n − 1)/2."
+    },
+    {
+      "mistake": "Assuming an inner loop that depends on i, like `range(i)`, is no longer O(n²).",
+      "fix": "It still adds up to about n²/2. Halving is a constant factor, so it stays O(n²)."
+    },
+    {
+      "mistake": "Multiplying loops that run one after another.",
+      "fix": "Sequential loops add, and only nested loops multiply. n + n is O(n), not O(n²)."
+    },
+    {
+      "mistake": "Treating Big O as a prediction of seconds.",
+      "fix": "It describes growth. An O(n²) algorithm can beat an O(n) one on tiny inputs, but it loses as n grows."
+    },
+    {
+      "mistake": "Calling any loop that shrinks O(log n).",
+      "fix": "Only halving (or cutting by any constant fraction) gives log n. Shrinking by 1 each step is still O(n)."
+    }
+  ]
+}

@@ -63,9 +63,11 @@ button {
   color: inherit;
 }
 
+/* Transitions are opt-in: components set transition-property, these set the timing. */
 *,
 *::before,
 *::after {
+  transition-property: none;
   transition-duration: var(--dur);
   transition-timing-function: var(--ease);
 }

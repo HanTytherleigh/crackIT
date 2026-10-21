@@ -6,6 +6,7 @@ import './styles/tokens.css'
 import './styles/global.css'
 import './styles/shell.css'
 import './styles/screens.css'
+import './styles/lesson.css'
 
 void requestPersistentStorage()
 
