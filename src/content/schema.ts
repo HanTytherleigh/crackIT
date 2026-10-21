@@ -241,3 +241,79 @@ export const complexityDrillSchema = z.object({
 
 export type ComplexityItem = z.infer<typeof complexityItemSchema>
 export type ComplexityDrill = z.infer<typeof complexityDrillSchema>
+
+// ---------------------------------------------------------------------------
+// Pattern trainer: /content/patterns.json and its drills.
+
+const exampleSchema = z.object({ title: z.string().min(1), statement: prose, why: prose })
+
+export const patternSchema = z.object({
+  id: idSchema,
+  name: z.string().min(1),
+  /** The DSA topic that teaches it, for a "revise" link. */
+  topic: idSchema,
+  cue: prose,
+  signals: z.array(z.string().min(1)).min(3),
+  complexity: z.string().min(1),
+  template: snippetSchema,
+  examples: z.array(exampleSchema).min(3),
+  confusions: z.array(z.object({ with: idSchema, difference: prose })).min(1),
+})
+
+export const patternsFileSchema = z
+  .object({ schemaVersion: z.literal(1), patterns: z.array(patternSchema).min(1) })
+  .superRefine((file, ctx) => {
+    const ids = new Set(file.patterns.map((p) => p.id))
+    if (ids.size !== file.patterns.length) ctx.addIssue({ code: 'custom', message: 'Duplicate pattern id' })
+    for (const p of file.patterns)
+      for (const c of p.confusions) {
+        if (!ids.has(c.with)) ctx.addIssue({ code: 'custom', message: `${p.id}: confusion with unknown pattern "${c.with}"` })
+        if (c.with === p.id) ctx.addIssue({ code: 'custom', message: `${p.id}: confused with itself` })
+      }
+  })
+
+export const signalItemSchema = z
+  .object({
+    id: idSchema,
+    statement: z.string().min(1),
+    pattern: idSchema,
+    options: z.array(idSchema).min(2).max(5),
+    candidates: z.array(z.object({ phrase: z.string().min(1), cue: z.boolean() })).min(2),
+    explanation: prose,
+  })
+  .superRefine((it, ctx) => {
+    if (!it.options.includes(it.pattern)) ctx.addIssue({ code: 'custom', message: `${it.id}: options must include the answer` })
+    if (new Set(it.options).size !== it.options.length) ctx.addIssue({ code: 'custom', message: `${it.id}: duplicate options` })
+    if (!it.candidates.some((c) => c.cue)) ctx.addIssue({ code: 'custom', message: `${it.id}: needs at least one real cue` })
+    for (const c of it.candidates)
+      if (!it.statement.toLowerCase().includes(c.phrase.toLowerCase()))
+        ctx.addIssue({ code: 'custom', message: `${it.id}: phrase "${c.phrase}" is not in the statement` })
+  })
+
+const sideSchema = z.object({ statement: z.string().min(1), pattern: idSchema })
+export const lookalikeItemSchema = z
+  .object({ id: idSchema, a: sideSchema, b: sideSchema, difference: prose, rubric: z.array(z.string().min(1)).min(2) })
+  .refine((it) => it.a.pattern !== it.b.pattern, { message: 'a look-alike pair must need different patterns' })
+
+export const complexityPredictionItemSchema = z
+  .object({ id: idSchema, approach: prose, options: z.array(z.string().min(1)).min(2).max(5), answer: z.number().int().min(0), explanation: prose })
+  .refine((it) => it.answer < it.options.length, { message: 'answer index out of range' })
+
+const drillFile = <T extends z.ZodType>(id: string, item: T) =>
+  z.object({ schemaVersion: z.literal(1), id: z.literal(id), title: z.string().min(1), items: z.array(item).min(1) }).superRefine((f, ctx) => {
+    const ids = f.items.map((i) => (i as { id: string }).id)
+    if (new Set(ids).size !== ids.length) ctx.addIssue({ code: 'custom', message: 'Duplicate item id' })
+  })
+
+export const signalDrillSchema = drillFile('signal-spotting', signalItemSchema)
+export const lookalikeDrillSchema = drillFile('lookalikes', lookalikeItemSchema)
+export const complexityPredictionDrillSchema = drillFile('complexity-prediction', complexityPredictionItemSchema)
+
+export type Pattern = z.infer<typeof patternSchema>
+export type PatternsFile = z.infer<typeof patternsFileSchema>
+export type SignalItem = z.infer<typeof signalItemSchema>
+export type LookalikeItem = z.infer<typeof lookalikeItemSchema>
+export type ComplexityPredictionItem = z.infer<typeof complexityPredictionItemSchema>
+export type SignalDrill = z.infer<typeof signalDrillSchema>
+export type LookalikeDrill = z.infer<typeof lookalikeDrillSchema>
+export type ComplexityPredictionDrill = z.infer<typeof complexityPredictionDrillSchema>

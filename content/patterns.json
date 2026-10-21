@@ -1,0 +1,811 @@
+{
+  "schemaVersion": 1,
+  "patterns": [
+    {
+      "id": "two-pointers",
+      "name": "Two pointers",
+      "topic": "arrays-strings",
+      "cue": "Sorted array or string, comparing items from both ends, or two positions moving through it together.",
+      "signals": [
+        "sorted",
+        "pair",
+        "from both ends",
+        "palindrome",
+        "in place",
+        "reverse"
+      ],
+      "complexity": "O(n) time, O(1) extra space",
+      "template": {
+        "ts": "let left = 0\nlet right = arr.length - 1\nwhile (left < right) {\n  if (isAnswer(arr[left], arr[right])) return [left, right]\n  if (needBigger(arr[left], arr[right])) left++\n  else right--\n}",
+        "py": "left, right = 0, len(arr) - 1\nwhile left < right:\n    if is_answer(arr[left], arr[right]):\n        return left, right\n    if need_bigger(arr[left], arr[right]):\n        left += 1\n    else:\n        right -= 1"
+      },
+      "examples": [
+        {
+          "title": "Pair sum in a sorted array",
+          "statement": "Find two numbers in a sorted array that add up to a target.",
+          "why": "Sorted order tells you which pointer to move."
+        },
+        {
+          "title": "Valid palindrome",
+          "statement": "Check whether a string reads the same forwards and backwards, ignoring punctuation.",
+          "why": "Compare the two ends and move inwards."
+        },
+        {
+          "title": "Container with most water",
+          "statement": "Choose two lines that, with the x-axis, hold the most water.",
+          "why": "Always move the shorter side: it is the only move that can help."
+        },
+        {
+          "title": "Remove duplicates in place",
+          "statement": "Remove duplicates from a sorted array without extra space.",
+          "why": "A slow write pointer and a fast read pointer move the same way."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "sliding-window",
+          "difference": "If both pointers move the same way to mark a contiguous run you are measuring, it is a sliding window."
+        },
+        {
+          "with": "hash-lookup",
+          "difference": "If the data is unsorted, a pair sum needs a hash map instead (or a sort first)."
+        }
+      ]
+    },
+    {
+      "id": "sliding-window",
+      "name": "Sliding window",
+      "topic": "arrays-strings",
+      "cue": "The best, longest or shortest contiguous subarray or substring that satisfies a condition.",
+      "signals": [
+        "contiguous",
+        "subarray",
+        "substring",
+        "consecutive",
+        "longest",
+        "at most k"
+      ],
+      "complexity": "O(n) time: each index enters and leaves the window once",
+      "template": {
+        "ts": "let left = 0\nlet best = 0\nfor (let right = 0; right < arr.length; right++) {\n  add(arr[right])\n  while (!valid()) remove(arr[left++])\n  best = Math.max(best, right - left + 1)\n}",
+        "py": "left = 0\nbest = 0\nfor right in range(len(arr)):\n    add(arr[right])\n    while not valid():\n        remove(arr[left])\n        left += 1\n    best = max(best, right - left + 1)"
+      },
+      "examples": [
+        {
+          "title": "Max sum of k consecutive items",
+          "statement": "Find the largest sum of any k consecutive numbers.",
+          "why": "Fixed window: subtract the item leaving, add the item entering."
+        },
+        {
+          "title": "Longest substring without repeats",
+          "statement": "Find the longest substring with no repeated characters.",
+          "why": "Grow right; shrink left until the window has no repeats."
+        },
+        {
+          "title": "Minimum window substring",
+          "statement": "Find the smallest substring containing every letter of another string.",
+          "why": "Grow until valid, then shrink while it stays valid."
+        },
+        {
+          "title": "Longest run with at most k distinct",
+          "statement": "Find the longest substring with at most k distinct characters.",
+          "why": "A hash map of counts tells you when the window breaks the rule."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "prefix-sums",
+          "difference": "If numbers can be negative, a window can't decide when to shrink. Counting subarrays with sum k needs prefix sums and a hash map."
+        },
+        {
+          "with": "dynamic-programming",
+          "difference": "A subsequence can skip items, which usually needs DP. A substring or subarray is contiguous: a window."
+        }
+      ]
+    },
+    {
+      "id": "fast-slow",
+      "name": "Fast and slow pointers",
+      "topic": "linked-lists",
+      "cue": "A linked list, or a sequence driven by a 'next' function, where you need the middle, a cycle, or the k-th from the end.",
+      "signals": [
+        "linked list",
+        "cycle",
+        "middle",
+        "loop",
+        "from the end"
+      ],
+      "complexity": "O(n) time, O(1) extra space",
+      "template": {
+        "ts": "let slow = head\nlet fast = head\nwhile (fast && fast.next) {\n  slow = slow.next\n  fast = fast.next.next\n  if (slow === fast) return true // a cycle\n}\nreturn false // fast ran off the end; slow is at the middle",
+        "py": "slow = fast = head\nwhile fast and fast.next:\n    slow = slow.next\n    fast = fast.next.next\n    if slow is fast:\n        return True  # a cycle\nreturn False  # fast ran off the end; slow is at the middle"
+      },
+      "examples": [
+        {
+          "title": "Linked list cycle",
+          "statement": "Decide whether a linked list loops back on itself.",
+          "why": "Fast laps slow if there is a loop."
+        },
+        {
+          "title": "Middle of a linked list",
+          "statement": "Return the middle node in one pass.",
+          "why": "When fast reaches the end, slow is halfway."
+        },
+        {
+          "title": "Happy number",
+          "statement": "Repeatedly replace a number by the sum of the squares of its digits; does it reach 1?",
+          "why": "The sequence either reaches 1 or cycles: detect the cycle."
+        },
+        {
+          "title": "Remove the k-th node from the end",
+          "statement": "Delete the k-th node from the end of a list in one pass.",
+          "why": "Start one pointer k steps ahead, then move both together."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "hash-lookup",
+          "difference": "A set of visited nodes also finds a cycle, but uses O(n) space. Fast and slow uses O(1)."
+        }
+      ]
+    },
+    {
+      "id": "hash-lookup",
+      "name": "Hash map lookup",
+      "topic": "hash-maps-sets",
+      "cue": "You need to answer 'have I seen this?' or 'how many of these?' in constant time.",
+      "signals": [
+        "seen before",
+        "duplicate",
+        "frequency",
+        "count",
+        "anagram",
+        "complement",
+        "unsorted"
+      ],
+      "complexity": "O(n) time, O(n) extra space",
+      "template": {
+        "ts": "const seen = new Map<number, number>() // value → index (or count)\nfor (let i = 0; i < arr.length; i++) {\n  const want = target - arr[i]\n  if (seen.has(want)) return [seen.get(want)!, i]\n  seen.set(arr[i], i)\n}",
+        "py": "seen = {}  # value → index (or count)\nfor i, x in enumerate(arr):\n    want = target - x\n    if want in seen:\n        return seen[want], i\n    seen[x] = i"
+      },
+      "examples": [
+        {
+          "title": "Two sum (unsorted)",
+          "statement": "Find two numbers in an unsorted array that add to a target.",
+          "why": "Look up each number's complement among those already seen."
+        },
+        {
+          "title": "Group anagrams",
+          "statement": "Group words that are anagrams of each other.",
+          "why": "Map each word's sorted letters (or letter counts) to its group."
+        },
+        {
+          "title": "First unique character",
+          "statement": "Find the first character that appears only once in a string.",
+          "why": "Count every character, then scan again."
+        },
+        {
+          "title": "Contains duplicate",
+          "statement": "Does any value appear at least twice?",
+          "why": "A set answers 'seen before?' in O(1)."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "two-pointers",
+          "difference": "On sorted data, two pointers solve pair sums in O(1) extra space."
+        },
+        {
+          "with": "prefix-sums",
+          "difference": "If the question is about sums of ranges, store running totals, often in a hash map."
+        }
+      ]
+    },
+    {
+      "id": "prefix-sums",
+      "name": "Prefix sums",
+      "topic": "arrays-strings",
+      "cue": "Many range-sum questions, or counting subarrays with a given sum, even when numbers are negative.",
+      "signals": [
+        "range sum",
+        "sum between",
+        "sum equals k",
+        "running total",
+        "cumulative"
+      ],
+      "complexity": "O(n) to build, then O(1) per range query",
+      "template": {
+        "ts": "// prefix[i] = sum of arr[0..i-1]\nconst prefix = [0]\nfor (const x of arr) prefix.push(prefix.at(-1)! + x)\nconst rangeSum = (i: number, j: number) => prefix[j + 1] - prefix[i] // arr[i..j]",
+        "py": "# prefix[i] = sum of arr[0..i-1]\nprefix = [0]\nfor x in arr:\n    prefix.append(prefix[-1] + x)\n\ndef range_sum(i, j):  # arr[i..j]\n    return prefix[j + 1] - prefix[i]"
+      },
+      "examples": [
+        {
+          "title": "Range sum queries",
+          "statement": "Answer many questions of the form 'sum of items i to j'.",
+          "why": "Precompute once; each query is a subtraction."
+        },
+        {
+          "title": "Subarray sum equals k",
+          "statement": "Count subarrays that add up to k, where numbers may be negative.",
+          "why": "Count earlier prefix sums equal to current − k with a hash map."
+        },
+        {
+          "title": "Product of array except self",
+          "statement": "For each index, the product of all other items, without division.",
+          "why": "Multiply a prefix product by a suffix product."
+        },
+        {
+          "title": "Pivot index",
+          "statement": "Find the index where the sum to the left equals the sum to the right.",
+          "why": "Total minus prefix gives the right side instantly."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "sliding-window",
+          "difference": "With only non-negative numbers, a sliding window also finds sums. With negatives, use prefix sums."
+        }
+      ]
+    },
+    {
+      "id": "binary-search",
+      "name": "Binary search",
+      "topic": "big-o",
+      "cue": "Sorted data, or a yes-or-no question that flips exactly once as the input grows, so you can search for the answer.",
+      "signals": [
+        "sorted",
+        "first",
+        "minimum",
+        "rotated",
+        "log n",
+        "search"
+      ],
+      "complexity": "O(log n) time, or O(n log M) when each check scans the input",
+      "template": {
+        "ts": "// Find the first value in [lo, hi] for which ok(value) is true\nlet lo = low\nlet hi = high\nwhile (lo < hi) {\n  const mid = Math.floor((lo + hi) / 2)\n  if (ok(mid)) hi = mid\n  else lo = mid + 1\n}\nreturn lo",
+        "py": "# Find the first value in [lo, hi] for which ok(value) is true\nlo, hi = low, high\nwhile lo < hi:\n    mid = (lo + hi) // 2\n    if ok(mid):\n        hi = mid\n    else:\n        lo = mid + 1\nreturn lo"
+      },
+      "examples": [
+        {
+          "title": "Search a sorted array",
+          "statement": "Return the index of a target in a sorted array.",
+          "why": "Each comparison halves the range."
+        },
+        {
+          "title": "First bad version",
+          "statement": "Versions are good until some point, then all bad; find the first bad one.",
+          "why": "A yes/no that flips once: search for the boundary."
+        },
+        {
+          "title": "Search a rotated sorted array",
+          "statement": "Find a target in a sorted array that has been rotated.",
+          "why": "One half is always sorted; decide which side to keep."
+        },
+        {
+          "title": "Ship packages within D days",
+          "statement": "Find the smallest ship capacity that delivers everything in D days.",
+          "why": "Binary search on the answer; check each capacity in O(n)."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "two-pointers",
+          "difference": "Two pointers walk a sorted array in O(n) looking at pairs. Binary search jumps to one position in O(log n)."
+        }
+      ]
+    },
+    {
+      "id": "stack",
+      "name": "Stack (including monotonic)",
+      "topic": "stacks-queues",
+      "cue": "The most recent unfinished thing matters: nesting, matching, undo, or the next greater or smaller item.",
+      "signals": [
+        "parentheses",
+        "brackets",
+        "nested",
+        "valid",
+        "next greater",
+        "evaluate",
+        "undo"
+      ],
+      "complexity": "O(n): each item is pushed and popped at most once",
+      "template": {
+        "ts": "// Monotonic stack: next greater element to the right\nconst result = new Array(arr.length).fill(-1)\nconst stack: number[] = [] // indexes waiting for an answer\nfor (let i = 0; i < arr.length; i++) {\n  while (stack.length && arr[stack.at(-1)!] < arr[i]) result[stack.pop()!] = arr[i]\n  stack.push(i)\n}",
+        "py": "# Monotonic stack: next greater element to the right\nresult = [-1] * len(arr)\nstack = []  # indexes waiting for an answer\nfor i, x in enumerate(arr):\n    while stack and arr[stack[-1]] < x:\n        result[stack.pop()] = x\n    stack.append(i)"
+      },
+      "examples": [
+        {
+          "title": "Valid parentheses",
+          "statement": "Check that every bracket is closed in the right order.",
+          "why": "The most recent opener must close first."
+        },
+        {
+          "title": "Daily temperatures",
+          "statement": "For each day, how many days until a warmer one?",
+          "why": "A monotonic stack holds days still waiting."
+        },
+        {
+          "title": "Evaluate reverse Polish notation",
+          "statement": "Evaluate an expression like '3 4 + 2 *'.",
+          "why": "Push numbers; an operator pops its two operands."
+        },
+        {
+          "title": "Largest rectangle in a histogram",
+          "statement": "Find the largest rectangle under a bar chart.",
+          "why": "A monotonic stack finds each bar's nearest smaller neighbours."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "bfs",
+          "difference": "If items should be handled in arrival order (oldest first), that is a queue, as in BFS."
+        },
+        {
+          "with": "heap-top-k",
+          "difference": "'Next greater' looks at neighbours in order: a stack. 'k largest overall' ignores position: a heap."
+        }
+      ]
+    },
+    {
+      "id": "bfs",
+      "name": "Breadth-first search",
+      "topic": "trees-bfs-dfs",
+      "cue": "The fewest steps in an unweighted graph or grid, or processing something level by level.",
+      "signals": [
+        "shortest",
+        "minimum steps",
+        "fewest",
+        "level",
+        "nearest",
+        "layer"
+      ],
+      "complexity": "O(V + E) time, O(V) space",
+      "template": {
+        "ts": "const queue = [start]\nconst dist = new Map([[start, 0]])\nwhile (queue.length) {\n  const node = queue.shift()! // use a real deque for big inputs\n  for (const next of neighbours(node)) {\n    if (dist.has(next)) continue\n    dist.set(next, dist.get(node)! + 1)\n    queue.push(next)\n  }\n}",
+        "py": "from collections import deque\nqueue = deque([start])\ndist = {start: 0}\nwhile queue:\n    node = queue.popleft()\n    for nxt in neighbours(node):\n        if nxt in dist:\n            continue\n        dist[nxt] = dist[node] + 1\n        queue.append(nxt)"
+      },
+      "examples": [
+        {
+          "title": "Level-order traversal",
+          "statement": "Return a binary tree's values level by level.",
+          "why": "A queue keeps each level together."
+        },
+        {
+          "title": "Shortest path in a grid",
+          "statement": "Fewest moves from the top-left to the bottom-right of a grid with walls.",
+          "why": "Every move costs 1, so BFS finds the fewest."
+        },
+        {
+          "title": "Word ladder",
+          "statement": "Fewest one-letter changes to turn one word into another.",
+          "why": "Words are nodes; one-letter changes are edges."
+        },
+        {
+          "title": "Rotting oranges",
+          "statement": "Minutes until every orange is rotten, spreading to neighbours each minute.",
+          "why": "Multi-source BFS: every rotten orange starts in the queue."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "dfs",
+          "difference": "DFS explores fully but can find a long path first. For fewest steps, use BFS."
+        },
+        {
+          "with": "graph-traversal",
+          "difference": "If edges have different weights, BFS is wrong: use Dijkstra with a heap."
+        }
+      ]
+    },
+    {
+      "id": "dfs",
+      "name": "Depth-first search",
+      "topic": "graphs",
+      "cue": "Explore everything reachable, or follow one path all the way down: components, flood fill, reachability.",
+      "signals": [
+        "connected",
+        "islands",
+        "reachable",
+        "flood fill",
+        "region",
+        "all paths"
+      ],
+      "complexity": "O(V + E) time, O(V) space (the stack or recursion)",
+      "template": {
+        "ts": "const seen = new Set<Node>()\nfunction explore(node: Node) {\n  if (seen.has(node)) return\n  seen.add(node)\n  for (const next of neighbours(node)) explore(next)\n}",
+        "py": "seen = set()\ndef explore(node):\n    if node in seen:\n        return\n    seen.add(node)\n    for nxt in neighbours(node):\n        explore(nxt)"
+      },
+      "examples": [
+        {
+          "title": "Number of islands",
+          "statement": "Count groups of connected land cells in a grid.",
+          "why": "Each DFS from unvisited land marks one island."
+        },
+        {
+          "title": "Flood fill",
+          "statement": "Recolour the region connected to a starting pixel.",
+          "why": "Visit every same-coloured neighbour."
+        },
+        {
+          "title": "Max area of an island",
+          "statement": "Find the size of the largest island.",
+          "why": "Each DFS returns the size of what it explored."
+        },
+        {
+          "title": "Path exists",
+          "statement": "Is there any route from A to B?",
+          "why": "Explore from A until you hit B or run out."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "bfs",
+          "difference": "DFS answers 'is it reachable?' but not 'in how few steps?'. For that, use BFS."
+        },
+        {
+          "with": "backtracking",
+          "difference": "Backtracking is DFS over choices that undoes each choice to try the next."
+        }
+      ]
+    },
+    {
+      "id": "backtracking",
+      "name": "Recursion and backtracking",
+      "topic": "recursion",
+      "cue": "Generate every combination, permutation or subset, or search for a valid arrangement by trying choices and undoing them.",
+      "signals": [
+        "all possible",
+        "every combination",
+        "permutations",
+        "subsets",
+        "generate",
+        "arrangement"
+      ],
+      "complexity": "Exponential: O(2ⁿ) subsets, O(n!) permutations",
+      "template": {
+        "ts": "const results: number[][] = []\nfunction choose(start: number, path: number[]) {\n  results.push([...path]) // record this combination\n  for (let i = start; i < items.length; i++) {\n    path.push(items[i]) // choose\n    choose(i + 1, path) // explore\n    path.pop() // un-choose\n  }\n}\nchoose(0, [])",
+        "py": "results = []\ndef choose(start, path):\n    results.append(path[:])  # record this combination\n    for i in range(start, len(items)):\n        path.append(items[i])  # choose\n        choose(i + 1, path)    # explore\n        path.pop()             # un-choose\nchoose(0, [])"
+      },
+      "examples": [
+        {
+          "title": "Subsets",
+          "statement": "Return every subset of a set of numbers.",
+          "why": "At each item, include it or not, then undo."
+        },
+        {
+          "title": "Permutations",
+          "statement": "Return every ordering of a list.",
+          "why": "Pick each unused item next, recurse, then put it back."
+        },
+        {
+          "title": "Combination sum",
+          "statement": "List every combination of numbers that adds to a target.",
+          "why": "Choose, recurse with the reduced target, un-choose."
+        },
+        {
+          "title": "N-queens",
+          "statement": "Place n queens on an n × n board so none attack each other.",
+          "why": "Place row by row; undo when a row has no safe square."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "dynamic-programming",
+          "difference": "If you only need to **count** the ways or find the best one, the subproblems usually overlap: use DP. Backtracking **lists** them all."
+        },
+        {
+          "with": "dfs",
+          "difference": "DFS visits each node once. Backtracking revisits states through different choice paths."
+        }
+      ]
+    },
+    {
+      "id": "heap-top-k",
+      "name": "Heaps and top-k",
+      "topic": "heaps",
+      "cue": "The k largest, smallest, closest or most frequent, or always process the smallest or most urgent item next.",
+      "signals": [
+        "k largest",
+        "k smallest",
+        "top k",
+        "k closest",
+        "most frequent",
+        "median",
+        "merge k sorted"
+      ],
+      "complexity": "O(n log k) time, O(k) space",
+      "template": {
+        "ts": "// k largest: keep a min-heap of size k\nfor (const x of items) {\n  heap.push(x)\n  if (heap.size > k) heap.pop() // drop the smallest\n}",
+        "py": "import heapq\nheap = []  # k largest: keep a min-heap of size k\nfor x in items:\n    heapq.heappush(heap, x)\n    if len(heap) > k:\n        heapq.heappop(heap)  # drop the smallest"
+      },
+      "examples": [
+        {
+          "title": "Kth largest element",
+          "statement": "Find the k-th largest number in an unsorted array.",
+          "why": "A min-heap of size k keeps the k largest; its root is the answer."
+        },
+        {
+          "title": "Top k frequent words",
+          "statement": "Return the k most frequent words.",
+          "why": "Count with a hash map, then keep a heap of size k."
+        },
+        {
+          "title": "Merge k sorted lists",
+          "statement": "Merge k sorted linked lists into one.",
+          "why": "A heap of the k current heads gives the next smallest."
+        },
+        {
+          "title": "Median of a data stream",
+          "statement": "Report the median as numbers arrive.",
+          "why": "Two heaps: a max-heap of the lower half, a min-heap of the upper."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "stack",
+          "difference": "'Next greater to the right' depends on position: a monotonic stack. 'k largest overall' doesn't: a heap."
+        },
+        {
+          "with": "binary-search",
+          "difference": "If the data is already sorted, the k-th item is just an index."
+        }
+      ]
+    },
+    {
+      "id": "intervals",
+      "name": "Intervals",
+      "topic": "arrays-strings",
+      "cue": "Ranges with a start and an end: overlapping, merging, inserting, or scheduling rooms.",
+      "signals": [
+        "intervals",
+        "overlapping",
+        "meetings",
+        "start and end",
+        "merge",
+        "rooms"
+      ],
+      "complexity": "O(n log n) to sort by start, then O(n)",
+      "template": {
+        "ts": "intervals.sort((a, b) => a[0] - b[0])\nconst merged: [number, number][] = []\nfor (const [s, e] of intervals) {\n  const last = merged.at(-1)\n  if (last && s <= last[1]) last[1] = Math.max(last[1], e)\n  else merged.push([s, e])\n}",
+        "py": "intervals.sort(key=lambda iv: iv[0])\nmerged = []\nfor s, e in intervals:\n    if merged and s <= merged[-1][1]:\n        merged[-1][1] = max(merged[-1][1], e)\n    else:\n        merged.append([s, e])"
+      },
+      "examples": [
+        {
+          "title": "Merge intervals",
+          "statement": "Merge all overlapping intervals.",
+          "why": "Sort by start; each interval either extends the last one or starts a new one."
+        },
+        {
+          "title": "Insert interval",
+          "statement": "Insert a new interval into a sorted, non-overlapping list.",
+          "why": "Copy the ones before, merge the overlaps, copy the rest."
+        },
+        {
+          "title": "Meeting rooms",
+          "statement": "Can one person attend every meeting?",
+          "why": "Sort by start and check each against the previous end."
+        },
+        {
+          "title": "Meeting rooms II",
+          "statement": "The fewest rooms needed for all meetings.",
+          "why": "A min-heap of end times tracks rooms in use."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "greedy",
+          "difference": "'Remove the fewest intervals so none overlap' sorts by **end** and is greedy."
+        },
+        {
+          "with": "heap-top-k",
+          "difference": "Counting simultaneous meetings needs a heap of end times on top of sorting."
+        }
+      ]
+    },
+    {
+      "id": "tree-traversal",
+      "name": "Tree traversal",
+      "topic": "trees-bfs-dfs",
+      "cue": "A binary tree question you can answer by combining the answers for the left and right subtrees, or that needs a particular visit order.",
+      "signals": [
+        "binary tree",
+        "BST",
+        "depth",
+        "height",
+        "subtree",
+        "ancestor",
+        "in-order"
+      ],
+      "complexity": "O(n) time, O(h) space for the recursion",
+      "template": {
+        "ts": "function solve(node: TreeNode | null): number {\n  if (node === null) return 0 // base case\n  const left = solve(node.left)\n  const right = solve(node.right)\n  return combine(node, left, right)\n}",
+        "py": "def solve(node):\n    if node is None:\n        return 0  # base case\n    left = solve(node.left)\n    right = solve(node.right)\n    return combine(node, left, right)"
+      },
+      "examples": [
+        {
+          "title": "Maximum depth",
+          "statement": "Find the number of levels in a binary tree.",
+          "why": "1 + the larger of the two subtree depths."
+        },
+        {
+          "title": "Validate a BST",
+          "statement": "Check the binary search tree property holds everywhere.",
+          "why": "Pass down the (low, high) bounds."
+        },
+        {
+          "title": "Lowest common ancestor",
+          "statement": "Find the deepest node that has both p and q below it.",
+          "why": "The answer is where p and q are found in different subtrees."
+        },
+        {
+          "title": "Kth smallest in a BST",
+          "statement": "Find the k-th smallest value in a BST.",
+          "why": "In-order visits a BST in sorted order."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "bfs",
+          "difference": "If the question is about levels, or the nearest leaf, BFS can stop early."
+        },
+        {
+          "with": "graph-traversal",
+          "difference": "Trees have no cycles, so tree recursion needs no visited set. Graphs do."
+        }
+      ]
+    },
+    {
+      "id": "graph-traversal",
+      "name": "Graph traversal",
+      "topic": "graphs",
+      "cue": "Things connected by relationships (dependencies, friendships, routes): build a graph, then search it, order it or find paths.",
+      "signals": [
+        "prerequisites",
+        "dependencies",
+        "network",
+        "connections",
+        "friends",
+        "route"
+      ],
+      "complexity": "O(V + E) to build and search; Dijkstra is O((V + E) log V)",
+      "template": {
+        "ts": "// Build an adjacency list, then search with a visited set\nconst adj = new Map<number, number[]>()\nfor (const [a, b] of edges) {\n  if (!adj.has(a)) adj.set(a, [])\n  if (!adj.has(b)) adj.set(b, [])\n  adj.get(a)!.push(b)\n  adj.get(b)!.push(a) // undirected\n}",
+        "py": "# Build an adjacency list, then search with a visited set\nfrom collections import defaultdict\nadj = defaultdict(list)\nfor a, b in edges:\n    adj[a].append(b)\n    adj[b].append(a)  # undirected"
+      },
+      "examples": [
+        {
+          "title": "Course schedule",
+          "statement": "Can you finish every course given its prerequisites? In what order?",
+          "why": "Topological sort; a leftover cycle means impossible."
+        },
+        {
+          "title": "Number of provinces",
+          "statement": "How many groups of cities are connected directly or indirectly?",
+          "why": "Count connected components."
+        },
+        {
+          "title": "Clone graph",
+          "statement": "Deep-copy a graph of nodes and neighbours.",
+          "why": "Traverse with a map from original to copy."
+        },
+        {
+          "title": "Network delay time",
+          "statement": "How long until a signal reaches every node, given weighted travel times?",
+          "why": "Weighted shortest paths: Dijkstra with a heap."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "tree-traversal",
+          "difference": "A tree is a graph with no cycles and one parent per node, so it needs no visited set."
+        },
+        {
+          "with": "bfs",
+          "difference": "BFS is one way to search a graph; the pattern here is spotting that the problem is a graph at all."
+        }
+      ]
+    },
+    {
+      "id": "dynamic-programming",
+      "name": "Dynamic programming",
+      "topic": "dynamic-programming",
+      "cue": "Count the ways, or find the minimum or maximum, where choices carry forward and the same subproblems keep coming back.",
+      "signals": [
+        "number of ways",
+        "minimum cost",
+        "maximum profit",
+        "longest increasing",
+        "can you reach",
+        "subsequence"
+      ],
+      "complexity": "Number of states × work per state",
+      "template": {
+        "ts": "const dp = new Array(n + 1).fill(0)\ndp[0] = base\nfor (let i = 1; i <= n; i++) {\n  dp[i] = best(/* answers for smaller states, e.g. dp[i - 1], dp[i - 2] */)\n}\nreturn dp[n]",
+        "py": "dp = [0] * (n + 1)\ndp[0] = base\nfor i in range(1, n + 1):\n    dp[i] = best(...)  # answers for smaller states, e.g. dp[i - 1], dp[i - 2]\nreturn dp[n]"
+      },
+      "examples": [
+        {
+          "title": "Climbing stairs",
+          "statement": "How many ways to climb n stairs taking 1 or 2 steps?",
+          "why": "ways(n) = ways(n − 1) + ways(n − 2)."
+        },
+        {
+          "title": "Coin change",
+          "statement": "The fewest coins that make an amount.",
+          "why": "dp[c] = 1 + min over coins of dp[c − coin]."
+        },
+        {
+          "title": "House robber",
+          "statement": "Rob houses along a street for the most money without robbing two neighbours.",
+          "why": "dp[i] = max(skip house i, rob it + dp[i − 2])."
+        },
+        {
+          "title": "Edit distance",
+          "statement": "The fewest single-letter edits to turn one word into another.",
+          "why": "A 2D table over prefixes of both words."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "greedy",
+          "difference": "If a local choice can be wrong (coins 1, 3, 4 for amount 6), you need DP."
+        },
+        {
+          "with": "backtracking",
+          "difference": "Listing every option is backtracking. Counting them, or finding the best, is usually DP."
+        }
+      ]
+    },
+    {
+      "id": "greedy",
+      "name": "Greedy",
+      "topic": "dynamic-programming",
+      "cue": "A locally best choice is provably safe: sort by the right key, then take whatever fits.",
+      "signals": [
+        "as many as possible",
+        "non-overlapping",
+        "earliest",
+        "deadline",
+        "jump",
+        "minimum number of"
+      ],
+      "complexity": "Usually O(n log n) for the sort, then O(n)",
+      "template": {
+        "ts": "items.sort((a, b) => key(a) - key(b))\nlet count = 0\nfor (const item of items) {\n  if (fits(item)) {\n    take(item)\n    count++\n  }\n}",
+        "py": "items.sort(key=key)\ncount = 0\nfor item in items:\n    if fits(item):\n        take(item)\n        count += 1"
+      },
+      "examples": [
+        {
+          "title": "Non-overlapping intervals",
+          "statement": "Remove the fewest intervals so the rest don't overlap.",
+          "why": "Sort by end and keep each interval that starts after the last kept end."
+        },
+        {
+          "title": "Jump game",
+          "statement": "Can you reach the last index, where each value is your maximum jump?",
+          "why": "Track the furthest reachable index in one pass."
+        },
+        {
+          "title": "Best time to buy and sell stock",
+          "statement": "One buy, then one sell: the maximum profit.",
+          "why": "Track the lowest price so far; the best sale is today's price minus it."
+        },
+        {
+          "title": "Assign cookies",
+          "statement": "Give cookies to as many children as possible, each needing a minimum size.",
+          "why": "Sort both; give each child the smallest cookie that fits."
+        }
+      ],
+      "confusions": [
+        {
+          "with": "dynamic-programming",
+          "difference": "Greedy never revisits a choice. If you can find a counter-example where it fails, use DP."
+        },
+        {
+          "with": "intervals",
+          "difference": "Interval problems are often greedy after sorting, but merging is a different job."
+        }
+      ]
+    }
+  ]
+}

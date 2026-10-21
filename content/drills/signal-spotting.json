@@ -1,0 +1,611 @@
+{
+  "schemaVersion": 1,
+  "id": "signal-spotting",
+  "title": "Signal spotting",
+  "items": [
+    {
+      "id": "sorted-pair",
+      "statement": "Given a sorted array of integers and a target, return the indices of the pair whose sum equals the target, using constant extra space.",
+      "pattern": "two-pointers",
+      "options": [
+        "two-pointers",
+        "hash-lookup",
+        "binary-search",
+        "sliding-window"
+      ],
+      "candidates": [
+        {
+          "phrase": "sorted",
+          "cue": true
+        },
+        {
+          "phrase": "integers",
+          "cue": false
+        },
+        {
+          "phrase": "indices",
+          "cue": false
+        },
+        {
+          "phrase": "pair",
+          "cue": true
+        },
+        {
+          "phrase": "constant extra space",
+          "cue": true
+        }
+      ],
+      "explanation": "**Sorted** plus a **pair** is the two-pointer signature, and **constant extra space** rules out a hash map."
+    },
+    {
+      "id": "distinct-substring",
+      "statement": "Given a string, find the length of the longest substring that contains at most two distinct characters.",
+      "pattern": "sliding-window",
+      "options": [
+        "sliding-window",
+        "dynamic-programming",
+        "hash-lookup",
+        "two-pointers"
+      ],
+      "candidates": [
+        {
+          "phrase": "Given a string",
+          "cue": false
+        },
+        {
+          "phrase": "length",
+          "cue": false
+        },
+        {
+          "phrase": "longest substring",
+          "cue": true
+        },
+        {
+          "phrase": "at most two distinct",
+          "cue": true
+        }
+      ],
+      "explanation": "**Longest substring** (contiguous) with a condition like **at most two distinct** is a variable sliding window. A hash map of counts helps, but the window is the pattern."
+    },
+    {
+      "id": "list-cycle",
+      "statement": "Given the head of a linked list, decide whether it contains a cycle, using O(1) memory.",
+      "pattern": "fast-slow",
+      "options": [
+        "fast-slow",
+        "hash-lookup",
+        "dfs",
+        "stack"
+      ],
+      "candidates": [
+        {
+          "phrase": "the head",
+          "cue": false
+        },
+        {
+          "phrase": "linked list",
+          "cue": true
+        },
+        {
+          "phrase": "cycle",
+          "cue": true
+        },
+        {
+          "phrase": "O(1) memory",
+          "cue": true
+        }
+      ],
+      "explanation": "A **cycle** in a **linked list** with **O(1) memory** is Floyd's fast and slow pointers. A visited set would need O(n) memory."
+    },
+    {
+      "id": "group-anagrams",
+      "statement": "Given a list of words, group together the words that are anagrams of each other.",
+      "pattern": "hash-lookup",
+      "options": [
+        "hash-lookup",
+        "backtracking",
+        "two-pointers",
+        "greedy"
+      ],
+      "candidates": [
+        {
+          "phrase": "list of words",
+          "cue": false
+        },
+        {
+          "phrase": "group together",
+          "cue": true
+        },
+        {
+          "phrase": "anagrams",
+          "cue": true
+        }
+      ],
+      "explanation": "**Anagrams** share a key (sorted letters or letter counts), and **group together** means a hash map from key to group."
+    },
+    {
+      "id": "negative-subarrays",
+      "statement": "Given an array of integers, which may be negative, count the number of contiguous subarrays whose sum equals k.",
+      "pattern": "prefix-sums",
+      "options": [
+        "prefix-sums",
+        "sliding-window",
+        "dynamic-programming",
+        "two-pointers"
+      ],
+      "candidates": [
+        {
+          "phrase": "array of integers",
+          "cue": false
+        },
+        {
+          "phrase": "may be negative",
+          "cue": true
+        },
+        {
+          "phrase": "contiguous subarrays",
+          "cue": false
+        },
+        {
+          "phrase": "sum equals k",
+          "cue": true
+        }
+      ],
+      "explanation": "**Contiguous subarrays** tempts you towards a sliding window, but **may be negative** breaks it: a window can't tell when to shrink. Counting **sum equals k** uses prefix sums with a hash map of earlier totals."
+    },
+    {
+      "id": "ship-capacity",
+      "statement": "Packages must be shipped within D days in the given order. Find the minimum ship capacity that makes this possible.",
+      "pattern": "binary-search",
+      "options": [
+        "binary-search",
+        "greedy",
+        "dynamic-programming",
+        "heap-top-k"
+      ],
+      "candidates": [
+        {
+          "phrase": "within D days",
+          "cue": false
+        },
+        {
+          "phrase": "in the given order",
+          "cue": false
+        },
+        {
+          "phrase": "minimum ship capacity",
+          "cue": true
+        },
+        {
+          "phrase": "makes this possible",
+          "cue": true
+        }
+      ],
+      "explanation": "\"Find the **minimum** value that **makes this possible**\" is binary search on the answer: if a capacity works, every larger one does too. Each check is a greedy O(n) scan."
+    },
+    {
+      "id": "warmer-day",
+      "statement": "Given daily temperatures, return for each day how many days you would have to wait until a warmer temperature.",
+      "pattern": "stack",
+      "options": [
+        "stack",
+        "heap-top-k",
+        "two-pointers",
+        "dynamic-programming"
+      ],
+      "candidates": [
+        {
+          "phrase": "daily temperatures",
+          "cue": false
+        },
+        {
+          "phrase": "for each day",
+          "cue": true
+        },
+        {
+          "phrase": "until a warmer",
+          "cue": true
+        }
+      ],
+      "explanation": "**For each** item, the next one that is **warmer** (greater) is the monotonic stack signature."
+    },
+    {
+      "id": "brackets",
+      "statement": "Given a string containing only the characters ( ) [ ] { }, determine whether every bracket is closed in the correct order.",
+      "pattern": "stack",
+      "options": [
+        "stack",
+        "two-pointers",
+        "hash-lookup",
+        "greedy"
+      ],
+      "candidates": [
+        {
+          "phrase": "a string containing",
+          "cue": false
+        },
+        {
+          "phrase": "bracket",
+          "cue": true
+        },
+        {
+          "phrase": "closed in the correct order",
+          "cue": true
+        }
+      ],
+      "explanation": "Brackets **closed in the correct order** means the most recent opener must close first: a stack."
+    },
+    {
+      "id": "maze-steps",
+      "statement": "In a grid maze with walls, return the minimum number of steps to get from the start cell to the exit, moving up, down, left or right.",
+      "pattern": "bfs",
+      "options": [
+        "bfs",
+        "dfs",
+        "dynamic-programming",
+        "greedy"
+      ],
+      "candidates": [
+        {
+          "phrase": "grid",
+          "cue": true
+        },
+        {
+          "phrase": "walls",
+          "cue": false
+        },
+        {
+          "phrase": "minimum number of steps",
+          "cue": true
+        },
+        {
+          "phrase": "up, down, left or right",
+          "cue": false
+        }
+      ],
+      "explanation": "A **grid** is a graph, and the **minimum number of steps** with equal-cost moves is BFS. The walls and move directions just define the edges; they don't choose the algorithm."
+    },
+    {
+      "id": "count-islands",
+      "statement": "Given a map of land and water cells, count how many separate islands there are, where land connects horizontally or vertically.",
+      "pattern": "dfs",
+      "options": [
+        "dfs",
+        "dynamic-programming",
+        "sliding-window",
+        "heap-top-k"
+      ],
+      "candidates": [
+        {
+          "phrase": "land and water cells",
+          "cue": false
+        },
+        {
+          "phrase": "separate islands",
+          "cue": true
+        },
+        {
+          "phrase": "connects",
+          "cue": true
+        }
+      ],
+      "explanation": "Counting **separate** groups of things that **connect** is connected components: start a DFS (or BFS) from each unvisited land cell."
+    },
+    {
+      "id": "all-subsets",
+      "statement": "Return every possible subset of a set of distinct numbers.",
+      "pattern": "backtracking",
+      "options": [
+        "backtracking",
+        "dynamic-programming",
+        "greedy",
+        "bfs"
+      ],
+      "candidates": [
+        {
+          "phrase": "every possible subset",
+          "cue": true
+        },
+        {
+          "phrase": "distinct numbers",
+          "cue": false
+        }
+      ],
+      "explanation": "**Every possible** subset must be listed, so you have to generate them all: backtracking (include or exclude each number, then undo)."
+    },
+    {
+      "id": "frequent-words",
+      "statement": "Given a list of words, return the k most frequent words.",
+      "pattern": "heap-top-k",
+      "options": [
+        "heap-top-k",
+        "sliding-window",
+        "binary-search",
+        "stack"
+      ],
+      "candidates": [
+        {
+          "phrase": "list of words",
+          "cue": false
+        },
+        {
+          "phrase": "k most frequent",
+          "cue": true
+        }
+      ],
+      "explanation": "**k most frequent** is top-k: count with a hash map, then keep a heap of size k."
+    },
+    {
+      "id": "merge-meetings",
+      "statement": "Given a list of meeting times as start and end pairs, merge all the overlapping meetings.",
+      "pattern": "intervals",
+      "options": [
+        "intervals",
+        "greedy",
+        "two-pointers",
+        "heap-top-k"
+      ],
+      "candidates": [
+        {
+          "phrase": "a list of",
+          "cue": false
+        },
+        {
+          "phrase": "start and end",
+          "cue": true
+        },
+        {
+          "phrase": "overlapping",
+          "cue": true
+        }
+      ],
+      "explanation": "**Start and end** pairs that may be **overlapping** are intervals: sort by start, then merge in one pass."
+    },
+    {
+      "id": "bst-ancestor",
+      "statement": "Given a binary search tree and two of its nodes, find their lowest common ancestor.",
+      "pattern": "tree-traversal",
+      "options": [
+        "tree-traversal",
+        "bfs",
+        "graph-traversal",
+        "binary-search"
+      ],
+      "candidates": [
+        {
+          "phrase": "binary search tree",
+          "cue": true
+        },
+        {
+          "phrase": "two of its nodes",
+          "cue": false
+        },
+        {
+          "phrase": "common ancestor",
+          "cue": true
+        }
+      ],
+      "explanation": "A **binary search tree** question about an **ancestor** is tree recursion. The BST order tells you which subtree to walk into."
+    },
+    {
+      "id": "course-order",
+      "statement": "There are n courses, and some courses have prerequisites. Return an order in which all courses can be taken, or an empty list if that is impossible.",
+      "pattern": "graph-traversal",
+      "options": [
+        "graph-traversal",
+        "greedy",
+        "dynamic-programming",
+        "heap-top-k"
+      ],
+      "candidates": [
+        {
+          "phrase": "n courses",
+          "cue": false
+        },
+        {
+          "phrase": "prerequisites",
+          "cue": true
+        },
+        {
+          "phrase": "an order",
+          "cue": true
+        }
+      ],
+      "explanation": "**Prerequisites** are directed edges, and **an order** respecting them is a topological sort. Impossible means a cycle."
+    },
+    {
+      "id": "house-robber",
+      "statement": "Houses along a street hold different amounts of money. You cannot rob two adjacent houses. Find the maximum amount you can rob.",
+      "pattern": "dynamic-programming",
+      "options": [
+        "dynamic-programming",
+        "greedy",
+        "sliding-window",
+        "backtracking"
+      ],
+      "candidates": [
+        {
+          "phrase": "along a street",
+          "cue": false
+        },
+        {
+          "phrase": "cannot rob two adjacent",
+          "cue": true
+        },
+        {
+          "phrase": "maximum amount",
+          "cue": true
+        }
+      ],
+      "explanation": "A **maximum** where each choice (**cannot rob two adjacent**) affects later choices is DP: dp[i] = max(dp[i − 1], money[i] + dp[i − 2]). Greedy fails here."
+    },
+    {
+      "id": "three-steps",
+      "statement": "How many distinct ways can you climb a staircase of n steps if you can take 1, 2 or 3 steps at a time?",
+      "pattern": "dynamic-programming",
+      "options": [
+        "dynamic-programming",
+        "backtracking",
+        "bfs",
+        "greedy"
+      ],
+      "candidates": [
+        {
+          "phrase": "How many distinct ways",
+          "cue": true
+        },
+        {
+          "phrase": "staircase",
+          "cue": false
+        },
+        {
+          "phrase": "1, 2 or 3 steps at a time",
+          "cue": true
+        }
+      ],
+      "explanation": "**How many ways** with a small set of choices per step is DP: ways(n) = ways(n − 1) + ways(n − 2) + ways(n − 3). Backtracking would list them, which is far slower."
+    },
+    {
+      "id": "jump-game",
+      "statement": "Each array element is the maximum jump length from that position. Can you reach the last index?",
+      "pattern": "greedy",
+      "options": [
+        "greedy",
+        "binary-search",
+        "heap-top-k",
+        "stack"
+      ],
+      "candidates": [
+        {
+          "phrase": "maximum jump length",
+          "cue": true
+        },
+        {
+          "phrase": "Can you reach",
+          "cue": true
+        },
+        {
+          "phrase": "last index",
+          "cue": false
+        }
+      ],
+      "explanation": "Tracking the furthest index you **can reach** in one pass is greedy and O(n). DP also works, but in O(n²)."
+    },
+    {
+      "id": "middle-node",
+      "statement": "Return the middle node of a singly linked list in a single pass.",
+      "pattern": "fast-slow",
+      "options": [
+        "fast-slow",
+        "two-pointers",
+        "binary-search",
+        "stack"
+      ],
+      "candidates": [
+        {
+          "phrase": "Return",
+          "cue": false
+        },
+        {
+          "phrase": "middle node",
+          "cue": true
+        },
+        {
+          "phrase": "singly linked list",
+          "cue": true
+        },
+        {
+          "phrase": "single pass",
+          "cue": true
+        }
+      ],
+      "explanation": "The **middle** of a **linked list** in a **single pass**: fast moves two steps, slow moves one."
+    },
+    {
+      "id": "range-queries",
+      "statement": "An array is fixed, and you will be asked thousands of times for the sum of the items between index i and index j.",
+      "pattern": "prefix-sums",
+      "options": [
+        "prefix-sums",
+        "sliding-window",
+        "binary-search",
+        "heap-top-k"
+      ],
+      "candidates": [
+        {
+          "phrase": "fixed",
+          "cue": true
+        },
+        {
+          "phrase": "thousands of times",
+          "cue": true
+        },
+        {
+          "phrase": "sum of the items between",
+          "cue": true
+        },
+        {
+          "phrase": "index i",
+          "cue": false
+        }
+      ],
+      "explanation": "Many **range sum** queries on a **fixed** array: precompute prefix sums once, and each query is a subtraction."
+    },
+    {
+      "id": "stream-median",
+      "statement": "Numbers arrive one at a time. After each one, report the median of all numbers seen so far.",
+      "pattern": "heap-top-k",
+      "options": [
+        "heap-top-k",
+        "binary-search",
+        "sliding-window",
+        "prefix-sums"
+      ],
+      "candidates": [
+        {
+          "phrase": "arrive one at a time",
+          "cue": true
+        },
+        {
+          "phrase": "median",
+          "cue": true
+        },
+        {
+          "phrase": "seen so far",
+          "cue": false
+        }
+      ],
+      "explanation": "A running **median** as numbers **arrive one at a time**: two heaps, a max-heap of the lower half and a min-heap of the upper half."
+    },
+    {
+      "id": "rotated-search",
+      "statement": "A sorted array has been rotated at an unknown pivot. Find the index of a target in O(log n) time.",
+      "pattern": "binary-search",
+      "options": [
+        "binary-search",
+        "two-pointers",
+        "hash-lookup",
+        "sliding-window"
+      ],
+      "candidates": [
+        {
+          "phrase": "sorted",
+          "cue": true
+        },
+        {
+          "phrase": "rotated",
+          "cue": true
+        },
+        {
+          "phrase": "unknown pivot",
+          "cue": false
+        },
+        {
+          "phrase": "O(log n)",
+          "cue": true
+        }
+      ],
+      "explanation": "**Sorted** data and **O(log n)** mean binary search. When it is **rotated**, one half of each range is still sorted, so you can still decide which half to keep."
+    }
+  ]
+}

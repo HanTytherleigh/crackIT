@@ -1,14 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { getModule } from '../content/modules'
 import { loadTopic } from '../content/topics'
 import type { Check, Topic } from '../content/schema'
 import { masteryOf, recheckPassed, topicKey, type CheckRecord } from '../lib/progressModel'
-import { dueCards, interleave, nextDue, parseCheckCardId, SESSION_LIMIT, type Grade } from '../lib/scheduler'
+import { dueCards, interleave, nextDue, parseCardId, SESSION_LIMIT, type Grade } from '../lib/scheduler'
+import { complexityAsCheck, loadComplexityDrill, loadPatterns, loadSignalDrill, signalAsCheck } from '../content/patterns'
+import type { ReviewCard } from '../lib/progressModel'
 import { useProgress } from '../state/progress'
 import { CheckCard } from '../lesson/CheckCard'
 
-type Item = { cardId: string; moduleId: string; topicId: string; check: Check; topic: Topic; retry: boolean }
+/** One question in a session: a lesson check (with its topic, for the re-check rule) or a pattern drill item. */
+type Item = {
+  cardId: string
+  check: Check
+  label: string
+  topic?: { moduleId: string; topicId: string; topic: Topic }
+  retry: boolean
+}
+
+const isPatternCard = (c: ReviewCard) => c.id.startsWith('drill:')
 type Answer = { record: CheckRecord; hints: number }
 
 const dayFmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -21,37 +32,57 @@ export function describeDay(date: Date, now = new Date()): string {
 }
 
 export function ReviewScreen() {
+  const [params] = useSearchParams()
+  const onlyPatterns = params.get('only') === 'patterns'
   const [session, setSession] = useState<{ status: 'loading' } | { status: 'ready'; items: Item[] }>({ status: 'loading' })
 
   // Snapshot the due cards once, so answering doesn't reshuffle the session under you.
   useEffect(() => {
     let live = true
-    buildSession().then((items) => live && setSession({ status: 'ready', items }))
+    setSession({ status: 'loading' })
+    buildSession(new Date(), onlyPatterns ? isPatternCard : undefined).then((items) => live && setSession({ status: 'ready', items }))
     return () => {
       live = false
     }
-  }, [])
+  }, [onlyPatterns])
 
   return (
     <div className="page">
-      <h1>Review</h1>
+      <h1>{onlyPatterns ? 'Pattern review' : 'Review'}</h1>
+      {onlyPatterns && <p className="page-lead">Mixed practice of the patterns you have drilled, old and new together.</p>}
       {session.status === 'loading' && <p className="muted" role="status">Gathering today's questions…</p>}
       {session.status === 'ready' &&
-        (session.items.length === 0 ? <NothingDue /> : <Session initial={session.items} />)}
+        (session.items.length === 0 ? <NothingDue onlyPatterns={onlyPatterns} /> : <Session initial={session.items} />)}
     </div>
   )
 }
 
-async function buildSession(now = new Date()): Promise<Item[]> {
+async function buildSession(now = new Date(), filter?: (c: ReviewCard) => boolean): Promise<Item[]> {
   const cards = useProgress.getState().review.cards
-  const due = interleave(dueCards(cards, now), (c) => c.id.split('#')[0]!).slice(0, SESSION_LIMIT)
+  const due = interleave(
+    dueCards(cards, now).filter((c) => !filter || filter(c)),
+    (c) => c.id.split('#')[0]!,
+  ).slice(0, SESSION_LIMIT)
 
-  // Load each topic file once. Cards whose question no longer exists in the content are skipped.
+  // Load each content file once. Cards whose question no longer exists in the content are skipped.
   const topics = new Map<string, Promise<Topic | undefined>>()
+  let drillContent: Promise<{ patterns: Awaited<ReturnType<typeof loadPatterns>>; signal: Awaited<ReturnType<typeof loadSignalDrill>>; complexity: Awaited<ReturnType<typeof loadComplexityDrill>> }> | undefined
   const items: Item[] = []
   for (const card of due) {
-    const ref = parseCheckCardId(card.id)
+    const ref = parseCardId(card.id)
     if (!ref) continue
+    if (ref.kind === 'drill') {
+      drillContent ??= Promise.all([loadPatterns(), loadSignalDrill(), loadComplexityDrill()]).then(([patterns, signal, complexity]) => ({ patterns, signal, complexity }))
+      const d = await drillContent
+      if (ref.drill === 'signal-spotting') {
+        const it = d.signal.items.find((x) => x.id === ref.itemId)
+        if (it) items.push({ cardId: card.id, check: signalAsCheck(it, d.patterns), label: 'Pattern: signal spotting', retry: false })
+      } else if (ref.drill === 'complexity-prediction') {
+        const it = d.complexity.items.find((x) => x.id === ref.itemId)
+        if (it) items.push({ cardId: card.id, check: complexityAsCheck(it), label: 'Pattern: complexity', retry: false })
+      }
+      continue
+    }
     const key = topicKey(ref.moduleId, ref.topicId)
     if (!topics.has(key)) {
       const file = getModule(ref.moduleId)?.topics.find((t) => t.id === ref.topicId)?.file
@@ -59,13 +90,15 @@ async function buildSession(now = new Date()): Promise<Item[]> {
     }
     const topic = await topics.get(key)!
     const check = topic?.checks.find((c) => c.id === ref.checkId)
-    if (topic && check) items.push({ cardId: card.id, moduleId: ref.moduleId, topicId: ref.topicId, check, topic, retry: false })
+    if (topic && check)
+      items.push({ cardId: card.id, check, label: topic.title, topic: { moduleId: ref.moduleId, topicId: ref.topicId, topic }, retry: false })
   }
   return items
 }
 
-function NothingDue() {
-  const cards = useProgress((s) => s.review.cards)
+function NothingDue({ onlyPatterns }: { onlyPatterns: boolean }) {
+  const all = useProgress((s) => s.review.cards)
+  const cards = onlyPatterns ? Object.fromEntries(Object.entries(all).filter(([id]) => id.startsWith('drill:'))) : all
   const upcoming = nextDue(cards, new Date())
   return (
     <div className="card empty">
@@ -79,10 +112,14 @@ function NothingDue() {
       ) : (
         <>
           <p>Nothing to review yet.</p>
-          <p>Answer the checks in a lesson and they will come back here, starting the next day.</p>
+          <p>
+            {onlyPatterns
+              ? 'Try the signal-spotting and complexity drills. The items you answer come back here, starting the next day.'
+              : 'Answer the checks in a lesson and they will come back here, starting the next day.'}
+          </p>
         </>
       )}
-      <Link to="/learn" className="btn">Go to lessons</Link>
+      {onlyPatterns ? <Link to="/patterns" className="btn">Go to the drills</Link> : <Link to="/learn" className="btn">Go to lessons</Link>}
     </div>
   )
 }
@@ -116,13 +153,17 @@ function Session({ initial }: { initial: Item[] }) {
     recordReview(item.cardId, grade)
     if (grade === 'again') setQueue((q) => [...q, { ...item, retry: true }])
 
-    const state = useProgress.getState()
-    const key = topicKey(item.moduleId, item.topicId)
-    const tp = state.topics[key]
-    const topicCards = Object.values(state.review.cards).filter((c) => c.id.startsWith(`${key}#`))
-    if (!tp?.recheckPassedAt && recheckPassed(tp, topicCards, item.topic.checks.length)) {
-      markRecheckPassed({ moduleId: item.moduleId, topicId: item.topicId })
-      if (masteryOf(useProgress.getState().topics[key]) === 'solid') setNewlySolid((s) => [...s, item.topic.title])
+    // Only lesson checks count towards a topic's delayed re-check.
+    if (item.topic) {
+      const { moduleId, topicId, topic } = item.topic
+      const state = useProgress.getState()
+      const key = topicKey(moduleId, topicId)
+      const tp = state.topics[key]
+      const topicCards = Object.values(state.review.cards).filter((c) => c.id.startsWith(`${key}#`))
+      if (!tp?.recheckPassedAt && recheckPassed(tp, topicCards, topic.checks.length)) {
+        markRecheckPassed({ moduleId, topicId })
+        if (masteryOf(useProgress.getState().topics[key]) === 'solid') setNewlySolid((s) => [...s, topic.title])
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, pos])
@@ -147,7 +188,7 @@ function Session({ initial }: { initial: Item[] }) {
         key={pos}
         check={item.check}
         index={0}
-        label={item.topic.title}
+        label={item.label}
         record={answer.record}
         hintsShown={answer.hints}
         revealedNote="It will come back again soon."
