@@ -1,0 +1,96 @@
+/* Design tokens. Every colour and spacing value in the app comes from here.
+   Light values were darkened from the handout's suggestions to pass WCAG AA for text. */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+
+  --tap: 44px;
+  --sidebar-width: 232px;
+  --tabbar-height: 64px;
+  --content-max: 720px;
+
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Chart series, each also drawn with its own dash pattern so colour is never the only cue. */
+  --series-1: var(--muted);
+  --series-2: var(--secondary);
+  --series-3: var(--accent);
+  --series-4: var(--warm);
+  --series-5: var(--error);
+  --dur: 200ms;
+}
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #121a22;
+  --surface: #1a2530;
+  --raised: #223040;
+  --border: #2d3e50;
+  --text: #e6edf3;
+  --muted: #9fb0c0;
+  --accent: #7fb8a4;
+  --on-accent: #121a22;
+  --secondary: #8ea2ff;
+  --warm: #e3b66b;
+  --error: #e07a7a;
+  --focus: #e3b66b;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --raised: #eeebe2;
+    --border: #d9d4c7;
+    --text: #1d2733;
+    --muted: #4a5868;
+    --accent: #2f7a66;
+    --on-accent: #ffffff;
+    --secondary: #4a5bc9;
+    --warm: #8a5f17;
+    --error: #b23b3b;
+    --focus: #4a5bc9;
+    --shadow: 0 1px 2px rgb(29 39 51 / 0.08);
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f6f4ee;
+  --surface: #ffffff;
+  --raised: #eeebe2;
+  --border: #d9d4c7;
+  --text: #1d2733;
+  --muted: #4a5868;
+  --accent: #2f7a66;
+  --on-accent: #ffffff;
+  --secondary: #4a5bc9;
+  --warm: #8a5f17;
+  --error: #b23b3b;
+  --focus: #4a5bc9;
+  --shadow: 0 1px 2px rgb(29 39 51 / 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}
+:root[data-reduced-motion='true'] {
+  --dur: 0ms;
+}

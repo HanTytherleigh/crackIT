@@ -1,0 +1,474 @@
+{
+  "schemaVersion": 1,
+  "id": "complexity-reading",
+  "title": "Complexity reading",
+  "items": [
+    {
+      "id": "single-loop",
+      "title": "One loop",
+      "model": "single",
+      "snippet": {
+        "ts": "let total = 0\nfor (let i = 0; i < n; i++) {\n  total += arr[i]\n}",
+        "py": "total = 0\nfor i in range(n):\n    total += arr[i]"
+      },
+      "lines": {
+        "ts": {
+          "loop": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        },
+        "py": {
+          "loop": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        }
+      },
+      "answer": "n",
+      "dominant": {
+        "options": [
+          "n",
+          "1",
+          "n²"
+        ],
+        "answer": 0
+      },
+      "explanation": "One loop over n items runs n times. It is O(n), not O(1): count the runs, not the loops you can see.",
+      "trap": false
+    },
+    {
+      "id": "sequential",
+      "title": "Two loops, one after the other",
+      "model": "sequential",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  print(arr[i])\n}\nfor (let j = 0; j < n; j++) {\n  print(arr[j] * 2)\n}",
+        "py": "for i in range(n):\n    print(arr[i])\nfor j in range(n):\n    print(arr[j] * 2)"
+      },
+      "lines": {
+        "ts": {
+          "loop": [
+            1
+          ],
+          "step": [
+            2
+          ],
+          "loop2": [
+            4
+          ],
+          "step2": [
+            5
+          ]
+        },
+        "py": {
+          "loop": [
+            1
+          ],
+          "step": [
+            2
+          ],
+          "loop2": [
+            3
+          ],
+          "step2": [
+            4
+          ]
+        }
+      },
+      "answer": "n",
+      "dominant": {
+        "options": [
+          "2n",
+          "n²",
+          "1"
+        ],
+        "answer": 0
+      },
+      "explanation": "Sequential loops **add**: n + n = 2n. The dominant term is 2n, and dropping the constant gives O(n). Doubling n doubles the count, not quadruples it.",
+      "trap": false
+    },
+    {
+      "id": "nested",
+      "title": "A loop inside a loop",
+      "model": "nested",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  for (let j = 0; j < n; j++) {\n    compare(arr[i], arr[j])\n  }\n}",
+        "py": "for i in range(n):\n    for j in range(n):\n        compare(arr[i], arr[j])"
+      },
+      "lines": {
+        "ts": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        },
+        "py": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        }
+      },
+      "answer": "n^2",
+      "dominant": {
+        "options": [
+          "2n",
+          "n²",
+          "n"
+        ],
+        "answer": 1
+      },
+      "explanation": "Nested loops **multiply**: each of the n outer steps runs the whole inner loop, so n × n = n². The count quadruples each time n doubles.",
+      "trap": false
+    },
+    {
+      "id": "triangular",
+      "title": "The triangular loop trap",
+      "model": "triangular",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  for (let j = 0; j < i; j++) {\n    count++\n  }\n}",
+        "py": "for i in range(n):\n    for j in range(i):\n        count += 1"
+      },
+      "lines": {
+        "ts": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        },
+        "py": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        }
+      },
+      "answer": "n^2",
+      "dominant": {
+        "options": [
+          "n",
+          "n²/2",
+          "i"
+        ],
+        "answer": 1
+      },
+      "explanation": "When i is 0, `range(0)` runs zero times. The inner loop runs 0 + 1 + … + (n − 1) = n(n − 1)/2 times, roughly n²/2. Halving is a constant, so it is still O(n²). Look at the ratios: they head towards ×4.",
+      "trap": true
+    },
+    {
+      "id": "unique-pairs",
+      "title": "Unique pairs",
+      "model": "unique-pairs",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  for (let j = i + 1; j < n; j++) {\n    check(arr[i], arr[j])\n  }\n}",
+        "py": "for i in range(n):\n    for j in range(i + 1, n):\n        check(arr[i], arr[j])"
+      },
+      "lines": {
+        "ts": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        },
+        "py": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        }
+      },
+      "answer": "n^2",
+      "dominant": {
+        "options": [
+          "n²/2",
+          "n",
+          "n − 1"
+        ],
+        "answer": 0
+      },
+      "explanation": "Each pair is checked once: (n − 1) + (n − 2) + … + 0 = n(n − 1)/2. That is the triangular count again, so it is O(n²).",
+      "trap": false
+    },
+    {
+      "id": "fixed-inner",
+      "title": "A fixed inner loop",
+      "model": "fixed-inner",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  for (let j = 0; j < 5; j++) {\n    work(i, j)\n  }\n}",
+        "py": "for i in range(n):\n    for j in range(5):\n        work(i, j)"
+      },
+      "lines": {
+        "ts": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        },
+        "py": {
+          "outer": [
+            1
+          ],
+          "inner": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        }
+      },
+      "answer": "n",
+      "dominant": {
+        "options": [
+          "5n",
+          "n²",
+          "5"
+        ],
+        "answer": 0
+      },
+      "explanation": "Nested, but the inner loop is a fixed 5, not n. That gives 5n steps, which is O(n). Nesting only means n² when both loops grow with n.",
+      "trap": true,
+      "params": {
+        "k": 5
+      }
+    },
+    {
+      "id": "halving",
+      "title": "Halving each time",
+      "model": "halving",
+      "snippet": {
+        "ts": "let i = n\nwhile (i > 1) {\n  i = Math.floor(i / 2)\n}",
+        "py": "i = n\nwhile i > 1:\n    i = i // 2"
+      },
+      "lines": {
+        "ts": {
+          "init": [
+            1
+          ],
+          "loop": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        },
+        "py": {
+          "init": [
+            1
+          ],
+          "loop": [
+            2
+          ],
+          "step": [
+            3
+          ]
+        }
+      },
+      "answer": "log n",
+      "dominant": {
+        "options": [
+          "log n",
+          "n / 2",
+          "n"
+        ],
+        "answer": 0
+      },
+      "explanation": "i halves every step, so the loop runs as many times as n can be halved before reaching 1: log₂ n. Doubling n adds just **one** step.",
+      "trap": false
+    },
+    {
+      "id": "loop-then-nested",
+      "title": "A loop, then nested loops",
+      "model": "loop-then-nested",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  setup(arr[i])\n}\nfor (let i = 0; i < n; i++) {\n  for (let j = 0; j < n; j++) {\n    pair(arr[i], arr[j])\n  }\n}",
+        "py": "for i in range(n):\n    setup(arr[i])\nfor i in range(n):\n    for j in range(n):\n        pair(arr[i], arr[j])"
+      },
+      "lines": {
+        "ts": {
+          "loop": [
+            1
+          ],
+          "step": [
+            2
+          ],
+          "outer": [
+            4
+          ],
+          "inner": [
+            5
+          ],
+          "step2": [
+            6
+          ]
+        },
+        "py": {
+          "loop": [
+            1
+          ],
+          "step": [
+            2
+          ],
+          "outer": [
+            3
+          ],
+          "inner": [
+            4
+          ],
+          "step2": [
+            5
+          ]
+        }
+      },
+      "answer": "n^2",
+      "dominant": {
+        "options": [
+          "n",
+          "n²",
+          "n + n"
+        ],
+        "answer": 1
+      },
+      "explanation": "The two parts run one after the other, so they add: n + n². Keep the dominant term: O(n²). The first loop barely registers by n = 16.",
+      "trap": false
+    },
+    {
+      "id": "triple",
+      "title": "Three nested loops",
+      "model": "triple",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  for (let j = 0; j < n; j++) {\n    for (let k = 0; k < n; k++) {\n      visit(i, j, k)\n    }\n  }\n}",
+        "py": "for i in range(n):\n    for j in range(n):\n        for k in range(n):\n            visit(i, j, k)"
+      },
+      "lines": {
+        "ts": {
+          "outer": [
+            1
+          ],
+          "middle": [
+            2
+          ],
+          "inner": [
+            3
+          ],
+          "step": [
+            4
+          ]
+        },
+        "py": {
+          "outer": [
+            1
+          ],
+          "middle": [
+            2
+          ],
+          "inner": [
+            3
+          ],
+          "step": [
+            4
+          ]
+        }
+      },
+      "answer": "n^3",
+      "dominant": {
+        "options": [
+          "3n",
+          "n²",
+          "n³"
+        ],
+        "answer": 2
+      },
+      "explanation": "Three nested loops over n multiply to n × n × n = n³. Doubling n multiplies the count by 8.",
+      "trap": false
+    },
+    {
+      "id": "n-log-n",
+      "title": "A halving loop inside a loop",
+      "model": "n-log-n",
+      "snippet": {
+        "ts": "for (let i = 0; i < n; i++) {\n  let j = n\n  while (j > 1) {\n    j = Math.floor(j / 2)\n  }\n}",
+        "py": "for i in range(n):\n    j = n\n    while j > 1:\n        j = j // 2"
+      },
+      "lines": {
+        "ts": {
+          "outer": [
+            1
+          ],
+          "init": [
+            2
+          ],
+          "loop": [
+            3
+          ],
+          "step": [
+            4
+          ]
+        },
+        "py": {
+          "outer": [
+            1
+          ],
+          "init": [
+            2
+          ],
+          "loop": [
+            3
+          ],
+          "step": [
+            4
+          ]
+        }
+      },
+      "answer": "n log n",
+      "dominant": {
+        "options": [
+          "n log n",
+          "n²",
+          "log n"
+        ],
+        "answer": 0
+      },
+      "explanation": "The outer loop runs n times, and each time the inner loop halves j: log n steps. Nested multiplies, so n × log n = O(n log n). This is the shape of efficient sorting.",
+      "trap": false
+    }
+  ]
+}
