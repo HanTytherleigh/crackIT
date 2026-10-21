@@ -10,7 +10,7 @@
       "topics": [
         { "id": "big-o", "title": "Big O", "summary": "How work grows as the input grows.", "file": "01-big-o.json" },
         { "id": "arrays-strings", "title": "Arrays and strings", "summary": "Contiguous memory, indexing, shifting, two pointers.", "file": "02-arrays-strings.json" },
-        { "id": "hash-maps-sets", "title": "Hash maps and sets", "summary": "Constant-time lookup, hashing, collisions, resizing." },
+        { "id": "hash-maps-sets", "title": "Hash maps and sets", "summary": "Constant-time lookup, hashing, collisions, resizing.", "file": "03-hash-maps-sets.json" },
         { "id": "linked-lists", "title": "Linked lists", "summary": "Nodes, pointers, and rewiring them safely." },
         { "id": "stacks-queues", "title": "Stacks and queues", "summary": "LIFO, FIFO, and spotting the hidden stack." },
         { "id": "recursion", "title": "Recursion", "summary": "Base cases, the call stack, and repeated work." },

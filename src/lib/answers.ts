@@ -25,7 +25,7 @@ export function normalizeAnswer(raw: string): string {
 
 export function parseNumber(raw: string): number | undefined {
   const cleaned = raw.replace(/[,\s_]/g, '')
-  if (!/^-?\d+(\.\d+)?$/.test(cleaned)) return undefined
+  if (!/^-?(\d+(\.\d+)?|\.\d+)$/.test(cleaned)) return undefined
   return Number(cleaned)
 }
 
@@ -52,6 +52,7 @@ export function displayAnswer(check: Check): string {
     case 'text':
       return check.accept[0]!
     case 'number':
-      return check.tolerance > 0 ? `About ${check.answer.toLocaleString('en-GB')}` : check.answer.toLocaleString('en-GB')
+      // Only call it approximate when the tolerance is a whole step or more, e.g. "about 20 guesses".
+      return check.tolerance >= 1 ? `About ${check.answer.toLocaleString('en-GB')}` : check.answer.toLocaleString('en-GB')
   }
 }

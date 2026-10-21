@@ -24,6 +24,7 @@ const widgets: Partial<Record<WidgetId, LazyExoticComponent<ComponentType>>> = {
   'complexity-reader': lazy(() => import('../widgets/ComplexityReader')),
   'array-ops': lazy(() => import('../widgets/ArrayOps')),
   'two-pointers': lazy(() => import('../widgets/TwoPointers')),
+  'hash-table': lazy(() => import('../widgets/HashTable')),
 }
 
 /** Embeds an interactive widget by id, or a placeholder while that widget is still being built. */

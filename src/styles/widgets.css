@@ -400,3 +400,113 @@
   background: var(--accent);
   color: var(--on-accent);
 }
+
+/* Hash table */
+.quick-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.chip-btn {
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.chip-btn:hover {
+  border-color: var(--accent);
+}
+.load-row {
+  display: grid;
+  gap: var(--space-1);
+}
+.load-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--raised);
+}
+.load-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition-property: width;
+}
+.load-fill[data-over='true'] {
+  background: var(--warm);
+}
+.load-limit {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--text);
+}
+.buckets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 3px;
+}
+.bucket {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 34px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  transition-property: border-color, background-color;
+}
+.bucket.is-active {
+  border-color: var(--warm);
+}
+.bucket-idx {
+  width: 2ch;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.chain-key {
+  padding: 1px var(--space-2);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.chain-key + .chain-key::before {
+  content: '→ ';
+  color: var(--muted);
+}
+.chain-key.is-mid {
+  border-color: var(--warm);
+}
+.chain-key.is-found {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.slots .cell-word {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  min-height: 1.4em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
