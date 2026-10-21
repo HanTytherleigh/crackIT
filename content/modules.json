@@ -24,9 +24,15 @@
       "id": "oop",
       "title": "Object-oriented programming and design",
       "description": "Explain the pillars, defend a design, and recognise common patterns.",
-      "status": "locked",
+      "status": "available",
       "covers": ["The four pillars", "SOLID", "Composition versus inheritance", "Common design patterns", "Interfaces and abstraction"],
-      "topics": []
+      "topics": [
+        { "id": "four-pillars", "title": "The four pillars", "summary": "Encapsulation, abstraction, inheritance and polymorphism.", "file": "01-four-pillars.json" },
+        { "id": "solid", "title": "SOLID principles", "summary": "Five rules of thumb for classes that are easy to change.", "file": "02-solid.json" },
+        { "id": "composition-inheritance", "title": "Composition versus inheritance", "summary": "Is-a, has-a, and why \"favour composition\" is common advice.", "file": "03-composition-inheritance.json" },
+        { "id": "interfaces", "title": "Interfaces and abstract classes", "summary": "Contracts, partial implementations, and programming to an interface.", "file": "04-interfaces.json" },
+        { "id": "design-patterns", "title": "Common design patterns", "summary": "Singleton, factory, strategy, observer, adapter and decorator.", "file": "05-design-patterns.json" }
+      ]
     },
     {
       "id": "databases",

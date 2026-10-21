@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "id": "solid",
+  "moduleId": "oop",
+  "title": "SOLID principles",
+  "summary": "Five rules of thumb for classes that are easy to change.",
+  "estimatedMinutes": 22,
+  "prerequisites": [
+    "four-pillars"
+  ],
+  "recallPrompts": [
+    {
+      "id": "letters",
+      "prompt": "What do the five letters of SOLID stand for?"
+    },
+    {
+      "id": "why",
+      "prompt": "What problem are the SOLID principles trying to prevent?"
+    },
+    {
+      "id": "lsp",
+      "prompt": "Is a `Square` a good subclass of `Rectangle`? Why or why not?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "SOLID is a set of **workshop rules for building with Lego, not glue**. Each brick does one job, you add new bricks instead of carving old ones, any brick of the right shape fits any slot, slots ask only for what they use, and you build against the standard stud shape rather than one particular brick.",
+    "sections": [
+      {
+        "id": "why-solid",
+        "heading": "Why SOLID exists",
+        "body": "Code that works today still has to change tomorrow. The SOLID principles are guidelines from Robert C. Martin for keeping classes **easy to change, test and reuse**, by limiting how much one change ripples through the rest of the code.\n\nThey are heuristics, not laws. In an interview, the strongest answers name the principle, show a small violation, and explain what goes wrong because of it."
+      },
+      {
+        "id": "srp",
+        "heading": "S: Single responsibility",
+        "body": "**A class should have one reason to change.** An `Invoice` class that calculates totals, formats a PDF and emails the customer will change when tax rules change, when the design changes, and when the email provider changes. That's three reasons.\n\nSplit it into `InvoiceCalculator`, `InvoicePdfRenderer` and `InvoiceMailer`. Each is smaller, easier to test, and a change to one doesn't risk breaking the others.\n\n\"One responsibility\" doesn't mean \"one method\". It means one **reason to change**, or one group of people who would ask for it."
+      },
+      {
+        "id": "ocp",
+        "heading": "O: Open for extension, closed for modification",
+        "body": "**You should be able to add behaviour without editing code that already works.**\n\nA `priceFor(customer)` function with an `if type == 'student' … elif type == 'staff' …` chain must be edited, and retested, every time a new customer type appears. Instead, give each type a `discount()` method behind a common interface, or pass in a pricing strategy. A new type is then a **new class**, and the old code stays untouched.\n\nPolymorphism is usually how you get there.",
+        "code": {
+          "ts": "interface Discount {\n  apply(price: number): number\n}\nclass StudentDiscount implements Discount {\n  apply(price: number) { return price * 0.8 }\n}\nclass NoDiscount implements Discount {\n  apply(price: number) { return price }\n}\n// Adding StaffDiscount later needs no change here:\nconst checkout = (price: number, d: Discount) => d.apply(price)",
+          "py": "from abc import ABC, abstractmethod\n\nclass Discount(ABC):\n    @abstractmethod\n    def apply(self, price): ...\n\nclass StudentDiscount(Discount):\n    def apply(self, price): return price * 0.8\n\nclass NoDiscount(Discount):\n    def apply(self, price): return price\n\n# Adding StaffDiscount later needs no change here:\ndef checkout(price, discount): return discount.apply(price)"
+        }
+      },
+      {
+        "id": "lsp",
+        "heading": "L: Liskov substitution",
+        "body": "**A subclass must work anywhere its parent is expected, without surprises.** Callers shouldn't need to know which subclass they have.\n\nThe classic trap: `Square extends Rectangle`. A rectangle lets you set its width and height independently, so code like `r.setWidth(5); r.setHeight(4); assert r.area() == 20` is reasonable. A square must keep its sides equal, so setting the height also changes the width, and the assertion fails. Mathematically a square *is* a rectangle, but behaviourally it can't keep the rectangle's promises.\n\nWarning signs: a subclass that throws \"not supported\" for an inherited method, overrides that do less than the parent promised, or callers that check `instanceof` before using the object."
+      },
+      {
+        "id": "isp",
+        "heading": "I: Interface segregation",
+        "body": "**Don't force a class to depend on methods it doesn't use.** A fat `Machine` interface with `print`, `scan` and `fax` makes a simple printer implement `scan` and `fax`, usually by throwing errors.\n\nSplit it into small, focused interfaces, `Printer`, `Scanner` and `Fax`. A multi-function device implements all three; a basic printer implements one. Callers then depend only on the one capability they need."
+      },
+      {
+        "id": "dip",
+        "heading": "D: Dependency inversion",
+        "body": "**High-level code should depend on abstractions, not on concrete details.** If `ReportService` creates a `FileWriter` itself, it is welded to the file system: you can't test it without touching disk, and switching to cloud storage means editing it.\n\nInstead, have `ReportService` depend on a `Writer` interface, and **pass the concrete writer in**: this is **dependency injection**. Production code passes a file writer. A test passes an in-memory fake and checks what was written.\n\nOn Android, this is what Hilt and Dagger automate. Constructor injection by hand is the same idea, and is enough for an interview."
+      }
+    ]
+  },
+  "widgets": [],
+  "explainBack": {
+    "prompt": "Explain each SOLID principle in a sentence, give a violation of one of them, and say what goes wrong in that code because of it.",
+    "rubric": [
+      {
+        "id": "s",
+        "point": "Single responsibility: one reason to change per class."
+      },
+      {
+        "id": "o",
+        "point": "Open/closed: add behaviour with new code (often via polymorphism), not by editing working code."
+      },
+      {
+        "id": "l",
+        "point": "Liskov: a subclass must be usable wherever its parent is, without breaking expectations (the square/rectangle trap)."
+      },
+      {
+        "id": "i",
+        "point": "Interface segregation: small, focused interfaces, so classes don't implement methods they don't need."
+      },
+      {
+        "id": "d",
+        "point": "Dependency inversion: depend on abstractions and inject the concrete implementations."
+      },
+      {
+        "id": "cost",
+        "point": "A concrete violation and its cost, e.g. hard to test, or one change breaking unrelated code."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "spot-srp",
+      "kind": "choice",
+      "prompt": "A `UserService` class validates sign-up forms, hashes passwords, writes users to the database and sends welcome emails. Which principle does it most clearly break?",
+      "options": [
+        "Single responsibility",
+        "Liskov substitution",
+        "Interface segregation",
+        "None: this is fine"
+      ],
+      "answer": 0,
+      "explanation": "It has several reasons to change (validation rules, security, storage, email). Split those responsibilities into separate classes.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Count the different reasons someone might need to change this class."
+        }
+      ]
+    },
+    {
+      "id": "spot-ocp",
+      "kind": "choice",
+      "prompt": "Every time the shop adds a payment method, someone edits a long `if method == ...` chain inside `processPayment`. Which principle does that break?",
+      "options": [
+        "Open/closed",
+        "Single responsibility",
+        "Dependency inversion",
+        "Liskov substitution"
+      ],
+      "answer": 0,
+      "explanation": "Working code has to be modified to add behaviour. Give each payment method its own class behind a common interface, and adding one becomes a new class.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Adding something new forces edits to old, working code."
+        }
+      ]
+    },
+    {
+      "id": "square-rectangle",
+      "kind": "choice",
+      "prompt": "Why is `Square extends Rectangle` a problem, even though every square is a rectangle in maths?",
+      "options": [
+        "Squares have fewer fields, so they waste memory.",
+        "Code that sets width and height independently, as a Rectangle allows, gets wrong results with a Square: it breaks Liskov substitution.",
+        "Square should extend Shape instead.",
+        "It isn't a problem."
+      ],
+      "answer": 1,
+      "explanation": "A square can't keep the rectangle's promise that width and height change independently, so it can't be substituted safely. Model them as siblings, or make them immutable.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Picture code that calls setWidth(5) then setHeight(4) and expects an area of 20."
+        }
+      ]
+    },
+    {
+      "id": "spot-isp",
+      "kind": "choice",
+      "prompt": "A `SimplePrinter` implements a `Machine` interface and throws \"not supported\" from `scan()` and `fax()`. Which principle is being broken?",
+      "options": [
+        "Interface segregation",
+        "Open/closed",
+        "Single responsibility",
+        "Encapsulation"
+      ],
+      "answer": 0,
+      "explanation": "The interface is too fat. Split it into `Printer`, `Scanner` and `Fax` so each class implements only what it supports. (Throwing from inherited methods is also a Liskov smell.)",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "The class is forced to have methods it can't support."
+        }
+      ]
+    },
+    {
+      "id": "dip-benefit",
+      "kind": "choice",
+      "prompt": "`ReportService` takes a `Writer` in its constructor instead of creating a `FileWriter` itself. What is the biggest practical benefit?",
+      "options": [
+        "The code runs faster.",
+        "A test can pass in an in-memory writer and check the output, with no files involved; the storage can also be swapped without editing the service.",
+        "It uses less memory.",
+        "It makes the class final."
+      ],
+      "answer": 1,
+      "explanation": "Depending on an abstraction and injecting the implementation makes the service testable and flexible. That is dependency inversion via dependency injection.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How would you unit test the service if it created its own FileWriter?"
+        }
+      ]
+    },
+    {
+      "id": "dip-name",
+      "kind": "text",
+      "prompt": "Passing a class's collaborators into it (often through the constructor) instead of letting it create them is called dependency ______. (One word.)",
+      "accept": [
+        "injection"
+      ],
+      "placeholder": "one word",
+      "explanation": "**Dependency injection**. It is the usual way to achieve dependency inversion. On Android, Hilt and Dagger automate it.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "You put the dependency in from outside."
+        }
+      ]
+    },
+    {
+      "id": "srp-meaning",
+      "kind": "choice",
+      "prompt": "What does \"single responsibility\" really mean?",
+      "options": [
+        "A class should have only one method.",
+        "A class should have one reason to change.",
+        "A class should be used in only one place.",
+        "Each file should hold one class."
+      ],
+      "answer": 1,
+      "explanation": "It is about reasons to change (who asks for the change), not counting methods. A cohesive class can have many methods.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "It isn't about counting methods."
+        }
+      ]
+    },
+    {
+      "id": "lsp-smell",
+      "kind": "choice",
+      "prompt": "Which is the strongest warning sign of a Liskov substitution violation?",
+      "options": [
+        "A subclass adds a new method.",
+        "A subclass overrides a method and throws \"not supported\", so callers must check the type first.",
+        "A subclass calls super() in its constructor.",
+        "A class has two subclasses."
+      ],
+      "answer": 1,
+      "explanation": "If callers must know which subclass they have to avoid errors, the subclass can't stand in for its parent. Adding methods is fine.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which one would force calling code to use instanceof checks?"
+        }
+      ]
+    },
+    {
+      "id": "ocp-tool",
+      "kind": "choice",
+      "prompt": "Which OOP idea is the usual way to make code open for extension but closed for modification?",
+      "options": [
+        "Polymorphism behind a common interface",
+        "Making every field public",
+        "Copy-pasting classes",
+        "Global variables"
+      ],
+      "answer": 0,
+      "explanation": "Write code against an interface, and add behaviour by adding new implementations. The caller never needs to change.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How did we avoid if/else chains on type in the pillars topic?"
+        }
+      ]
+    },
+    {
+      "id": "solid-balance",
+      "kind": "choice",
+      "prompt": "An interviewer asks: \"Should you always apply every SOLID principle?\" What is the best answer?",
+      "options": [
+        "Yes, every class must follow all five.",
+        "They are guidelines: apply them where change is likely, and don't add layers of interfaces to tiny or stable code.",
+        "No, SOLID is outdated.",
+        "Only in Java."
+      ],
+      "answer": 1,
+      "explanation": "Over-applying SOLID creates needless abstractions. Good engineers weigh them against simplicity, and that judgement is what interviewers want to hear.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What is the cost of adding an interface for everything?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write a `ReportService` that **depends on a `Writer` abstraction** instead of on files.\n\n- `Writer` has one method, `write(line)`.\n- `ReportService` receives a writer in its constructor. `publish(items)` writes a header line `Report: N items`, then one line `- item` per item.\n- Also write `InMemoryWriter`, which stores the lines in a `lines` list, so a test can check the output.\n\nWhich SOLID principle is this, and why does it make testing easier?",
+    "starter": {
+      "ts": "interface Writer {\n  write(line: string): void\n}\n\nclass ReportService {\n  // your code here\n}\n\nclass InMemoryWriter implements Writer {\n  // your code here\n}",
+      "py": "class ReportService:\n    # your code here\n    pass\n\nclass InMemoryWriter:\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "ReportService should never say `new FileWriter`. Where does its writer come from?"
+      },
+      {
+        "level": "pattern",
+        "text": "Dependency inversion through constructor injection."
+      },
+      {
+        "level": "approach",
+        "text": "Store the injected writer in a field. publish writes the header, then loops over the items. InMemoryWriter appends each line to its lines list."
+      }
+    ],
+    "reference": {
+      "ts": "interface Writer {\n  write(line: string): void\n}\n\nclass ReportService {\n  constructor(private writer: Writer) {}\n\n  publish(items: string[]): void {\n    this.writer.write(`Report: ${items.length} items`)\n    for (const item of items) this.writer.write(`- ${item}`)\n  }\n}\n\nclass InMemoryWriter implements Writer {\n  lines: string[] = []\n  write(line: string): void {\n    this.lines.push(line)\n  }\n}",
+      "py": "from abc import ABC, abstractmethod\n\nclass Writer(ABC):\n    @abstractmethod\n    def write(self, line): ...\n\nclass ReportService:\n    def __init__(self, writer):\n        self.writer = writer\n\n    def publish(self, items):\n        self.writer.write(f\"Report: {len(items)} items\")\n        for item in items:\n            self.writer.write(f\"- {item}\")\n\nclass InMemoryWriter(Writer):\n    def __init__(self):\n        self.lines = []\n\n    def write(self, line):\n        self.lines.append(line)"
+    },
+    "explanation": "This is **dependency inversion**: the high-level `ReportService` depends on the `Writer` abstraction, and the concrete writer is **injected**. A test passes an `InMemoryWriter` and asserts on `lines`, with no files and no clean-up. Production passes a file or network writer, and the service never changes, which is open/closed as a bonus.",
+    "selfCheck": [
+      "ReportService never creates a concrete writer itself.",
+      "The writer arrives through the constructor.",
+      "InMemoryWriter lets a test check the exact lines.",
+      "I named dependency inversion and explained the testing benefit."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Reciting the five names with no example.",
+      "fix": "Pick one, show a small violation, and explain what breaks. That is what interviewers listen for."
+    },
+    {
+      "mistake": "Reading single responsibility as \"one method per class\".",
+      "fix": "It means one reason to change. A cohesive class can have many methods."
+    },
+    {
+      "mistake": "Thinking Liskov is only about types matching.",
+      "fix": "It is about behaviour: a subclass must keep the parent's promises, so callers need no type checks."
+    },
+    {
+      "mistake": "Mixing up dependency inversion and dependency injection.",
+      "fix": "Inversion is the principle (depend on abstractions). Injection is the technique (pass dependencies in)."
+    },
+    {
+      "mistake": "Adding an interface in front of every class.",
+      "fix": "Abstractions cost something. Add them where change or testing needs them."
+    },
+    {
+      "mistake": "Creating collaborators with `new` deep inside methods.",
+      "fix": "That hard-wires the dependency and makes testing painful. Inject it instead."
+    }
+  ]
+}

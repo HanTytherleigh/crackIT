@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "id": "four-pillars",
+  "moduleId": "oop",
+  "title": "The four pillars",
+  "summary": "Encapsulation, abstraction, inheritance and polymorphism.",
+  "estimatedMinutes": 20,
+  "prerequisites": [],
+  "recallPrompts": [
+    {
+      "id": "name-them",
+      "prompt": "Name the four pillars of object-oriented programming, with one sentence on each."
+    },
+    {
+      "id": "enc-vs-abs",
+      "prompt": "Encapsulation and abstraction are often mixed up. How would you tell them apart?"
+    },
+    {
+      "id": "poly-example",
+      "prompt": "Give a real example of polymorphism from code you have written or used."
+    }
+  ],
+  "mentalModel": {
+    "analogy": "Think of a **car**. You drive it with a wheel and two pedals, without knowing how fuel injection works: that is **abstraction**. The engine is sealed under the bonnet so you can't break it by accident: **encapsulation**. An electric car **is a** car and reuses the idea of one: **inheritance**. Press accelerate in any car and it goes, each in its own way: **polymorphism**.",
+    "sections": [
+      {
+        "id": "objects",
+        "heading": "Classes and objects",
+        "body": "A **class** is a blueprint that bundles **state** (fields) with the **behaviour** that acts on it (methods). An **object** is one instance built from that blueprint, with its own state.\n\nThe point of OOP is to model a program as objects that look after their own data and talk to each other through methods, rather than one big pile of functions reaching into shared data. The four pillars are the ideas that make that work.",
+        "code": {
+          "ts": "class Counter {\n  private count = 0          // state\n  increment(): void {        // behaviour\n    this.count++\n  }\n  get value(): number {\n    return this.count\n  }\n}\n\nconst a = new Counter()      // two objects, separate state\nconst b = new Counter()\na.increment()\nconsole.log(a.value, b.value) // 1 0",
+          "py": "class Counter:\n    def __init__(self):\n        self._count = 0        # state\n\n    def increment(self):       # behaviour\n        self._count += 1\n\n    @property\n    def value(self):\n        return self._count\n\na, b = Counter(), Counter()    # two objects, separate state\na.increment()\nprint(a.value, b.value)        # 1 0"
+        }
+      },
+      {
+        "id": "encapsulation",
+        "heading": "Encapsulation: protect the state",
+        "body": "**Encapsulation** means an object keeps its data private and only lets the outside world change it through methods it controls. Those methods enforce the rules (the **invariants**): a bank balance must never go negative, an email field must hold a valid address.\n\nThe benefit is that a bug which breaks the rules can only live inside the class. Nobody else can set `balance = -500` directly.\n\nIt is not just \"add a getter and setter for every field\". A setter that lets anyone write anything protects nothing. Expose operations that mean something (`deposit`, `withdraw`), not raw fields.\n\nLanguages differ in how strict this is. TypeScript, Java and Kotlin have `private`. Python relies on convention: a leading underscore (`_balance`) means \"internal, don't touch\"."
+      },
+      {
+        "id": "abstraction",
+        "heading": "Abstraction: show what, hide how",
+        "body": "**Abstraction** means presenting a simple interface and hiding the complicated details behind it. You call `list.sort()` without caring which sorting algorithm runs.\n\nHow it differs from encapsulation:\n\n- **Abstraction** is about **design**: deciding what a user of the class needs to see, the *what*.\n- **Encapsulation** is about **protection**: hiding and guarding the internals, the *how*.\n\nThey work together: you choose a clean interface (abstraction) and enforce it by making everything else private (encapsulation). Interfaces and abstract classes are the main tools for abstraction, covered in their own topic."
+      },
+      {
+        "id": "inheritance",
+        "heading": "Inheritance: is-a and reuse",
+        "body": "**Inheritance** lets a class (the subclass) build on another (the superclass), reusing its fields and methods and **overriding** the ones it needs to change. It models an **is-a** relationship: a `SavingsAccount` *is a* `BankAccount`.\n\n- The subclass calls `super(...)` in its constructor to set up the parent part of the object.\n- It can add new methods, and override existing ones.\n- Java, Kotlin and TypeScript allow only one parent class. Python allows several (multiple inheritance), resolved in a fixed order (the MRO).\n- **Kotlin** classes are `final` by default: you must mark a class `open` to allow subclasses, and a method `open` to allow overriding.\n\nInheritance is powerful but couples the child tightly to the parent. The composition topic covers when to prefer something else.",
+        "code": {
+          "ts": "class Animal {\n  constructor(public name: string) {}\n  speak(): string {\n    return `${this.name} makes a sound`\n  }\n}\n\nclass Dog extends Animal {\n  speak(): string {            // override\n    return `${this.name} says woof`\n  }\n}",
+          "py": "class Animal:\n    def __init__(self, name):\n        self.name = name\n\n    def speak(self):\n        return f\"{self.name} makes a sound\"\n\nclass Dog(Animal):\n    def speak(self):           # override\n        return f\"{self.name} says woof\""
+        }
+      },
+      {
+        "id": "polymorphism",
+        "heading": "Polymorphism: one call, many behaviours",
+        "body": "**Polymorphism** means code written against a general type works with any specific type that fits it, and each object responds in its own way.\n\n`for (const a of animals) a.speak()` calls `Dog.speak` for dogs and `Cat.speak` for cats. The calling code never checks which kind it has. The right method is chosen **at run time**, from the object's actual type: this is **dynamic dispatch**.\n\nTwo terms interviewers like:\n\n- **Overriding**: a subclass replaces a parent's method with the same signature. Chosen at run time.\n- **Overloading**: several methods with the same name but different parameter lists, chosen at compile time. Java and Kotlin have it; Python and JavaScript don't (the last definition wins).\n\nPolymorphism is what removes long `if type == ...` chains: add a new subclass and existing code works with it unchanged."
+      }
+    ]
+  },
+  "widgets": [],
+  "explainBack": {
+    "prompt": "Explain the four pillars of OOP as you would in an interview, with a small example for each, and say how encapsulation differs from abstraction.",
+    "rubric": [
+      {
+        "id": "enc",
+        "point": "Encapsulation: keep state private and change it only through methods that enforce the rules."
+      },
+      {
+        "id": "abs",
+        "point": "Abstraction: expose a simple interface (the what) and hide the details (the how)."
+      },
+      {
+        "id": "diff",
+        "point": "Abstraction is a design decision; encapsulation is the protection that enforces it."
+      },
+      {
+        "id": "inh",
+        "point": "Inheritance: a subclass reuses and extends a superclass, modelling an is-a relationship."
+      },
+      {
+        "id": "poly",
+        "point": "Polymorphism: one call on a general type runs each object's own version."
+      },
+      {
+        "id": "dispatch",
+        "point": "Overriding is chosen at run time (dynamic dispatch); overloading at compile time."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "which-pillar-enc",
+      "kind": "choice",
+      "prompt": "A `BankAccount` keeps `balance` private and only changes it through `deposit` and `withdraw`, which refuse to let it go negative. Which pillar is that mainly showing?",
+      "options": [
+        "Encapsulation",
+        "Inheritance",
+        "Polymorphism",
+        "Overloading"
+      ],
+      "answer": 0,
+      "explanation": "Hiding the field and guarding every change behind methods that enforce a rule is encapsulation.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What stops other code setting the balance to −500?"
+        }
+      ]
+    },
+    {
+      "id": "enc-vs-abs",
+      "kind": "choice",
+      "prompt": "Which statement best separates abstraction from encapsulation?",
+      "options": [
+        "They are two names for the same thing.",
+        "Abstraction decides what a user of the class sees; encapsulation hides and protects the internals that make it work.",
+        "Abstraction is only about abstract classes; encapsulation is only about getters and setters.",
+        "Encapsulation is for data; abstraction is for loops."
+      ],
+      "answer": 1,
+      "explanation": "Abstraction is the design of a simple interface (the what). Encapsulation enforces it by keeping everything else private (the how).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "One is about what you show, the other about what you protect."
+        }
+      ]
+    },
+    {
+      "id": "shapes",
+      "kind": "choice",
+      "prompt": "A loop calls `shape.area()` on a list holding circles, squares and triangles, and each returns its own correct area. Which pillar is that?",
+      "options": [
+        "Encapsulation",
+        "Abstraction",
+        "Polymorphism",
+        "Composition"
+      ],
+      "answer": 2,
+      "explanation": "The same call runs a different method depending on each object's actual type: polymorphism through dynamic dispatch.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "The calling code never checks which kind of shape it has."
+        }
+      ]
+    },
+    {
+      "id": "count-woof",
+      "kind": "number",
+      "prompt": "Using the `Animal` and `Dog` classes above, how many strings ending in \"woof\" does this produce?",
+      "code": {
+        "ts": "const pets: Animal[] = [new Animal('Rex'), new Dog('Fido'), new Dog('Bo')]\nconst lines = pets.map((p) => p.speak())",
+        "py": "pets = [Animal(\"Rex\"), Dog(\"Fido\"), Dog(\"Bo\")]\nlines = [p.speak() for p in pets]"
+      },
+      "answer": 2,
+      "tolerance": 0,
+      "explanation": "The two `Dog` objects run the overridden `speak`, even though the list is typed as `Animal`. The plain `Animal` makes a sound. So **2**.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which `speak` runs is decided by the object, not by the list's type."
+        }
+      ]
+    },
+    {
+      "id": "override-vs-overload",
+      "kind": "choice",
+      "prompt": "What is the difference between overriding and overloading?",
+      "options": [
+        "Overriding replaces a parent's method in a subclass (chosen at run time); overloading defines same-named methods with different parameters (chosen at compile time).",
+        "They mean the same thing.",
+        "Overloading replaces a parent's method; overriding adds parameters.",
+        "Overriding is only allowed in Python."
+      ],
+      "answer": 0,
+      "explanation": "Overriding is about subclasses and dynamic dispatch. Overloading is about parameter lists, and isn't supported in Python or JavaScript.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "One needs a subclass; the other needs a different parameter list."
+        }
+      ]
+    },
+    {
+      "id": "is-a",
+      "kind": "choice",
+      "prompt": "Which relationship is a good fit for inheritance?",
+      "options": [
+        "A `Car` has an `Engine`",
+        "A `SavingsAccount` is a `BankAccount`",
+        "A `Library` has many `Book`s",
+        "A `Logger` uses a `File`"
+      ],
+      "answer": 1,
+      "explanation": "Inheritance models is-a. The others are has-a or uses relationships, which are modelled with fields (composition).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Say each one as \"X is a Y\". Which one sounds right?"
+        }
+      ]
+    },
+    {
+      "id": "why-private",
+      "kind": "choice",
+      "prompt": "A colleague says making fields private is pointless extra typing. What is the strongest reply?",
+      "options": [
+        "Private fields make the program run faster.",
+        "They let the class guarantee its own rules: only its methods can change the state, so invalid states can't come from outside.",
+        "Interviewers expect it.",
+        "Public fields use more memory."
+      ],
+      "answer": 1,
+      "explanation": "Encapsulation makes invariants enforceable and confines the bugs that break them to one class. It also lets you change the internals later without breaking callers.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Think about who could break the class's rules if the fields were public."
+        }
+      ]
+    },
+    {
+      "id": "kotlin-open",
+      "kind": "choice",
+      "prompt": "In Kotlin, you write `class Shape` and then try `class Circle : Shape()`. It fails to compile. Why?",
+      "options": [
+        "Kotlin doesn't support inheritance.",
+        "Kotlin classes are final by default; `Shape` must be marked `open`.",
+        "You must use `extends` instead of `:`.",
+        "Circle needs to be abstract."
+      ],
+      "answer": 1,
+      "explanation": "Kotlin makes classes and methods final unless marked `open`, so inheritance is a deliberate choice. Java is the reverse: open unless marked `final`.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What is the default for classes in Kotlin, compared with Java?"
+        }
+      ]
+    },
+    {
+      "id": "dispatch-time",
+      "kind": "choice",
+      "prompt": "When `animal.speak()` is called on a variable typed as `Animal` that holds a `Dog`, when is it decided which `speak` runs?",
+      "options": [
+        "At compile time, from the variable's type",
+        "At run time, from the object's actual type",
+        "When the class is written",
+        "It always runs Animal.speak"
+      ],
+      "answer": 1,
+      "explanation": "That is dynamic dispatch: the object's real type (Dog) decides at run time. That's what makes polymorphism work.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "If it were decided from the variable's type, would Dog ever bark?"
+        }
+      ]
+    },
+    {
+      "id": "super",
+      "kind": "choice",
+      "prompt": "In a subclass constructor, what does calling `super(...)` do?",
+      "options": [
+        "Creates a second, separate parent object.",
+        "Runs the parent class's constructor so the inherited part of this object is set up.",
+        "Makes every method public.",
+        "Stops the parent's methods being inherited."
+      ],
+      "answer": 1,
+      "explanation": "One object is created. `super(...)` initialises the fields the parent defines, before the subclass adds its own.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Who sets up the fields that the parent class defines?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write a `BankAccount` class whose balance can only change through `deposit(amount)` and `withdraw(amount)`. Withdrawing more than the balance must throw an error and leave the balance unchanged, and amounts must be positive. Expose the balance read-only.\n\nThen write `SavingsAccount`, a subclass with a `rate` and an `addInterest()` method that deposits `balance × rate`.\n\nWhich pillars did you use, and where?",
+    "starter": {
+      "ts": "class BankAccount {\n  // your code here\n}\n\nclass SavingsAccount extends BankAccount {\n  // your code here\n}",
+      "py": "class BankAccount:\n    # your code here\n    pass\n\nclass SavingsAccount(BankAccount):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Which field must outside code never be able to set directly?"
+      },
+      {
+        "level": "pattern",
+        "text": "Encapsulation: a private field, and methods that check the rule before changing it."
+      },
+      {
+        "level": "approach",
+        "text": "Keep the balance private with a read-only getter or property. Validate in deposit and withdraw and throw on bad input. In SavingsAccount, call super's constructor and reuse deposit inside addInterest."
+      }
+    ],
+    "reference": {
+      "ts": "class BankAccount {\n  private _balance = 0\n\n  get balance(): number {\n    return this._balance\n  }\n\n  deposit(amount: number): void {\n    if (amount <= 0) throw new Error('Amount must be positive')\n    this._balance += amount\n  }\n\n  withdraw(amount: number): void {\n    if (amount <= 0) throw new Error('Amount must be positive')\n    if (amount > this._balance) throw new Error('Insufficient funds')\n    this._balance -= amount\n  }\n}\n\nclass SavingsAccount extends BankAccount {\n  constructor(private rate: number) {\n    super()\n  }\n\n  addInterest(): void {\n    this.deposit(this.balance * this.rate)\n  }\n}",
+      "py": "class BankAccount:\n    def __init__(self):\n        self._balance = 0\n\n    @property\n    def balance(self):\n        return self._balance\n\n    def deposit(self, amount):\n        if amount <= 0:\n            raise ValueError(\"Amount must be positive\")\n        self._balance += amount\n\n    def withdraw(self, amount):\n        if amount <= 0:\n            raise ValueError(\"Amount must be positive\")\n        if amount > self._balance:\n            raise ValueError(\"Insufficient funds\")\n        self._balance -= amount\n\nclass SavingsAccount(BankAccount):\n    def __init__(self, rate):\n        super().__init__()\n        self.rate = rate\n\n    def add_interest(self):\n        self.deposit(self.balance * self.rate)"
+    },
+    "explanation": "**Encapsulation**: the balance is private and only `deposit` and `withdraw` change it, and they enforce the rules. **Abstraction**: callers see three simple operations, not the bookkeeping. **Inheritance**: `SavingsAccount` is a `BankAccount` and reuses all of it. `addInterest` goes through `deposit` rather than touching the field, so the rules still apply. Because a `SavingsAccount` can be used anywhere a `BankAccount` is expected, that is **polymorphism** too.",
+    "selfCheck": [
+      "Outside code can read the balance but cannot assign to it.",
+      "A failed withdrawal leaves the balance exactly as it was.",
+      "SavingsAccount calls the parent constructor and reuses deposit instead of editing the balance directly.",
+      "I named which pillar each part used."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Defining encapsulation as \"getters and setters for every field\".",
+      "fix": "A setter that accepts anything protects nothing. Expose meaningful operations that enforce the rules."
+    },
+    {
+      "mistake": "Using abstraction and encapsulation as synonyms.",
+      "fix": "Abstraction is choosing what to show; encapsulation is protecting what you hide."
+    },
+    {
+      "mistake": "Calling overloading polymorphism without saying which kind.",
+      "fix": "In interviews, polymorphism usually means overriding with dynamic dispatch. Overloading is resolved at compile time."
+    },
+    {
+      "mistake": "Reaching for inheritance whenever two classes share some code.",
+      "fix": "Use it for genuine is-a relationships. For has-a, use a field: see composition versus inheritance."
+    },
+    {
+      "mistake": "Switching on an object's type with long if/else chains.",
+      "fix": "Put the behaviour in each class and call it polymorphically. New types then need no changes to the caller."
+    },
+    {
+      "mistake": "Forgetting Kotlin's default.",
+      "fix": "Kotlin classes and methods are final unless marked `open`. Java's are open unless marked `final`."
+    }
+  ]
+}

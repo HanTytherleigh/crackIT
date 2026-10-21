@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "id": "design-patterns",
+  "moduleId": "oop",
+  "title": "Common design patterns",
+  "summary": "Singleton, factory, strategy, observer, adapter and decorator.",
+  "estimatedMinutes": 24,
+  "prerequisites": [
+    "interfaces",
+    "composition-inheritance"
+  ],
+  "recallPrompts": [
+    {
+      "id": "name-some",
+      "prompt": "Name three design patterns and the problem each one solves."
+    },
+    {
+      "id": "singleton",
+      "prompt": "What is a singleton, and why do many developers treat it with suspicion?"
+    },
+    {
+      "id": "observer",
+      "prompt": "How would you let many parts of an app react when some data changes, without the data knowing who they are?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "Design patterns are **named recipes** that experienced cooks reach for. Nobody invents a new way to make a white sauce each time. Knowing the names lets a team say \"use a strategy here\" and be understood immediately.",
+    "sections": [
+      {
+        "id": "what",
+        "heading": "What a pattern is",
+        "body": "A **design pattern** is a reusable solution shape for a problem that keeps coming up in object-oriented design. The classic catalogue is the \"Gang of Four\" book (1994), which groups patterns as:\n\n- **Creational**: how objects get made (singleton, factory, builder).\n- **Structural**: how objects fit together (adapter, decorator, facade).\n- **Behavioural**: how objects share work and talk (strategy, observer, command).\n\nInterviewers rarely want UML. They want you to recognise the **problem** a pattern solves, sketch it, and know its trade-offs."
+      },
+      {
+        "id": "creational",
+        "heading": "Creational: singleton and factory",
+        "body": "**Singleton** guarantees **one instance** with a global access point: a configuration object or a logger. Its downsides make it a common trick question:\n\n- it is **global state** in disguise, so hidden coupling creeps in;\n- it is **hard to test**, because you can't easily substitute a fake;\n- it needs care with **threads** (two threads creating it at once).\n\nPrefer creating one instance at start-up and **injecting** it. Kotlin's `object` declaration gives you a thread-safe singleton for free when you do need one.\n\n**Factory** puts object creation behind a method, `createNotifier(\"email\")`, so callers ask for an interface and don't name concrete classes. Adding a new kind changes the factory, not every caller. The **builder** pattern handles objects with many optional parameters, through step-by-step calls ending in `build()`."
+      },
+      {
+        "id": "behavioural",
+        "heading": "Behavioural: strategy and observer",
+        "body": "**Strategy** packages interchangeable algorithms behind one interface and lets the caller pick or swap them: sorting orders, pricing rules, route planners. It is composition in action, and it replaces `if/else` chains on type. The ducks' flying behaviour in the composition topic was a strategy.\n\n**Observer** (publish and subscribe) lets one object, the **subject**, notify any number of **observers** when something changes, without knowing what they are. Observers subscribe and unsubscribe themselves. UI events, `LiveData` and `Flow` on Android, and JavaScript's `addEventListener` all follow this shape.\n\nWatch for **memory leaks**: an observer that never unsubscribes keeps itself alive through the subject's list.",
+        "code": {
+          "ts": "type Listener<T> = (value: T) => void\n\nclass Subject<T> {\n  private listeners = new Set<Listener<T>>()\n\n  subscribe(fn: Listener<T>): () => void {\n    this.listeners.add(fn)\n    return () => this.listeners.delete(fn) // call to unsubscribe\n  }\n\n  notify(value: T): void {\n    for (const fn of this.listeners) fn(value)\n  }\n}",
+          "py": "class Subject:\n    def __init__(self):\n        self._listeners = []\n\n    def subscribe(self, fn):\n        self._listeners.append(fn)\n        return lambda: self._listeners.remove(fn)  # call to unsubscribe\n\n    def notify(self, value):\n        for fn in list(self._listeners):\n            fn(value)"
+        }
+      },
+      {
+        "id": "structural",
+        "heading": "Structural: adapter and decorator",
+        "body": "**Adapter** wraps an object with the wrong interface so it fits the one your code expects. Think of a travel plug adapter. If your app uses a `Payment` interface but a new SDK has `makeCharge(cents)`, write a small `SdkPaymentAdapter` that implements `Payment` and translates the calls. Android's `RecyclerView.Adapter` is the same idea: it adapts your data to what a list view needs.\n\n**Decorator** wraps an object with the **same** interface to add behaviour around it: logging, caching, retries, compression. Decorators stack, so `Retry(Cache(Logging(api)))` adds features without touching `api` or creating a subclass for every combination. Python's `@decorator` syntax is the same idea, applied to functions.\n\nThe difference: an adapter **changes** the interface; a decorator **keeps** it and adds behaviour."
+      },
+      {
+        "id": "architecture",
+        "heading": "Patterns at app scale: MVC and MVVM",
+        "body": "Bigger patterns organise whole apps by separating concerns:\n\n- **MVC**: the Model holds data and rules, the View displays it, and the Controller handles input.\n- **MVVM**: the ViewModel exposes UI state that the View **observes**. This is Google's recommended architecture for Android: a `ViewModel` holds a `StateFlow`, and the Compose UI collects it and redraws.\n\nIn an interview, link MVVM back to the smaller patterns. The view observing the ViewModel is the **observer** pattern, and the repository behind the ViewModel is injected, which is **dependency inversion**."
+      }
+    ]
+  },
+  "widgets": [],
+  "explainBack": {
+    "prompt": "Explain three design patterns of your choice: the problem each solves, a sketch of how it works, and one trade-off or pitfall. Include why singleton is controversial.",
+    "rubric": [
+      {
+        "id": "problem",
+        "point": "Each pattern was tied to the problem it solves, not just defined."
+      },
+      {
+        "id": "singleton",
+        "point": "Singleton: one instance, but global state that is hard to test; prefer injecting a single instance."
+      },
+      {
+        "id": "strategy",
+        "point": "Strategy: interchangeable algorithms behind one interface, replacing if/else on type."
+      },
+      {
+        "id": "observer",
+        "point": "Observer: subjects notify subscribers without knowing them; unsubscribe to avoid leaks."
+      },
+      {
+        "id": "adapter-decorator",
+        "point": "Adapter changes an interface to fit; decorator keeps it and adds behaviour."
+      },
+      {
+        "id": "app",
+        "point": "Linked to real use, such as MVVM on Android observing a ViewModel."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "spot-strategy",
+      "kind": "choice",
+      "prompt": "A route planner lets users choose fastest, shortest or scenic routes, and new options get added often. Which pattern fits?",
+      "options": [
+        "Strategy",
+        "Singleton",
+        "Adapter",
+        "Builder"
+      ],
+      "answer": 0,
+      "explanation": "Interchangeable algorithms behind one interface, chosen at run time: strategy. A new option is a new class.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Several ways of doing the same job, picked at run time."
+        }
+      ]
+    },
+    {
+      "id": "spot-observer",
+      "kind": "choice",
+      "prompt": "When the basket changes, the badge count, the total and a \"free delivery\" banner must all update, and more widgets may be added later. Which pattern?",
+      "options": [
+        "Observer",
+        "Factory",
+        "Decorator",
+        "Singleton"
+      ],
+      "answer": 0,
+      "explanation": "One subject (the basket) notifies any number of subscribers, without knowing who they are.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "One thing changes; many things need to hear about it."
+        }
+      ]
+    },
+    {
+      "id": "spot-adapter",
+      "kind": "choice",
+      "prompt": "Your code expects `Payment.charge(pounds)`, but the new provider's SDK offers `makeCharge(pence)`. What do you write?",
+      "options": [
+        "An adapter",
+        "A decorator",
+        "A singleton",
+        "An observer"
+      ],
+      "answer": 0,
+      "explanation": "An adapter implements your interface and translates calls to the SDK, converting pounds to pence. Neither side has to change.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "The interfaces don't match. What converts one into the other?"
+        }
+      ]
+    },
+    {
+      "id": "spot-decorator",
+      "kind": "choice",
+      "prompt": "You want to add caching and logging around an API client without editing it, and sometimes only one of the two. Which pattern?",
+      "options": [
+        "Decorator",
+        "Adapter",
+        "Factory",
+        "Template method"
+      ],
+      "answer": 0,
+      "explanation": "Decorators wrap an object with the same interface and add behaviour. They stack in any combination, with no subclass per combination.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Same interface, extra behaviour, combinable."
+        }
+      ]
+    },
+    {
+      "id": "singleton-issue",
+      "kind": "choice",
+      "prompt": "Why is the singleton pattern often called an anti-pattern?",
+      "options": [
+        "It uses too much memory.",
+        "It is global state in disguise: it hides dependencies, makes tests hard to isolate, and needs thread-safety care.",
+        "It can't be written in Python.",
+        "It always creates two instances."
+      ],
+      "answer": 1,
+      "explanation": "Code reaches for it from anywhere, so dependencies are hidden and tests can't easily swap it. Prefer creating one instance and injecting it.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How would a test replace a singleton with a fake?"
+        }
+      ]
+    },
+    {
+      "id": "kotlin-object",
+      "kind": "choice",
+      "prompt": "In Kotlin, what is the idiomatic way to declare a singleton?",
+      "options": [
+        "An `object` declaration",
+        "A class with a public constructor",
+        "A `data class`",
+        "An `enum` with no values"
+      ],
+      "answer": 0,
+      "explanation": "`object Config { … }` creates exactly one, lazily initialised and thread-safe instance.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Kotlin has a keyword for exactly one instance."
+        }
+      ]
+    },
+    {
+      "id": "adapter-vs-decorator",
+      "kind": "choice",
+      "prompt": "What is the key difference between an adapter and a decorator?",
+      "options": [
+        "Adapter changes the interface to fit what callers expect; decorator keeps the same interface and adds behaviour.",
+        "They are the same pattern.",
+        "Decorator changes the interface; adapter adds logging.",
+        "Adapters can only be used on Android."
+      ],
+      "answer": 0,
+      "explanation": "Both wrap an object. An adapter converts it to a different interface; a decorator enhances it behind the same interface.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Does the wrapper look the same as the wrapped object from outside?"
+        }
+      ]
+    },
+    {
+      "id": "observer-leak",
+      "kind": "choice",
+      "prompt": "Screens subscribe to a long-lived data store but never unsubscribe. What can go wrong?",
+      "options": [
+        "Nothing: the garbage collector handles it.",
+        "The store keeps references to old screens, so they can't be freed (a memory leak), and they keep reacting to updates.",
+        "The store becomes a singleton.",
+        "The screens stop compiling."
+      ],
+      "answer": 1,
+      "explanation": "The subject's listener list keeps observers alive. Unsubscribe when the observer's lifetime ends. Android's lifecycle-aware observers do this for you.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Who still holds a reference to the old screen?"
+        }
+      ]
+    },
+    {
+      "id": "factory-why",
+      "kind": "choice",
+      "prompt": "What is the main benefit of a factory method like `createNotifier(type)`?",
+      "options": [
+        "Callers depend on the Notifier interface, not concrete classes; adding a new kind only changes the factory.",
+        "It makes objects immutable.",
+        "It guarantees a single instance.",
+        "It removes the need for interfaces."
+      ],
+      "answer": 0,
+      "explanation": "Creation logic lives in one place, so callers never name concrete classes.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Where do the concrete class names appear?"
+        }
+      ]
+    },
+    {
+      "id": "mvvm",
+      "kind": "choice",
+      "prompt": "In Android's MVVM, the Compose UI collects a `StateFlow` from a `ViewModel` and redraws on each change. Which smaller pattern is that?",
+      "options": [
+        "Observer",
+        "Adapter",
+        "Singleton",
+        "Builder"
+      ],
+      "answer": 0,
+      "explanation": "The view observes the ViewModel's state stream. MVVM leans on observer for its data flow and on dependency injection for its repositories.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "The UI subscribes to state and reacts when it changes."
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Implement the **observer** pattern.\n\n- `Subject` has `subscribe(fn)`, which returns an **unsubscribe** function, and `notify(value)`, which calls every current subscriber with the value.\n- An observer that unsubscribes must not be called again.\n\nThen answer: why return an unsubscribe function, and what goes wrong in a long-running app if observers never unsubscribe?",
+    "starter": {
+      "ts": "class Subject<T> {\n  // your code here\n}",
+      "py": "class Subject:\n    pass  # your code here"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "The subject needs to remember its subscribers."
+      },
+      {
+        "level": "pattern",
+        "text": "Observer: a collection of listeners, notified in turn."
+      },
+      {
+        "level": "approach",
+        "text": "Keep a set or list of functions. subscribe adds fn and returns a function that removes it. notify loops over a copy and calls each one."
+      }
+    ],
+    "reference": {
+      "ts": "class Subject<T> {\n  private listeners = new Set<(value: T) => void>()\n\n  subscribe(fn: (value: T) => void): () => void {\n    this.listeners.add(fn)\n    return () => {\n      this.listeners.delete(fn)\n    }\n  }\n\n  notify(value: T): void {\n    for (const fn of [...this.listeners]) fn(value)\n  }\n}",
+      "py": "class Subject:\n    def __init__(self):\n        self._listeners = []\n\n    def subscribe(self, fn):\n        self._listeners.append(fn)\n\n        def unsubscribe():\n            if fn in self._listeners:\n                self._listeners.remove(fn)\n\n        return unsubscribe\n\n    def notify(self, value):\n        for fn in list(self._listeners):\n            fn(value)"
+    },
+    "explanation": "The subject knows only that its observers are functions, so any part of the app can subscribe without the subject changing. Returning the unsubscribe function puts clean-up next to the subscription, which makes it easy to tie to a lifecycle (a React effect or an Android lifecycle). Without unsubscribing, the subject keeps old observers alive: a **memory leak**, plus stale screens reacting to events. Looping over a copy lets observers unsubscribe while a notification is running.",
+    "selfCheck": [
+      "subscribe returns a function that removes exactly that subscriber.",
+      "An unsubscribed observer is not called again.",
+      "notify loops over a copy, so unsubscribing during a notification is safe.",
+      "I explained the memory-leak risk."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Defining patterns without the problem they solve.",
+      "fix": "Lead with the problem (\"many widgets must react to basket changes\"), then name the pattern."
+    },
+    {
+      "mistake": "Reaching for singleton as the default way to share an object.",
+      "fix": "Create one instance and inject it. Singleton hides dependencies and hurts testing."
+    },
+    {
+      "mistake": "Mixing up adapter and decorator.",
+      "fix": "Adapter changes the interface; decorator keeps it and adds behaviour."
+    },
+    {
+      "mistake": "Forgetting to unsubscribe observers.",
+      "fix": "It leaks memory and leaves stale listeners. Tie unsubscription to the observer's lifecycle."
+    },
+    {
+      "mistake": "Writing a subclass for every combination of extra features.",
+      "fix": "Decorators (or composition) combine features without a class explosion."
+    },
+    {
+      "mistake": "Forcing patterns into simple code.",
+      "fix": "Patterns earn their place where the problem they solve actually exists. Say that in interviews."
+    }
+  ]
+}

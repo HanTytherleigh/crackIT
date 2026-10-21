@@ -1,0 +1,337 @@
+{
+  "schemaVersion": 1,
+  "id": "composition-inheritance",
+  "moduleId": "oop",
+  "title": "Composition versus inheritance",
+  "summary": "Is-a, has-a, and why \"favour composition\" is common advice.",
+  "estimatedMinutes": 18,
+  "prerequisites": [
+    "four-pillars"
+  ],
+  "recallPrompts": [
+    {
+      "id": "difference",
+      "prompt": "What is the difference between composition and inheritance? Give an example of each."
+    },
+    {
+      "id": "favour",
+      "prompt": "Why do people say \"favour composition over inheritance\"?"
+    },
+    {
+      "id": "when-inherit",
+      "prompt": "When is inheritance still the right choice?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "Inheritance is **family resemblance**: you get your parents' traits whether you want them or not, and you can't swap them later. Composition is **assembling a team**: you pick the specialists you need, and you can replace one without rebuilding everyone else.",
+    "sections": [
+      {
+        "id": "has-a",
+        "heading": "Is-a versus has-a",
+        "body": "**Inheritance** models **is-a**: a `Dog` is an `Animal`. **Composition** models **has-a**: a `Car` has an `Engine`, so it holds one in a field and **delegates** work to it (`car.start()` calls `engine.start()`).\n\nA quick test is to say the sentence. \"A car is an engine\" is nonsense, so a car must *have* one. If both sentences sound odd, the classes probably shouldn't be linked at all."
+      },
+      {
+        "id": "problems",
+        "heading": "What goes wrong with deep inheritance",
+        "body": "Inheritance is the tightest coupling in OOP. The child depends on the parent's internals, not just its public interface.\n\n- **Fragile base class**: a harmless-looking change to a parent can break subclasses you didn't know about.\n- **Rigid hierarchies**: a `Duck` class with `fly()` works until you need a rubber duck that can't fly, then a robot duck that flies with rockets. You end up overriding methods to do nothing, or with combinations like `FlyingQuackingDuck`.\n- **Fixed at compile time**: an object can't change its parent while running.\n- **Single parent**: Java, Kotlin and TypeScript allow only one superclass, so behaviours can't be mixed in from two."
+      },
+      {
+        "id": "composition",
+        "heading": "Composition: build from parts",
+        "body": "With composition, a class holds **objects that provide behaviour** and delegates to them:\n\n- Behaviours combine freely: a duck gets *some* flying behaviour and *some* quacking behaviour.\n- They can be **swapped at run time**, for example when a duck's wing is injured.\n- Each part can be tested on its own, and a part's internals can change without touching the class that uses it.\n\nThis is the heart of the **strategy** pattern, and it fits with dependency injection from SOLID. Kotlin even has built-in delegation (`class Logger(w: Writer) : Writer by w`) to make it cheap.",
+        "code": {
+          "ts": "interface FlyBehaviour {\n  fly(): string\n}\nclass Wings implements FlyBehaviour {\n  fly() { return 'flaps its wings' }\n}\nclass CannotFly implements FlyBehaviour {\n  fly() { return \"can't fly\" }\n}\n\nclass Duck {\n  constructor(public name: string, private flyer: FlyBehaviour) {}\n  fly() { return `${this.name} ${this.flyer.fly()}` } // delegate\n  setFlyer(f: FlyBehaviour) { this.flyer = f }         // swap at run time\n}",
+          "py": "class Wings:\n    def fly(self): return \"flaps its wings\"\n\nclass CannotFly:\n    def fly(self): return \"can't fly\"\n\nclass Duck:\n    def __init__(self, name, flyer):\n        self.name = name\n        self._flyer = flyer\n\n    def fly(self):                      # delegate\n        return f\"{self.name} {self._flyer.fly()}\"\n\n    def set_flyer(self, flyer):         # swap at run time\n        self._flyer = flyer"
+        }
+      },
+      {
+        "id": "when-inheritance",
+        "heading": "When inheritance is right",
+        "body": "Inheritance isn't banned. It fits when:\n\n- the relationship is a **true, stable is-a**, and the subclass can honour every promise the parent makes (Liskov);\n- you are extending a framework that is **designed** for it, such as an Android `Activity` or `ViewModel`, or an abstract base class meant for subclassing;\n- the hierarchy is **shallow**, one or two levels.\n\nIn interviews, \"favour composition\" doesn't mean \"never inherit\". Say you would default to composition for sharing behaviour, and use inheritance for genuine is-a types."
+      },
+      {
+        "id": "multiple",
+        "heading": "Multiple inheritance and the diamond",
+        "body": "If `C` inherits from both `A` and `B`, and both override a method from a shared parent, which version does `C` get? That is the **diamond problem**.\n\n- **Java, Kotlin and TypeScript** avoid it: one superclass, but any number of **interfaces**.\n- **Python** allows multiple inheritance and picks a method using a fixed **method resolution order** (MRO), which you can inspect with `C.__mro__`.\n\nMixing in behaviour through composition, or through interfaces with default methods, sidesteps the problem entirely."
+      }
+    ]
+  },
+  "widgets": [],
+  "explainBack": {
+    "prompt": "Explain composition and inheritance, why \"favour composition\" is common advice, and when you would still choose inheritance.",
+    "rubric": [
+      {
+        "id": "isa-hasa",
+        "point": "Inheritance models is-a; composition models has-a, holding parts and delegating to them."
+      },
+      {
+        "id": "coupling",
+        "point": "Inheritance couples a child to its parent's internals (fragile base class)."
+      },
+      {
+        "id": "rigid",
+        "point": "Hierarchies get rigid: behaviours can't be mixed or changed at run time."
+      },
+      {
+        "id": "flex",
+        "point": "Composition lets behaviours combine, be swapped at run time, and be tested alone."
+      },
+      {
+        "id": "when",
+        "point": "Inheritance still fits true, stable is-a relationships and framework base classes."
+      },
+      {
+        "id": "diamond",
+        "point": "Single-parent languages use interfaces; Python resolves multiple inheritance with the MRO."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "car-engine",
+      "kind": "choice",
+      "prompt": "How should `Car` and `Engine` be related?",
+      "options": [
+        "Car extends Engine",
+        "Engine extends Car",
+        "Car holds an Engine field and delegates to it",
+        "They should be one class"
+      ],
+      "answer": 2,
+      "explanation": "A car has an engine: composition. \"A car is an engine\" makes no sense, so inheritance would be wrong.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Try saying \"a car is an engine\" out loud."
+        }
+      ]
+    },
+    {
+      "id": "fragile",
+      "kind": "choice",
+      "prompt": "What is the \"fragile base class\" problem?",
+      "options": [
+        "Base classes use too much memory.",
+        "A change inside a parent class can silently break subclasses that relied on how it worked internally.",
+        "Base classes can't have constructors.",
+        "Abstract classes can't be instantiated."
+      ],
+      "answer": 1,
+      "explanation": "Subclasses often depend on a parent's internal behaviour, not just its public interface, so the parent can't change safely.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How tightly is a subclass tied to its parent?"
+        }
+      ]
+    },
+    {
+      "id": "runtime-swap",
+      "kind": "choice",
+      "prompt": "A game character's attack style must change mid-game, from sword to bow. Which design handles that best?",
+      "options": [
+        "SwordCharacter and BowCharacter subclasses",
+        "A Character holding an AttackBehaviour field that can be replaced",
+        "A long if/else on a string",
+        "Copying the character into a new class"
+      ],
+      "answer": 1,
+      "explanation": "Composition lets you swap the behaviour object at run time. An object can't change its class once it exists.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Can an object change its class after it is created?"
+        }
+      ]
+    },
+    {
+      "id": "rubber-duck",
+      "kind": "choice",
+      "prompt": "`RubberDuck extends Duck` overrides `fly()` to do nothing. What does that suggest?",
+      "options": [
+        "Good reuse of Duck's code.",
+        "The hierarchy is wrong: flying isn't a behaviour every duck shares, so it should be composed in.",
+        "RubberDuck should be abstract.",
+        "fly() should be private."
+      ],
+      "answer": 1,
+      "explanation": "Overriding to do nothing means the subclass can't honour the parent's promise. That is a Liskov smell. Model flying as a swappable behaviour instead.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Can every Duck in this design actually fly?"
+        }
+      ]
+    },
+    {
+      "id": "favour-meaning",
+      "kind": "choice",
+      "prompt": "What does \"favour composition over inheritance\" mean?",
+      "options": [
+        "Never use inheritance.",
+        "Default to composing behaviour from parts; use inheritance for genuine, stable is-a relationships.",
+        "Composition is faster at run time.",
+        "Inheritance is deprecated in modern languages."
+      ],
+      "answer": 1,
+      "explanation": "It is a default, not a ban. Inheritance stays right for true is-a types and framework base classes.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Is it \"never\" or \"prefer\"?"
+        }
+      ]
+    },
+    {
+      "id": "android",
+      "kind": "choice",
+      "prompt": "In Android, your screen class extends `AppCompatActivity`. Is that a misuse of inheritance?",
+      "options": [
+        "Yes: always use composition.",
+        "No: framework base classes are designed to be extended, and your screen genuinely is an activity.",
+        "Yes: Kotlin doesn't allow it.",
+        "Only if the class has more than ten methods."
+      ],
+      "answer": 1,
+      "explanation": "Frameworks often provide base classes built for subclassing. The problems come from deep hierarchies you invent yourself, not from extending one designed base class.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Was that base class designed to be extended?"
+        }
+      ]
+    },
+    {
+      "id": "diamond",
+      "kind": "choice",
+      "prompt": "How do Java and Kotlin avoid the diamond problem?",
+      "options": [
+        "They pick a random parent's method.",
+        "A class can extend only one class, but implement many interfaces.",
+        "They ban interfaces.",
+        "They copy both methods."
+      ],
+      "answer": 1,
+      "explanation": "Single class inheritance avoids ambiguous implementations. If two interfaces provide clashing default methods, you must override the method and choose explicitly.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many superclasses can a Java or Kotlin class have?"
+        }
+      ]
+    },
+    {
+      "id": "python-mro",
+      "kind": "text",
+      "prompt": "Python allows multiple inheritance. What is the name (or abbreviation) for the fixed order it uses to decide which parent's method runs?",
+      "accept": [
+        "MRO",
+        "method resolution order"
+      ],
+      "placeholder": "e.g. LIFO",
+      "explanation": "The **method resolution order (MRO)**, which you can inspect with `ClassName.__mro__`. It is computed with C3 linearisation.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Three letters: the order Python resolves methods in."
+        }
+      ]
+    },
+    {
+      "id": "delegate",
+      "kind": "choice",
+      "prompt": "In composition, what does \"delegation\" mean?",
+      "options": [
+        "The class forwards a call to an object it holds, which does the actual work.",
+        "The class inherits all of a parent's methods.",
+        "Methods are made private.",
+        "A subclass replaces a parent's method."
+      ],
+      "answer": 0,
+      "explanation": "`car.start()` calls `this.engine.start()`. The outer class presents the method and the part implements it.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Who actually does the work when you call car.start()?"
+        }
+      ]
+    },
+    {
+      "id": "testability",
+      "kind": "choice",
+      "prompt": "Why is composition usually easier to unit test than a deep inheritance hierarchy?",
+      "options": [
+        "Composed parts can be replaced with simple fakes, and each part can be tested on its own.",
+        "Composition runs faster in tests.",
+        "Test frameworks only support composition.",
+        "It isn't easier to test."
+      ],
+      "answer": 0,
+      "explanation": "Injected parts can be swapped for fakes, and each behaviour is a small class with its own tests. A deep hierarchy drags every ancestor into every test.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Think back to injecting an InMemoryWriter in the SOLID topic."
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Build ducks with composition.\n\n- `Wings` has `fly()` returning `\"flies with wings\"`. `CannotFly` has `fly()` returning `\"can't fly\"`.\n- `Duck(name, flyer)` has `fly()`, returning the name, a space, then the flyer's text, e.g. `\"Mallard flies with wings\"`.\n- `setFlyer(newFlyer)` swaps the behaviour at run time. (Python: `set_flyer`.)\n\nWhy is this better than `RubberDuck extends Duck` overriding `fly()`?",
+    "starter": {
+      "ts": "class Wings {\n  // your code here\n}\nclass CannotFly {\n  // your code here\n}\nclass Duck {\n  // your code here\n}",
+      "py": "class Wings:\n    pass  # your code here\n\nclass CannotFly:\n    pass  # your code here\n\nclass Duck:\n    pass  # your code here"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Duck should not know how flying works. It should ask something else."
+      },
+      {
+        "level": "pattern",
+        "text": "Composition with delegation: the strategy pattern."
+      },
+      {
+        "level": "approach",
+        "text": "Store the flyer in a field. fly() returns `${name} ${flyer.fly()}`. setFlyer replaces the field."
+      }
+    ],
+    "reference": {
+      "ts": "interface FlyBehaviour {\n  fly(): string\n}\n\nclass Wings implements FlyBehaviour {\n  fly() {\n    return 'flies with wings'\n  }\n}\n\nclass CannotFly implements FlyBehaviour {\n  fly() {\n    return \"can't fly\"\n  }\n}\n\nclass Duck {\n  constructor(\n    private name: string,\n    private flyer: FlyBehaviour,\n  ) {}\n\n  fly(): string {\n    return `${this.name} ${this.flyer.fly()}`\n  }\n\n  setFlyer(flyer: FlyBehaviour): void {\n    this.flyer = flyer\n  }\n}",
+      "py": "class Wings:\n    def fly(self):\n        return \"flies with wings\"\n\nclass CannotFly:\n    def fly(self):\n        return \"can't fly\"\n\nclass Duck:\n    def __init__(self, name, flyer):\n        self.name = name\n        self._flyer = flyer\n\n    def fly(self):\n        return f\"{self.name} {self._flyer.fly()}\"\n\n    def set_flyer(self, flyer):\n        self._flyer = flyer"
+    },
+    "explanation": "The duck **has** a flying behaviour and **delegates** to it. A rubber duck is just `Duck('Rubber duck', CannotFly())`: no subclass that overrides `fly()` to do nothing, so there is no Liskov violation. Behaviours combine freely (add a quack behaviour the same way), can change at run time (an injured duck), and each one can be tested alone.",
+    "selfCheck": [
+      "Duck contains no flying logic of its own; it delegates.",
+      "Swapping the flyer changes what fly() returns, without a new class.",
+      "I explained why the subclass-that-overrides-to-nothing approach is worse."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Using inheritance just to reuse a few methods.",
+      "fix": "If it isn't a genuine is-a, hold the helper as a field and delegate to it."
+    },
+    {
+      "mistake": "Saying \"never use inheritance\".",
+      "fix": "The advice is \"favour composition\". Inheritance is right for true is-a types and designed framework base classes."
+    },
+    {
+      "mistake": "Overriding a parent's method to do nothing or throw.",
+      "fix": "That breaks Liskov. Move the varying behaviour into a composed part."
+    },
+    {
+      "mistake": "Building deep hierarchies to combine features (FlyingQuackingDuck…).",
+      "fix": "Combinations of behaviours are exactly what composition handles well."
+    },
+    {
+      "mistake": "Forgetting that an object can't change its class.",
+      "fix": "Behaviour that changes at run time must be composed in."
+    },
+    {
+      "mistake": "Thinking multiple inheritance is free in Python.",
+      "fix": "It works, but method lookup follows the MRO. Keep hierarchies shallow, or prefer mixins with care."
+    }
+  ]
+}

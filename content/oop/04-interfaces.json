@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "id": "interfaces",
+  "moduleId": "oop",
+  "title": "Interfaces and abstract classes",
+  "summary": "Contracts, partial implementations, and programming to an interface.",
+  "estimatedMinutes": 18,
+  "prerequisites": [
+    "four-pillars"
+  ],
+  "recallPrompts": [
+    {
+      "id": "difference",
+      "prompt": "What is the difference between an interface and an abstract class?"
+    },
+    {
+      "id": "program-to",
+      "prompt": "What does \"program to an interface, not an implementation\" mean?"
+    },
+    {
+      "id": "testing",
+      "prompt": "How do interfaces make code easier to test?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "An interface is a **job description**: it lists what the role must do, and anyone who can do those things can be hired. An abstract class is a **half-built house** from a developer: the foundations and walls are done and shared, and each buyer finishes the rooms their own way.",
+    "sections": [
+      {
+        "id": "interface",
+        "heading": "Interfaces: a contract",
+        "body": "An **interface** declares **what** a type can do, as method signatures, without saying **how**. Any class that implements all of them can be used wherever the interface is expected.\n\n- A class can implement **many** interfaces (`Comparable`, `Serializable`, `Clickable`…), even in languages with single class inheritance.\n- Interfaces normally hold no instance state. Java and Kotlin interfaces can have **default methods** with shared behaviour; Kotlin's can also declare properties.\n- TypeScript interfaces are **structural**: any object with the right shape fits, even without `implements`. Python uses `ABC` with `@abstractmethod`, or `typing.Protocol` for structural typing (duck typing that type checkers can verify)."
+      },
+      {
+        "id": "abstract",
+        "heading": "Abstract classes: a partial implementation",
+        "body": "An **abstract class** can't be instantiated. It can hold **state**, **constructors** and **finished methods**, alongside **abstract methods** that subclasses must fill in.\n\nIt suits a family of closely related classes that share real code. A `Shape` base might store a name and implement `describe()` using an abstract `area()` that each shape supplies. That is the **template method** pattern.\n\n| Feature | Interface | Abstract class |\n|---|---|---|\n| Instance state | No (only constants or properties) | Yes |\n| Constructors | No | Yes |\n| Implemented methods | Default methods only | Any |\n| How many per class | Many | One (Java, Kotlin, TS) |\n| Relationship | can-do (capability) | is-a (family) |",
+        "code": {
+          "ts": "abstract class Shape {\n  constructor(public name: string) {}\n  abstract area(): number                 // each subclass must supply this\n  describe(): string {                    // shared, finished behaviour\n    return `${this.name} with area ${this.area().toFixed(1)}`\n  }\n}\n\nclass Circle extends Shape {\n  constructor(private r: number) { super('circle') }\n  area() { return Math.PI * this.r ** 2 }\n}",
+          "py": "from abc import ABC, abstractmethod\nimport math\n\nclass Shape(ABC):\n    def __init__(self, name):\n        self.name = name\n\n    @abstractmethod\n    def area(self): ...                   # each subclass must supply this\n\n    def describe(self):                   # shared, finished behaviour\n        return f\"{self.name} with area {self.area():.1f}\"\n\nclass Circle(Shape):\n    def __init__(self, r):\n        super().__init__(\"circle\")\n        self.r = r\n\n    def area(self):\n        return math.pi * self.r ** 2"
+        }
+      },
+      {
+        "id": "choose",
+        "heading": "Which one to use",
+        "body": "- Use an **interface** to describe a **capability** that unrelated classes might share (`Comparable`, `Closeable`, `PaymentProcessor`), or whenever you just want a contract. This is the default choice.\n- Use an **abstract class** when closely related classes share **state and real code**, and you want a common base with a few gaps to fill.\n- You can combine them: an interface for the contract, plus an abstract base that implements the boring parts.\n\nIn interviews, mention that interfaces avoid the single-inheritance limit, and that abstract classes are where shared state lives."
+      },
+      {
+        "id": "program-to-interface",
+        "heading": "Program to an interface",
+        "body": "**Program to an interface, not an implementation** means variables, parameters and fields should be typed by what you need (`List`, `PaymentProcessor`), not by a specific class (`ArrayList`, `StripeProcessor`).\n\nThen any implementation can be passed in:\n\n- **Swapping** is cheap: change the payment provider in one place.\n- **Testing** is easy: pass a **fake** that records calls, or a **mock** from a library, instead of hitting a real payment API.\n- **Parallel work**: one team builds against the interface while another implements it.\n\nThis is the same idea as dependency inversion from SOLID, seen from the caller's side."
+      }
+    ]
+  },
+  "widgets": [],
+  "explainBack": {
+    "prompt": "Explain the difference between an interface and an abstract class, when you would use each, and how programming to an interface helps with testing.",
+    "rubric": [
+      {
+        "id": "contract",
+        "point": "An interface is a contract: what a type can do, not how."
+      },
+      {
+        "id": "many",
+        "point": "A class can implement many interfaces but extend only one class (in Java, Kotlin, TS)."
+      },
+      {
+        "id": "abstract",
+        "point": "An abstract class can hold state, constructors and finished methods, plus abstract gaps for subclasses."
+      },
+      {
+        "id": "choose",
+        "point": "Interface for a capability or contract; abstract class for related classes sharing real code."
+      },
+      {
+        "id": "program-to",
+        "point": "Type variables and parameters by the interface, so any implementation can be passed in."
+      },
+      {
+        "id": "fakes",
+        "point": "Tests can then pass a fake or mock instead of the real dependency."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "instantiate",
+      "kind": "choice",
+      "prompt": "Which of these can you create an instance of directly with `new` (or by calling it in Python)?",
+      "options": [
+        "An interface",
+        "An abstract class",
+        "A concrete class",
+        "An abstract method"
+      ],
+      "answer": 2,
+      "explanation": "Only concrete classes can be instantiated. Interfaces and abstract classes have gaps that something else must fill.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which one has no missing pieces?"
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "kind": "choice",
+      "prompt": "Several related classes need the same fields and some identical methods, but each computes one value differently. What fits best?",
+      "options": [
+        "An interface",
+        "An abstract base class with one abstract method",
+        "Copy the code into each class",
+        "A global function"
+      ],
+      "answer": 1,
+      "explanation": "Shared state and shared methods belong in an abstract class. The one varying calculation is the abstract method each subclass supplies.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which one can hold fields and finished methods?"
+        }
+      ]
+    },
+    {
+      "id": "capability",
+      "kind": "choice",
+      "prompt": "Unrelated classes (`Invoice`, `Photo`, `Song`) all need to be exportable. What fits best?",
+      "options": [
+        "An Exportable interface",
+        "Make them all extend a common Exportable base class",
+        "Put export logic in a global if/else",
+        "Make them all subclasses of Photo"
+      ],
+      "answer": 0,
+      "explanation": "A capability shared by unrelated classes is an interface. A shared base class would force an odd is-a relationship and use up their one superclass.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Is an invoice the same kind of thing as a song?"
+        }
+      ]
+    },
+    {
+      "id": "how-many",
+      "kind": "choice",
+      "prompt": "In Java or Kotlin, a class can…",
+      "options": [
+        "extend many classes and implement one interface",
+        "extend one class and implement many interfaces",
+        "extend one class and implement one interface",
+        "extend and implement nothing"
+      ],
+      "answer": 1,
+      "explanation": "Single class inheritance, multiple interface implementation. That is why capabilities are usually interfaces.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which one avoids the diamond problem?"
+        }
+      ]
+    },
+    {
+      "id": "program-to",
+      "kind": "choice",
+      "prompt": "Why declare a parameter as `PaymentProcessor` rather than `StripeProcessor`?",
+      "options": [
+        "It makes the code run faster.",
+        "Any implementation can then be passed in, including a fake in tests, and the provider can change without touching this code.",
+        "Stripe requires it.",
+        "Interfaces use less memory."
+      ],
+      "answer": 1,
+      "explanation": "Programming to an interface decouples the caller from one implementation. That is what makes swapping and testing cheap.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What would a unit test pass in?"
+        }
+      ]
+    },
+    {
+      "id": "ts-structural",
+      "kind": "choice",
+      "prompt": "In TypeScript, an object literal with the right methods is accepted where an interface is expected, even without `implements`. Why?",
+      "options": [
+        "A compiler bug",
+        "TypeScript's type system is structural: it checks the shape, not the declared name",
+        "Interfaces are optional in TypeScript",
+        "It isn't accepted"
+      ],
+      "answer": 1,
+      "explanation": "TypeScript compares shapes (structural typing). Java and Kotlin are nominal: a class must say it implements the interface.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Does TypeScript care what a type is called, or what it contains?"
+        }
+      ]
+    },
+    {
+      "id": "python-abc",
+      "kind": "choice",
+      "prompt": "In Python, how do you make a method that every subclass must implement?",
+      "options": [
+        "Name it with a leading underscore",
+        "Inherit from abc.ABC and decorate the method with @abstractmethod",
+        "Raise an error in __init__",
+        "Python can't do this"
+      ],
+      "answer": 1,
+      "explanation": "A class with an unimplemented `@abstractmethod` can't be instantiated. `typing.Protocol` is the structural alternative, checked by type checkers.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "There is a standard library module for abstract base classes."
+        }
+      ]
+    },
+    {
+      "id": "default-methods",
+      "kind": "choice",
+      "prompt": "Kotlin and Java interfaces can include method bodies. What are those called, and what can't the interface still hold?",
+      "options": [
+        "Default methods; interfaces still can't hold instance state set through a constructor",
+        "Static classes; they can't hold methods",
+        "Abstract methods; they can't hold constants",
+        "Overloads; they can't hold parameters"
+      ],
+      "answer": 0,
+      "explanation": "Default methods share behaviour across implementations. Per-instance state and constructors remain the job of classes.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "They provide a default behaviour that implementations may override."
+        }
+      ]
+    },
+    {
+      "id": "template",
+      "kind": "choice",
+      "prompt": "An abstract `Shape.describe()` calls the abstract `area()`, which each subclass supplies. What is this design called?",
+      "options": [
+        "The template method pattern",
+        "The singleton pattern",
+        "Interface segregation",
+        "Overloading"
+      ],
+      "answer": 0,
+      "explanation": "The base class fixes the overall algorithm and leaves specific steps to subclasses: the template method pattern.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "The base class provides a template with blanks."
+        }
+      ]
+    },
+    {
+      "id": "fake-vs-mock",
+      "kind": "choice",
+      "prompt": "In a test, you pass a `FakePaymentProcessor` that records amounts instead of charging cards. What does that rely on?",
+      "options": [
+        "Checkout depending on a PaymentProcessor interface",
+        "Checkout extending FakePaymentProcessor",
+        "Global variables",
+        "Making Checkout abstract"
+      ],
+      "answer": 0,
+      "explanation": "Because Checkout depends on the interface, any implementation fits, including a fake that just records calls.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What type is Checkout's processor field?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write a checkout that works with **any** payment processor.\n\n- A `PaymentProcessor` interface with `pay(amount)`, returning a receipt string.\n- `Checkout(processor)` with `add(price)` and `pay()`. `pay()` charges the total through the processor and returns its receipt. Paying an empty basket throws an error.\n- A `FakeProcessor` for tests: it records every amount in a `charged` list and returns `\"paid X\"`, with X to 2 decimal places, e.g. `\"paid 5.00\"`.\n\nHow does this let you test `Checkout` without a real payment provider?",
+    "starter": {
+      "ts": "interface PaymentProcessor {\n  pay(amount: number): string\n}\n\nclass Checkout {\n  // your code here\n}\n\nclass FakeProcessor implements PaymentProcessor {\n  // your code here\n}",
+      "py": "class Checkout:\n    pass  # your code here\n\nclass FakeProcessor:\n    pass  # your code here"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Checkout should only know about the interface, never a concrete processor."
+      },
+      {
+        "level": "pattern",
+        "text": "Program to an interface, and inject the implementation."
+      },
+      {
+        "level": "approach",
+        "text": "Checkout stores the processor and a list of prices. pay() sums them, throws if empty, otherwise returns processor.pay(total). FakeProcessor pushes the amount onto charged and returns the receipt string."
+      }
+    ],
+    "reference": {
+      "ts": "interface PaymentProcessor {\n  pay(amount: number): string\n}\n\nclass Checkout {\n  private prices: number[] = []\n  constructor(private processor: PaymentProcessor) {}\n\n  add(price: number): void {\n    this.prices.push(price)\n  }\n\n  pay(): string {\n    if (this.prices.length === 0) throw new Error('Basket is empty')\n    const total = this.prices.reduce((sum, p) => sum + p, 0)\n    return this.processor.pay(total)\n  }\n}\n\nclass FakeProcessor implements PaymentProcessor {\n  charged: number[] = []\n  pay(amount: number): string {\n    this.charged.push(amount)\n    return `paid ${amount.toFixed(2)}`\n  }\n}",
+      "py": "from abc import ABC, abstractmethod\n\nclass PaymentProcessor(ABC):\n    @abstractmethod\n    def pay(self, amount): ...\n\nclass Checkout:\n    def __init__(self, processor):\n        self.processor = processor\n        self.prices = []\n\n    def add(self, price):\n        self.prices.append(price)\n\n    def pay(self):\n        if not self.prices:\n            raise ValueError(\"Basket is empty\")\n        return self.processor.pay(sum(self.prices))\n\nclass FakeProcessor(PaymentProcessor):\n    def __init__(self):\n        self.charged = []\n\n    def pay(self, amount):\n        self.charged.append(amount)\n        return f\"paid {amount:.2f}\""
+    },
+    "explanation": "`Checkout` depends only on the `PaymentProcessor` contract, so a test passes a `FakeProcessor` and asserts on `charged` and the receipt: no network, no real money, fast and repeatable. Production passes a real processor. Switching providers is a new class plus one line where it is injected, and `Checkout` itself never changes.",
+    "selfCheck": [
+      "Checkout's field and constructor are typed by the interface, not a concrete class.",
+      "Paying an empty basket throws.",
+      "The fake records amounts, so a test can assert what was charged.",
+      "I explained how the fake avoids calling a real provider."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Saying interfaces and abstract classes are interchangeable.",
+      "fix": "Interfaces are contracts a class can have many of; abstract classes share state and code but use up the single superclass."
+    },
+    {
+      "mistake": "Typing parameters by the concrete class.",
+      "fix": "Type them by the interface, so any implementation, including a test fake, can be passed."
+    },
+    {
+      "mistake": "Creating a shared base class for unrelated types.",
+      "fix": "Unrelated types sharing a capability want an interface."
+    },
+    {
+      "mistake": "Thinking TypeScript needs `implements` for a type to fit an interface.",
+      "fix": "TypeScript is structural: matching the shape is enough. `implements` just checks it early."
+    },
+    {
+      "mistake": "Forgetting Python's tools.",
+      "fix": "Use `abc.ABC` with `@abstractmethod` for enforced contracts, or `typing.Protocol` for structural ones."
+    },
+    {
+      "mistake": "Testing against real external services.",
+      "fix": "Depend on an interface and pass a fake or mock in tests."
+    }
+  ]
+}

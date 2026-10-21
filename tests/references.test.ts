@@ -112,6 +112,71 @@ result = [
     py: `result = [coin_change([1, 2, 5], 11), coin_change([2], 3), coin_change([1], 0), coin_change([1, 3, 4], 6), coin_change([186, 419, 83, 408], 6249)]`,
     expected: [3, -1, 0, 2, 20],
   },
+  'four-pillars': {
+    ts: `const a = new BankAccount(); a.deposit(100); a.withdraw(30)
+let over = 'none'; try { a.withdraw(100) } catch { over = 'error' }
+let negative = 'none'; try { a.deposit(-5) } catch { negative = 'error' }
+const s = new SavingsAccount(0.1); s.deposit(70); s.addInterest()
+return [a.balance, over, negative, Math.round(s.balance * 100) / 100]`,
+    py: `a = BankAccount(); a.deposit(100); a.withdraw(30)
+over = 'none'
+try:
+    a.withdraw(100)
+except ValueError:
+    over = 'error'
+negative = 'none'
+try:
+    a.deposit(-5)
+except ValueError:
+    negative = 'error'
+s = SavingsAccount(0.1); s.deposit(70); s.add_interest()
+result = [a.balance, over, negative, round(s.balance, 2)]`,
+    expected: [70, 'error', 'error', 77],
+  },
+  solid: {
+    ts: `const w = new InMemoryWriter(); new ReportService(w).publish(['a', 'b'])
+const empty = new InMemoryWriter(); new ReportService(empty).publish([])
+return [w.lines, empty.lines]`,
+    py: `w = InMemoryWriter(); ReportService(w).publish(['a', 'b'])
+empty = InMemoryWriter(); ReportService(empty).publish([])
+result = [w.lines, empty.lines]`,
+    expected: [['Report: 2 items', '- a', '- b'], ['Report: 0 items']],
+  },
+  'composition-inheritance': {
+    ts: `const d = new Duck('Mallard', new Wings()); const r = new Duck('Rubber duck', new CannotFly())
+const before = d.fly(); d.setFlyer(new CannotFly())
+return [before, r.fly(), d.fly()]`,
+    py: `d = Duck('Mallard', Wings()); r = Duck('Rubber duck', CannotFly())
+before = d.fly(); d.set_flyer(CannotFly())
+result = [before, r.fly(), d.fly()]`,
+    expected: ['Mallard flies with wings', "Rubber duck can't fly", "Mallard can't fly"],
+  },
+  interfaces: {
+    ts: `const f = new FakeProcessor(); const c = new Checkout(f); c.add(3.5); c.add(1.5)
+const receipt = c.pay()
+let empty = 'none'; try { new Checkout(new FakeProcessor()).pay() } catch { empty = 'error' }
+return [receipt, f.charged, empty]`,
+    py: `f = FakeProcessor(); c = Checkout(f); c.add(3.5); c.add(1.5)
+receipt = c.pay()
+empty = 'none'
+try:
+    Checkout(FakeProcessor()).pay()
+except ValueError:
+    empty = 'error'
+result = [receipt, f.charged, empty]`,
+    expected: ['paid 5.00', [5], 'error'],
+  },
+  'design-patterns': {
+    ts: `const s = new Subject(); const log = []
+const off = s.subscribe((x) => log.push('1:' + x)); s.subscribe((x) => log.push('2:' + x))
+s.notify('a'); off(); s.notify('b'); off()
+return log`,
+    py: `s = Subject(); log = []
+off = s.subscribe(lambda x: log.append('1:' + x)); s.subscribe(lambda x: log.append('2:' + x))
+s.notify('a'); off(); s.notify('b'); off()
+result = log`,
+    expected: ['1:a', '2:a', '2:b'],
+  },
 }
 
 const topics = readdirSync('content', { withFileTypes: true })
