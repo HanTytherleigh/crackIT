@@ -6,6 +6,10 @@ import { LearnScreen } from './screens/LearnScreen'
 import { ModuleScreen } from './screens/ModuleScreen'
 import { LessonScreen } from './screens/LessonScreen'
 import { PatternsScreen } from './screens/PatternsScreen'
+import { PatternDetailScreen } from './screens/patterns/PatternDetailScreen'
+import { SignalDrillScreen } from './screens/patterns/SignalDrillScreen'
+import { LookalikeDrillScreen } from './screens/patterns/LookalikeDrillScreen'
+import { ComplexityDrillScreen } from './screens/patterns/ComplexityDrillScreen'
 import { ReviewScreen } from './screens/ReviewScreen'
 import { ProgressScreen } from './screens/ProgressScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
@@ -34,6 +38,10 @@ export function App() {
           <Route path="/learn/:moduleId" element={<ModuleScreen />} />
           <Route path="/learn/:moduleId/:topicId" element={<LessonScreen />} />
           <Route path="/patterns" element={<PatternsScreen />} />
+          <Route path="/patterns/drill/signals" element={<SignalDrillScreen />} />
+          <Route path="/patterns/drill/lookalikes" element={<LookalikeDrillScreen />} />
+          <Route path="/patterns/drill/complexity" element={<ComplexityDrillScreen />} />
+          <Route path="/patterns/:patternId" element={<PatternDetailScreen />} />
           <Route path="/review" element={<ReviewScreen />} />
           <Route path="/progress" element={<ProgressScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />

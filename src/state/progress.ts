@@ -30,6 +30,8 @@ interface ProgressActions {
   markChecksPassed: (ref: Ref, now?: Date) => void
   /** Reschedules a review card after it is answered in the Review queue. */
   recordReview: (cardId: string, grade: Grade, now?: Date) => void
+  /** Adds a review card if it doesn't exist yet (used by the pattern drills). */
+  ensureCard: (cardId: string, now?: Date) => void
   markRecheckPassed: (ref: Ref, now?: Date) => void
   markExported: (now?: Date) => void
   replaceAll: (data: ProgressData) => void
@@ -118,6 +120,11 @@ export const useProgress = create<ProgressStore>()(
           const card = get().review.cards[cardId]
           if (!card) return
           set({ review: { cards: { ...get().review.cards, [cardId]: reviewCard(card, grade, now) } } })
+        },
+
+        ensureCard: (cardId, now = new Date()) => {
+          if (get().review.cards[cardId]) return
+          set({ review: { cards: { ...get().review.cards, [cardId]: newCard(cardId, now) } } })
         },
 
         markRecheckPassed: (ref, now = new Date()) =>

@@ -274,3 +274,85 @@ a.module-card .module-num {
   border-radius: 6px 6px 2px 2px;
   background: var(--accent);
 }
+
+/* Patterns */
+.pattern-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+@media (min-width: 640px) {
+  .pattern-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.pattern-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  height: 100%;
+  color: var(--text);
+  text-decoration: none;
+}
+a.pattern-card:hover {
+  border-color: var(--accent);
+}
+.signal-chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+}
+.signal-chips li {
+  padding: 2px var(--space-3);
+  border-radius: 999px;
+  border: 1px solid var(--secondary);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.example-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.mistake-title {
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+.drill-statement {
+  font-size: 1.05rem;
+  margin: 0;
+}
+.drill-statement mark {
+  border-radius: 4px;
+  padding: 0 2px;
+  color: inherit;
+}
+.drill-statement mark.is-cue {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+.drill-statement mark.is-decoy {
+  background: transparent;
+  box-shadow: inset 0 -2px 0 var(--muted);
+}
+.cue-verdict {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: var(--space-1);
+}
+.cue-verdict.is-cue {
+  color: var(--accent);
+}
+.cue-verdict.is-decoy {
+  color: var(--muted);
+}
+.chip.chip-text span {
+  font-family: var(--font-body);
+}

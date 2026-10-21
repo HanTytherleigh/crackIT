@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "id": "complexity-prediction",
+  "title": "Complexity prediction",
+  "items": [
+    {
+      "id": "sort-then-search",
+      "approach": "Sort the array, then for each element binary search for its complement.",
+      "options": [
+        "O(n)",
+        "O(n log n)",
+        "O(n²)",
+        "O(log n)"
+      ],
+      "answer": 1,
+      "explanation": "Sorting is O(n log n), and n binary searches cost another O(n log n). Together: **O(n log n)**."
+    },
+    {
+      "id": "scan-for-complement",
+      "approach": "For each element, scan the rest of the array for its complement.",
+      "options": [
+        "O(n)",
+        "O(n log n)",
+        "O(n²)",
+        "O(2ⁿ)"
+      ],
+      "answer": 2,
+      "explanation": "A scan inside a loop: about n²/2 comparisons, which is **O(n²)**."
+    },
+    {
+      "id": "hash-one-pass",
+      "approach": "Make one pass over the array, storing each value in a hash set and checking for its complement.",
+      "options": [
+        "O(1)",
+        "O(n)",
+        "O(n log n)",
+        "O(n²)"
+      ],
+      "answer": 1,
+      "explanation": "n steps, each an O(1) average hash operation: **O(n)** time, with O(n) extra space."
+    },
+    {
+      "id": "window-scan",
+      "approach": "A sliding window over a string of length n, where each character enters and leaves the window at most once.",
+      "options": [
+        "O(n)",
+        "O(n²)",
+        "O(n × k)",
+        "O(log n)"
+      ],
+      "answer": 0,
+      "explanation": "There is a loop inside a loop, but each index moves in once and out once: at most 2n moves in total, so **O(n)**."
+    },
+    {
+      "id": "search-answer",
+      "approach": "Binary search on the answer between 1 and M, where each check scans all n items.",
+      "options": [
+        "O(n + M)",
+        "O(n log M)",
+        "O(M log n)",
+        "O(n × M)"
+      ],
+      "answer": 1,
+      "explanation": "About log M checks, each costing O(n): **O(n log M)**."
+    },
+    {
+      "id": "heap-k",
+      "approach": "Scan n items, keeping a heap of size k.",
+      "options": [
+        "O(n)",
+        "O(n log n)",
+        "O(n log k)",
+        "O(k log n)"
+      ],
+      "answer": 2,
+      "explanation": "Each of the n items costs a push and maybe a pop on a heap of size k: **O(n log k)**."
+    },
+    {
+      "id": "all-subsets",
+      "approach": "Generate every subset of n items, copying each into the result.",
+      "options": [
+        "O(n²)",
+        "O(2ⁿ)",
+        "O(n × 2ⁿ)",
+        "O(n!)"
+      ],
+      "answer": 2,
+      "explanation": "There are 2ⁿ subsets and copying each takes up to n steps: **O(n × 2ⁿ)**. Saying 2ⁿ subsets shows you understand the core of it."
+    },
+    {
+      "id": "all-permutations",
+      "approach": "Generate every ordering (permutation) of n items.",
+      "options": [
+        "O(n²)",
+        "O(2ⁿ)",
+        "O(n × n!)",
+        "O(n log n)"
+      ],
+      "answer": 2,
+      "explanation": "There are n! orderings, each n long: **O(n × n!)**. That is only feasible for small n (10! is already 3.6 million)."
+    },
+    {
+      "id": "grid-bfs",
+      "approach": "BFS over every cell of an m × n grid, checking 4 neighbours each.",
+      "options": [
+        "O(m + n)",
+        "O(m × n)",
+        "O((m × n)²)",
+        "O(m × n × log(mn))"
+      ],
+      "answer": 1,
+      "explanation": "Each cell is visited once with 4 neighbour checks: **O(m × n)**."
+    },
+    {
+      "id": "edit-distance",
+      "approach": "Fill a DP table for the edit distance between strings of lengths m and n.",
+      "options": [
+        "O(m + n)",
+        "O(m × n)",
+        "O(2^(m+n))",
+        "O(max(m, n)²)"
+      ],
+      "answer": 1,
+      "explanation": "There are (m + 1) × (n + 1) states, each O(1): **O(m × n)**."
+    },
+    {
+      "id": "merge-sorted",
+      "approach": "Merge two sorted lists of lengths m and n into one sorted list.",
+      "options": [
+        "O(m + n)",
+        "O(m × n)",
+        "O((m + n) log(m + n))",
+        "O(log(m + n))"
+      ],
+      "answer": 0,
+      "explanation": "Each step takes the smaller head and advances one list, so there are m + n steps: **O(m + n)**. No re-sorting is needed."
+    },
+    {
+      "id": "prefix-queries",
+      "approach": "Build a prefix-sum array over n numbers, then answer q range-sum queries.",
+      "options": [
+        "O(n × q)",
+        "O(n + q)",
+        "O(q log n)",
+        "O(n log q)"
+      ],
+      "answer": 1,
+      "explanation": "O(n) to build, then O(1) per query: **O(n + q)**. Summing each range directly would be O(n × q)."
+    },
+    {
+      "id": "merge-intervals",
+      "approach": "Sort n intervals by start, then merge them in one pass.",
+      "options": [
+        "O(n)",
+        "O(n log n)",
+        "O(n²)",
+        "O(log n)"
+      ],
+      "answer": 1,
+      "explanation": "The sort dominates: **O(n log n)**. The merging pass is O(n)."
+    },
+    {
+      "id": "naive-fib",
+      "approach": "Compute Fibonacci with plain recursion: fib(n) = fib(n − 1) + fib(n − 2), with no memo.",
+      "options": [
+        "O(n)",
+        "O(n²)",
+        "O(2ⁿ)",
+        "O(log n)"
+      ],
+      "answer": 2,
+      "explanation": "Each call branches in two and subproblems repeat: exponential, roughly **O(2ⁿ)**. A memo brings it down to O(n)."
+    },
+    {
+      "id": "kahn",
+      "approach": "Kahn's topological sort on V courses with E prerequisite edges.",
+      "options": [
+        "O(V)",
+        "O(V + E)",
+        "O(V × E)",
+        "O(V²)"
+      ],
+      "answer": 1,
+      "explanation": "Each course enters the queue once and each edge lowers one in-degree once: **O(V + E)**."
+    },
+    {
+      "id": "monotonic",
+      "approach": "Find the next greater element for each of n items with a monotonic stack.",
+      "options": [
+        "O(n)",
+        "O(n log n)",
+        "O(n²)",
+        "O(k × n)"
+      ],
+      "answer": 0,
+      "explanation": "Each item is pushed once and popped at most once, so the total work is **O(n)**, despite the nested loop."
+    }
+  ]
+}

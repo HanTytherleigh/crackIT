@@ -96,6 +96,21 @@ export function checkCardId(moduleId: string, topicId: string, checkId: string):
   return `${moduleId}/${topicId}#${checkId}`
 }
 
+export function drillCardId(drill: string, itemId: string): string {
+  return `drill:${drill}#${itemId}`
+}
+
+export type ParsedCardId =
+  | { kind: 'check'; moduleId: string; topicId: string; checkId: string }
+  | { kind: 'drill'; drill: string; itemId: string }
+
+export function parseCardId(id: string): ParsedCardId | undefined {
+  const drill = id.match(/^drill:([a-z0-9-]+)#([a-z0-9-]+)$/)
+  if (drill) return { kind: 'drill', drill: drill[1]!, itemId: drill[2]! }
+  const check = parseCheckCardId(id)
+  return check ? { kind: 'check', ...check } : undefined
+}
+
 export function parseCheckCardId(id: string): { moduleId: string; topicId: string; checkId: string } | undefined {
   const m = id.match(/^([a-z0-9-]+)\/([a-z0-9-]+)#([a-z0-9-]+)$/)
   return m ? { moduleId: m[1]!, topicId: m[2]!, checkId: m[3]! } : undefined

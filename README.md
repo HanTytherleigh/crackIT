@@ -32,6 +32,16 @@ Text fields accept a small Markdown subset: paragraphs, `- ` lists, `|` tables, 
 
 To add a topic, write its file and add `"file"` to its entry in `content/modules.json`. To add a module, add it to `modules.json` with its topic files. No code changes are needed unless the module needs a new widget.
 
+## Pattern trainer
+
+`content/patterns.json` holds the 16-pattern catalogue: a recognition cue, signal words, typical cost, a template in TypeScript and Python, examples, and look-alike patterns. Drills live in `content/drills/`:
+
+- `signal-spotting.json`: problems where you pick the pattern and tick the cue words. The build checks that every tickable phrase appears in its statement.
+- `lookalikes.json`: pairs of similar problems that need different patterns, with a model answer and rubric.
+- `complexity-prediction.json`: describe an approach and predict its Big O.
+
+Answered signal-spotting and complexity items become review cards, so they mix with lesson checks in the Review queue (or alone at `#/review?only=patterns`).
+
 ## Progress and mastery
 
 Progress is stored in `localStorage` (`crackit.progress`, versioned, with migrations in `src/lib/progressModel.ts`). A topic is **solid** only after 80% of its checks are passed without revealing the answer, the explain-back rubric reaches its pass mark, and a delayed re-check in Review is passed. Export writes a JSON file. Import validates it with Zod and asks before overwriting anything.
