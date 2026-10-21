@@ -22,6 +22,8 @@ const widgets: Partial<Record<WidgetId, LazyExoticComponent<ComponentType>>> = {
   'growth-plotter': lazy(() => import('../widgets/GrowthPlotter')),
   'binary-search-stepper': lazy(() => import('../widgets/BinarySearchStepper')),
   'complexity-reader': lazy(() => import('../widgets/ComplexityReader')),
+  'array-ops': lazy(() => import('../widgets/ArrayOps')),
+  'two-pointers': lazy(() => import('../widgets/TwoPointers')),
 }
 
 /** Embeds an interactive widget by id, or a placeholder while that widget is still being built. */

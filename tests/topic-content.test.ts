@@ -1,9 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { topicSchema } from '../src/content/schema'
 import { parseBlocks } from '../src/components/Prose'
 
 const bigO = JSON.parse(readFileSync('content/dsa/01-big-o.json', 'utf8'))
+
+describe('every topic file', () => {
+  for (const f of readdirSync('content/dsa')) {
+    it(`${f} matches the topic schema`, () => {
+      const r = topicSchema.safeParse(JSON.parse(readFileSync(`content/dsa/${f}`, 'utf8')))
+      expect(r.success, JSON.stringify(r.error?.issues)).toBe(true)
+    })
+  }
+})
 
 describe('Big O topic', () => {
   it('matches the topic schema', () => {
