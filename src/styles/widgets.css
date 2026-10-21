@@ -642,3 +642,91 @@
 .select.mono {
   font-family: var(--font-mono);
 }
+
+/* Trees (recursion, traversals, heaps) */
+.tree-edge {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+.call-node circle,
+.tree-node circle {
+  stroke-width: 2.5;
+  transition-property: fill, stroke;
+}
+.call-node text,
+.tree-node text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.call-node.is-done circle { fill: var(--surface); stroke: var(--accent); }
+.call-node.is-done text { fill: var(--text); }
+.call-node.is-active circle { fill: var(--surface); stroke: var(--warm); }
+.call-node.is-active text { fill: var(--text); }
+.call-node.is-top circle { fill: var(--warm); }
+.call-node.is-top text { fill: var(--bg); }
+.call-node.is-repeat circle { fill: var(--surface); stroke: var(--error); stroke-dasharray: 3 2; }
+.call-node.is-repeat text { fill: var(--error); }
+.call-node.is-cached circle { fill: var(--surface); stroke: var(--secondary); stroke-dasharray: 2 2; }
+.call-node.is-cached text { fill: var(--secondary); }
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+  color: var(--muted);
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: var(--space-2);
+  white-space: nowrap;
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2.5px solid;
+}
+.legend-dot.is-active { border-color: var(--warm); }
+.legend-dot.is-done { border-color: var(--accent); }
+.legend-dot.is-repeat { border-color: var(--error); border-style: dashed; }
+.legend-dot.is-cached { border-color: var(--secondary); border-style: dotted; }
+.call-stack-panel {
+  display: grid;
+  gap: var(--space-2);
+}
+.call-frames {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+}
+.call-frame {
+  padding: 2px var(--space-2);
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.call-frame.is-top {
+  border-color: var(--warm);
+}
+.inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  font-weight: 560;
+  cursor: pointer;
+}
+.inline-toggle input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--accent);
+}

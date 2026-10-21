@@ -41,7 +41,9 @@ export function useFrames(count: number, resetKey: unknown) {
     setIndex(0)
     setPlaying(false)
   }, [resetKey, setPlaying])
-  return { index, setIndex, ...player }
+  // When the frames change, this render can still hold the old index until the reset above
+  // runs, so clamp it: callers index straight into their frames array.
+  return { index: Math.max(0, Math.min(index, count - 1)), setIndex, ...player }
 }
 
 export function StepControls({
