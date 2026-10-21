@@ -107,6 +107,11 @@ result = [
 ]`,
     expected: [3, 1, 0, 0, 5],
   },
+  'dynamic-programming': {
+    ts: `return [coinChange([1, 2, 5], 11), coinChange([2], 3), coinChange([1], 0), coinChange([1, 3, 4], 6), coinChange([186, 419, 83, 408], 6249)]`,
+    py: `result = [coin_change([1, 2, 5], 11), coin_change([2], 3), coin_change([1], 0), coin_change([1, 3, 4], 6), coin_change([186, 419, 83, 408], 6249)]`,
+    expected: [3, -1, 0, 2, 20],
+  },
 }
 
 const topics = readdirSync('content/dsa').map((f) => JSON.parse(readFileSync(`content/dsa/${f}`, 'utf8')))

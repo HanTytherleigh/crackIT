@@ -795,3 +795,49 @@
 .graph-node.is-path circle { fill: var(--accent); stroke: var(--text); stroke-width: 3; }
 .graph-node.is-path text { fill: var(--on-accent); }
 .graph-svg .graph-node text.graph-dist { fill: var(--secondary); font-size: 11px; }
+
+/* DP table */
+.dp-wrap {
+  margin: 0;
+}
+.dp-table th,
+.dp-table td {
+  padding: 6px 4px;
+  min-width: 30px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+.dp-table th[scope='row'] {
+  text-align: left;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  background: var(--raised);
+  padding-inline: var(--space-2);
+}
+.dp-table thead th {
+  background: var(--raised);
+}
+.dp-corner {
+  font-family: var(--font-body);
+  font-size: 0.65rem !important;
+  color: var(--muted);
+}
+.dp-table td {
+  transition-property: background-color, color;
+}
+.dp-table td.is-empty { background: var(--bg); }
+.dp-table td.is-current { background: var(--warm); color: var(--bg); font-weight: 700; }
+.dp-table td.is-dep { background: color-mix(in srgb, var(--secondary) 28%, var(--surface)); box-shadow: inset 0 0 0 2px var(--secondary); }
+.dp-table td.is-path { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+.legend-swatch.is-current { background: var(--warm); }
+.legend-swatch.is-dep { box-shadow: inset 0 0 0 2px var(--secondary); }
+.legend-swatch.is-path { background: var(--accent); }

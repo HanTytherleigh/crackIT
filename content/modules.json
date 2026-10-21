@@ -17,7 +17,7 @@
         { "id": "trees-bfs-dfs", "title": "Trees, BFS and DFS", "summary": "Traversal orders and the stack or queue behind them.", "file": "07-trees-bfs-dfs.json" },
         { "id": "heaps", "title": "Heaps", "summary": "Priority queues, sift up and down, top-k.", "file": "08-heaps.json" },
         { "id": "graphs", "title": "Graphs", "summary": "Representations, traversal, and shortest paths.", "file": "09-graphs.json" },
-        { "id": "dynamic-programming", "title": "Dynamic programming", "summary": "Overlapping subproblems and filling the table." }
+        { "id": "dynamic-programming", "title": "Dynamic programming", "summary": "Overlapping subproblems and filling the table.", "file": "10-dynamic-programming.json" }
       ]
     },
     {
