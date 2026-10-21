@@ -763,3 +763,6 @@
 .visit-order li + li::before {
   content: '';
 }
+.heap-array {
+  grid-template-columns: repeat(8, 1fr);
+}

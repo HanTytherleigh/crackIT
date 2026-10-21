@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "id": "heaps",
+  "moduleId": "dsa",
+  "title": "Heaps",
+  "summary": "Priority queues, sift up and down, top-k.",
+  "estimatedMinutes": 20,
+  "prerequisites": [
+    "trees-bfs-dfs",
+    "arrays-strings"
+  ],
+  "recallPrompts": [
+    {
+      "id": "what",
+      "prompt": "What does a heap let you do quickly, and what doesn't it keep in order?"
+    },
+    {
+      "id": "array",
+      "prompt": "A heap is a tree, but it is usually stored in an array. How do you find a node's children and parent?"
+    },
+    {
+      "id": "top-k",
+      "prompt": "How would you find the 10 largest numbers in a stream of a million, without sorting them all?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "A heap is a **hospital triage queue**. The most urgent patient is always at the front, ready to be seen at once. Nobody keeps the rest of the waiting room perfectly sorted. When someone new arrives or someone leaves, a few people swap places until the most urgent is at the front again.",
+    "sections": [
+      {
+        "id": "property",
+        "heading": "The heap property",
+        "body": "A **min-heap** is a binary tree where every parent is **less than or equal to** its children. So the smallest item is always at the **root**. (A max-heap flips it: every parent ≥ its children.)\n\nThat is the only ordering promise. Siblings and cousins can be in any order, so a heap is **not sorted**. It is just good at one job: handing you the minimum.\n\nIt is also a **complete** tree: every level is full except possibly the last, which fills left to right. That keeps the height at about **log n**.\n\n| Operation | Cost |\n|---|---|\n| Peek at the min | O(1) |\n| Push | O(log n) |\n| Pop the min | O(log n) |\n| Build from n items (heapify) | O(n) |\n| Search for any value | O(n) |"
+      },
+      {
+        "id": "array",
+        "heading": "A tree stored in an array",
+        "body": "Because the tree is complete, it packs neatly into an array level by level, with no pointers:\n\n- the children of index `i` are at `2i + 1` and `2i + 2`,\n- the parent of index `i` is at `(i − 1) // 2`,\n- the root is index 0.\n\nThe widget shows the same heap both ways. Watch the array change as the tree changes."
+      },
+      {
+        "id": "operations",
+        "heading": "Sift up, sift down",
+        "body": "**Push.** Add the new item at the **end** of the array (the next free spot in the bottom row). Then **sift up**: while it is smaller than its parent, swap them. It climbs at most the height: **O(log n)**.\n\n**Pop the min.** Take the root. Move the **last** item into the root's place, so the tree stays complete. Then **sift down**: swap it with its **smaller** child until neither child is smaller. Again **O(log n)**.\n\nWhy the smaller child? Swapping with the larger one would put a larger value above the smaller one and break the property.",
+        "widget": "heap"
+      },
+      {
+        "id": "in-practice",
+        "heading": "Heaps in your language",
+        "body": "You rarely build one by hand, but you should know what the library does:\n\n- **Python**: `heapq` turns a list into a **min-heap**: `heappush`, `heappop`, and `heapify` in O(n). For a max-heap, push negated values.\n- **Java / Kotlin**: `PriorityQueue` is a min-heap by default. Pass a comparator to change the order.\n- **JavaScript** has no built-in heap. In an interview, say so, and either write `push` and `pop` as in the widget or say which library you would use.\n\nA heap is how a **priority queue** is built. Dijkstra's shortest paths, task schedulers and event simulations all need \"give me the most urgent item next\"."
+      },
+      {
+        "id": "top-k",
+        "heading": "Top-k and friends",
+        "body": "**Top-k largest** is the heap's signature interview pattern. Keep a **min-heap of size k**. For each new item, push it, and if the heap grows past k, pop the smallest. The heap always holds the k largest seen so far, and its root is the smallest of those, the one to drop next.\n\nThat is **O(n log k)** time and **O(k)** space, which beats sorting everything (O(n log n)) when k is small, and works on a stream you can't store.\n\nOther heap signals: *k closest*, *k most frequent*, *merge k sorted lists* (a heap of the k current heads), *running median* (two heaps), and *always take the cheapest or earliest next*.\n\n**Heap sort** pops everything in order: O(n log n), in place, but not stable.",
+        "code": {
+          "ts": "// k largest values, using the push/pop min-heap from the widget\nfunction kLargest(nums: number[], k: number): number[] {\n  const heap: number[] = []\n  for (const x of nums) {\n    push(heap, x)\n    if (heap.length > k) pop(heap) // drop the smallest\n  }\n  return heap\n}",
+          "py": "import heapq\n\n# k largest values with a min-heap of size k\ndef k_largest(nums, k):\n    heap = []\n    for x in nums:\n        heapq.heappush(heap, x)\n        if len(heap) > k:\n            heapq.heappop(heap)  # drop the smallest\n    return heap"
+        }
+      }
+    ]
+  },
+  "widgets": [
+    "heap"
+  ],
+  "explainBack": {
+    "prompt": "Explain what a min-heap guarantees and what it doesn't, how it is stored in an array, how push and pop keep it valid, and how a heap finds the k largest items efficiently.",
+    "rubric": [
+      {
+        "id": "property",
+        "point": "Every parent is ≤ its children, so the minimum is at the root; the rest is not sorted."
+      },
+      {
+        "id": "complete",
+        "point": "It is a complete tree, so its height is about log n."
+      },
+      {
+        "id": "array",
+        "point": "Stored in an array: children at 2i + 1 and 2i + 2, parent at (i − 1) // 2."
+      },
+      {
+        "id": "push",
+        "point": "Push adds at the end and sifts up past bigger parents: O(log n)."
+      },
+      {
+        "id": "pop",
+        "point": "Pop takes the root, moves the last item up and sifts it down via the smaller child: O(log n)."
+      },
+      {
+        "id": "top-k",
+        "point": "Top-k: keep a min-heap of size k and pop when it exceeds k: O(n log k)."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "peek",
+      "kind": "choice",
+      "prompt": "What does it cost to **look at** (not remove) the minimum of a min-heap?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n log n)"
+      ],
+      "answer": 0,
+      "explanation": "The minimum is always at index 0, so peeking is O(1). Removing it costs O(log n), because the heap then has to repair itself.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Where does the heap property put the minimum?"
+        }
+      ]
+    },
+    {
+      "id": "push-pop",
+      "kind": "choice",
+      "prompt": "What do push and pop-min cost on a heap of n items?",
+      "options": [
+        "O(1) each",
+        "O(log n) each",
+        "O(n) each",
+        "O(1) push, O(n) pop"
+      ],
+      "answer": 1,
+      "explanation": "Each sifts along one root-to-leaf path, and a complete tree has height about log n. So both are O(log n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How far can an item sift, at most?"
+        }
+      ]
+    },
+    {
+      "id": "parent-index",
+      "kind": "number",
+      "prompt": "In an array-stored heap, what is the index of the parent of index 9?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "Parent = (i − 1) // 2 = (9 − 1) // 2 = **4**. Check: the children of 4 are 9 and 10.",
+      "hints": [
+        {
+          "level": "approach",
+          "text": "Use (i − 1) // 2."
+        }
+      ]
+    },
+    {
+      "id": "left-child",
+      "kind": "number",
+      "prompt": "What is the index of the **left** child of index 3?",
+      "answer": 7,
+      "tolerance": 0,
+      "explanation": "Left child = 2i + 1 = 2 × 3 + 1 = **7**. The right child is 8.",
+      "hints": [
+        {
+          "level": "approach",
+          "text": "Use 2i + 1."
+        }
+      ]
+    },
+    {
+      "id": "valid-heap",
+      "kind": "choice",
+      "prompt": "Is the array `[1, 4, 2, 3]` a valid min-heap?",
+      "options": [
+        "Yes: it starts with the minimum.",
+        "No: index 3 (value 3) is a child of index 1 (value 4), and 3 < 4.",
+        "No: it isn't sorted.",
+        "Yes: every value is bigger than 1."
+      ],
+      "answer": 1,
+      "explanation": "The parent of index 3 is (3 − 1) // 2 = 1. 3 is less than its parent 4, which breaks the property. Note that a heap doesn't need to be sorted: `[1, 3, 2, 4]` is valid.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Check every child against its parent, not just the root."
+        }
+      ]
+    },
+    {
+      "id": "swaps",
+      "kind": "number",
+      "prompt": "Push 1 into the min-heap `[2, 5, 3, 9, 6, 8, 4]`. How many swaps does sifting up take?",
+      "answer": 3,
+      "tolerance": 0,
+      "explanation": "1 lands at index 7. It swaps with its parent 9 (index 3), then 5 (index 1), then 2 (index 0): **3** swaps, one per level. That is log₂ 8.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Where does 1 start, and who is its parent?"
+        },
+        {
+          "level": "approach",
+          "text": "Follow parents: 7 → 3 → 1 → 0, swapping while 1 is smaller."
+        }
+      ]
+    },
+    {
+      "id": "top-k",
+      "kind": "choice",
+      "prompt": "You want the 10 largest values from 1,000,000 numbers. Which approach is most efficient?",
+      "options": [
+        "Sort everything, then take the last 10: O(n log n).",
+        "A min-heap of size 10, popping its smallest whenever it holds 11: O(n log k).",
+        "A max-heap of all n items, then pop 10 times.",
+        "Scan the list 10 times, taking the max each time and removing it."
+      ],
+      "answer": 1,
+      "explanation": "The size-k min-heap does O(log 10) work per item, so about O(n). It also works on a stream. Heapifying all n and popping 10 is also O(n + k log n), but uses O(n) memory.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "You only need to remember 10 numbers at a time."
+        },
+        {
+          "level": "pattern",
+          "text": "Top-k: a heap of size k, ordered so that its root is the one to throw away."
+        }
+      ]
+    },
+    {
+      "id": "python-max",
+      "kind": "choice",
+      "prompt": "Python's `heapq` only gives a min-heap. How do you use it as a max-heap of numbers?",
+      "options": [
+        "Call heapq.reverse() first.",
+        "Push negated values (−x), and negate again when you pop.",
+        "Sort the list in reverse first.",
+        "Use heapq.heappush with reverse=True."
+      ],
+      "answer": 1,
+      "explanation": "Negating flips the order: the largest x becomes the smallest −x and sits at the root. Negate it back when you pop.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What happens to the order of numbers if you negate them all?"
+        }
+      ]
+    },
+    {
+      "id": "heapify",
+      "kind": "text",
+      "prompt": "What is the time complexity of building a heap from n unsorted items with `heapify` (sifting down from the last parent to the root)?",
+      "accept": [
+        "O(n)",
+        "n"
+      ],
+      "placeholder": "e.g. O(n log n)",
+      "explanation": "It is O(n), not O(n log n). Most nodes sit near the bottom and sift only a level or two. Only the few near the top can sift far, and the total work adds up to a linear bound.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Most nodes are near the bottom. How far can they sift down?"
+        }
+      ]
+    },
+    {
+      "id": "vs-sorted",
+      "kind": "choice",
+      "prompt": "A task scheduler keeps adding jobs and always runs the most urgent one next. Why use a heap rather than keeping a sorted array?",
+      "options": [
+        "Heaps use less memory than arrays.",
+        "Inserting into a sorted array is O(n) because of shifting; a heap does both insert and take-min in O(log n).",
+        "Sorted arrays can't hold priorities.",
+        "Heaps keep jobs fully sorted."
+      ],
+      "answer": 1,
+      "explanation": "A sorted array gives O(1) access to the minimum, but each insert shifts items: O(n). A heap balances the two at O(log n) each, which wins when there are many inserts.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What does inserting into the middle of a sorted array cost?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write `kClosest(points, k)`: given a list of points `[x, y]`, return the k points closest to the origin (any order). Use a heap of size k, not a full sort.\n\nThen answer:\n\n- Should the heap be a min-heap or a max-heap of distances, and why?\n- What are the time and space costs?",
+    "starter": {
+      "ts": "function kClosest(points: [number, number][], k: number): [number, number][] {\n  // your code here\n}",
+      "py": "def k_closest(points, k):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "You can compare squared distances, x² + y², with no square root needed."
+      },
+      {
+        "level": "pattern",
+        "text": "Top-k: keep k items, and always be ready to throw out the worst one."
+      },
+      {
+        "level": "approach",
+        "text": "Keep a max-heap by distance, of size k. Push each point; if the size passes k, pop the farthest. In Python, push (−distance, x, y) into heapq."
+      }
+    ],
+    "reference": {
+      "ts": "function kClosest(points: [number, number][], k: number): [number, number][] {\n  if (k <= 0) return []\n  const dist = ([x, y]: [number, number]) => x * x + y * y\n  // Max-heap by distance: the farthest kept point sits at heap[0]\n  const heap: [number, number][] = []\n  const swap = (i: number, j: number) => {\n    ;[heap[i], heap[j]] = [heap[j]!, heap[i]!]\n  }\n  const siftUp = (i: number) => {\n    while (i > 0) {\n      const p = Math.floor((i - 1) / 2)\n      if (dist(heap[i]!) <= dist(heap[p]!)) return\n      swap(i, p)\n      i = p\n    }\n  }\n  const siftDown = (i: number) => {\n    for (;;) {\n      let c = 2 * i + 1\n      if (c >= heap.length) return\n      if (c + 1 < heap.length && dist(heap[c + 1]!) > dist(heap[c]!)) c++\n      if (dist(heap[i]!) >= dist(heap[c]!)) return\n      swap(i, c)\n      i = c\n    }\n  }\n  for (const p of points) {\n    heap.push(p)\n    siftUp(heap.length - 1)\n    if (heap.length > k) {\n      heap[0] = heap.pop()! // replace the farthest with the last item\n      siftDown(0)\n    }\n  }\n  return heap\n}",
+      "py": "import heapq\n\ndef k_closest(points, k):\n    heap = []  # max-heap by distance, via negation\n    for x, y in points:\n        heapq.heappush(heap, (-(x * x + y * y), x, y))\n        if len(heap) > k:\n            heapq.heappop(heap)  # remove the farthest\n    return [[x, y] for _, x, y in heap]"
+    },
+    "explanation": "You want to throw away the **farthest** point whenever you have more than k, so the root must be the farthest: a **max-heap** of distances, built in Python by negating. Each of the n points costs O(log k): **O(n log k) time, O(k) space**. Sorting all the points would be O(n log n).",
+    "selfCheck": [
+      "I used a max-heap of distance (or negated distances in a min-heap).",
+      "The heap never holds more than k points after each step.",
+      "I compared squared distances and skipped the square root.",
+      "I said O(n log k) time and O(k) space."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Thinking a heap is sorted.",
+      "fix": "Only parent ≤ child is guaranteed. To get sorted output you must pop repeatedly."
+    },
+    {
+      "mistake": "Sifting down by swapping with the larger child in a min-heap.",
+      "fix": "Swap with the **smaller** child, or you put a bigger value above a smaller one."
+    },
+    {
+      "mistake": "Using a max-heap for the k largest.",
+      "fix": "Keep a **min-heap** of size k, so the root is the smallest of the k, the one to drop. (k smallest uses a max-heap.)"
+    },
+    {
+      "mistake": "Calling heapify O(n log n).",
+      "fix": "Sifting down from the bottom up builds a heap in O(n). Pushing items one by one is O(n log n)."
+    },
+    {
+      "mistake": "Expecting a built-in heap in JavaScript.",
+      "fix": "There isn't one. Say so, then write push and pop or name a library."
+    },
+    {
+      "mistake": "Searching a heap for an arbitrary value in O(log n).",
+      "fix": "A heap only orders parents over children. Finding an arbitrary value is O(n)."
+    }
+  ]
+}
