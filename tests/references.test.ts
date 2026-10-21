@@ -88,6 +88,25 @@ d = lambda p: p[0] * p[0] + p[1] * p[1]
 result = [sorted(d(p) for p in k_closest(pts, k)) for k in [0, 1, 3, 7]]`,
     expected: [[], [2], [2, 2, 4], [2, 2, 4, 18, 20, 26, 36]],
   },
+  graphs: {
+    ts: `const g = (rows) => rows.map((r) => [...r])
+return [
+  numIslands(g(['11000', '11000', '00100', '00011'])),
+  numIslands(g(['111', '010', '111'])),
+  numIslands(g(['000'])),
+  numIslands([]),
+  numIslands(g(['101', '010', '101'])),
+]`,
+    py: `g = lambda rows: [list(r) for r in rows]
+result = [
+    num_islands(g(['11000', '11000', '00100', '00011'])),
+    num_islands(g(['111', '010', '111'])),
+    num_islands(g(['000'])),
+    num_islands([]),
+    num_islands(g(['101', '010', '101'])),
+]`,
+    expected: [3, 1, 0, 0, 5],
+  },
 }
 
 const topics = readdirSync('content/dsa').map((f) => JSON.parse(readFileSync(`content/dsa/${f}`, 'utf8')))

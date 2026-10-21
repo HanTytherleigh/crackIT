@@ -1,0 +1,339 @@
+{
+  "schemaVersion": 1,
+  "id": "graphs",
+  "moduleId": "dsa",
+  "title": "Graphs",
+  "summary": "Representations, traversal, and shortest paths.",
+  "estimatedMinutes": 25,
+  "prerequisites": [
+    "trees-bfs-dfs",
+    "hash-maps-sets",
+    "heaps"
+  ],
+  "recallPrompts": [
+    {
+      "id": "represent",
+      "prompt": "How would you store a graph in code? Name two ways and when each is better."
+    },
+    {
+      "id": "visited",
+      "prompt": "A tree traversal never needs a \"visited\" set, but a graph traversal does. Why?"
+    },
+    {
+      "id": "shortest",
+      "prompt": "How would you find the shortest route between two people in a social network, counting friend-of-a-friend steps?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "A graph is a **map of towns and roads**. Towns are nodes, roads are edges. Some roads are one-way (directed), some have distances (weighted), and nothing stops roads forming loops. **BFS** spreads out like ripples from a stone dropped in one town. **DFS** is a hiker who follows one road as far as it goes before backtracking.",
+    "sections": [
+      {
+        "id": "vocabulary",
+        "heading": "Nodes, edges and kinds of graph",
+        "body": "A **graph** is a set of **nodes** (vertices, V) joined by **edges** (E). A tree is a special graph: connected, with no cycles.\n\n- **Directed** edges go one way (follows on social media, web links, course prerequisites). **Undirected** edges go both ways (friendships, roads).\n- **Weighted** edges carry a cost (distance, time, price). **Unweighted** edges all count as 1.\n- A **cycle** is a path that returns to its start. A directed graph with no cycles is a **DAG**.\n\nMany interview problems are graphs in disguise: grids (each cell joins its 4 neighbours), word ladders (words one letter apart), dependency orders, and network routing."
+      },
+      {
+        "id": "representation",
+        "heading": "Storing a graph",
+        "body": "**Adjacency list**: for each node, a list of its neighbours, usually a hash map from node to list. Space **O(V + E)**. Iterating a node's neighbours is fast. Use this by default.\n\n**Adjacency matrix**: a V × V grid where `matrix[a][b]` says whether the edge a→b exists. Edge checks are O(1), but it uses **O(V²)** space even when edges are few.\n\nMost real graphs are **sparse** (E is much smaller than V²), so lists win. Interview inputs often arrive as an edge list like `[[0, 1], [1, 2]]`; build the adjacency list first.",
+        "code": {
+          "ts": "// Undirected edge list to adjacency list\nfunction buildGraph(n: number, edges: [number, number][]) {\n  const adj: number[][] = Array.from({ length: n }, () => [])\n  for (const [a, b] of edges) {\n    adj[a].push(b)\n    adj[b].push(a) // omit this line for a directed graph\n  }\n  return adj\n}",
+          "py": "# Undirected edge list to adjacency list\nfrom collections import defaultdict\n\ndef build_graph(edges):\n    adj = defaultdict(list)\n    for a, b in edges:\n        adj[a].append(b)\n        adj[b].append(a)  # omit this line for a directed graph\n    return adj"
+        }
+      },
+      {
+        "id": "search",
+        "heading": "BFS and DFS on graphs",
+        "body": "Graph search is tree traversal plus one thing: a **visited set**. A graph can have cycles and many routes to the same node, so without it you would loop forever or redo work.\n\n- **BFS** uses a **queue**, explores in rings of increasing distance, and finds the **fewest-edges path** in an unweighted graph.\n- **DFS** uses a **stack** (or recursion), goes deep first, and suits \"is there a path\", cycle detection, connected components and topological order.\n\nBoth handle each node once and each edge once or twice: **O(V + E)** time, O(V) extra space.\n\nIn the widget, run BFS and DFS from the same start and compare the frontier: the only difference is queue versus stack. Then build your own graph and find a shortest path.",
+        "widget": "graph"
+      },
+      {
+        "id": "weighted",
+        "heading": "Weighted shortest paths",
+        "body": "BFS counts edges, so it fails when edges have different costs. A one-edge route of 10 km loses to a three-edge route of 3 km.\n\n**Dijkstra's algorithm** handles **non-negative** weights. It is BFS with a **priority queue** (a min-heap) ordered by distance so far: always expand the closest unfinished node next. With a binary heap it costs **O((V + E) log V)**.\n\nNegative weights break Dijkstra; Bellman-Ford handles them, slower. For interviews, know when to use which, and be ready to sketch Dijkstra with a heap."
+      },
+      {
+        "id": "patterns",
+        "heading": "Graph patterns to recognise",
+        "body": "- **Connected components / islands**: start a BFS or DFS from every unvisited node and count how many searches you start.\n- **Topological sort**: order tasks so each comes after its prerequisites, for a DAG only. Kahn's algorithm repeatedly takes nodes with no remaining incoming edges, using a queue. If some nodes are never taken, there is a cycle.\n- **Cycle detection**: in an undirected graph, finding a visited neighbour that isn't your parent means a cycle. In a directed graph, reaching a node that is still on the current DFS path means a cycle.\n- **Multi-source BFS**: put every starting point in the queue at once, as in \"rotting oranges\" or the distance to the nearest exit.\n\nSignals in the problem statement: *network, connections, dependencies, prerequisites, grid, islands, neighbours, reachable, minimum steps*."
+      }
+    ]
+  },
+  "widgets": [
+    "graph"
+  ],
+  "explainBack": {
+    "prompt": "Explain how to represent a graph, why graph search needs a visited set, how BFS and DFS differ and what each is good for, and when you would need Dijkstra instead of BFS.",
+    "rubric": [
+      {
+        "id": "list",
+        "point": "An adjacency list uses O(V + E) space; a matrix uses O(V²) but checks an edge in O(1)."
+      },
+      {
+        "id": "visited",
+        "point": "Graphs can have cycles and multiple routes, so a visited set stops loops and repeated work."
+      },
+      {
+        "id": "bfs",
+        "point": "BFS uses a queue and finds the fewest-edges path in an unweighted graph."
+      },
+      {
+        "id": "dfs",
+        "point": "DFS uses a stack or recursion: good for reachability, cycles, components and topological order."
+      },
+      {
+        "id": "cost",
+        "point": "Both BFS and DFS run in O(V + E)."
+      },
+      {
+        "id": "dijkstra",
+        "point": "Weighted edges (non-negative) need Dijkstra: a min-heap by distance, O((V + E) log V)."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "list-space",
+      "kind": "choice",
+      "prompt": "How much space does an adjacency list use for a graph with V nodes and E edges?",
+      "options": [
+        "O(V)",
+        "O(E)",
+        "O(V + E)",
+        "O(V²)"
+      ],
+      "answer": 2,
+      "explanation": "One entry per node, plus one list item per edge end: O(V + E). A matrix always needs V × V cells.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What does the list store for each node, and for each edge?"
+        }
+      ]
+    },
+    {
+      "id": "search-time",
+      "kind": "choice",
+      "prompt": "What is the time complexity of BFS or DFS over a whole graph stored as an adjacency list?",
+      "options": [
+        "O(V)",
+        "O(E log V)",
+        "O(V + E)",
+        "O(V × E)"
+      ],
+      "answer": 2,
+      "explanation": "Each node is taken from the frontier once, and each edge is looked at once (directed) or twice (undirected): O(V + E).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Count how often each node, and each edge, is handled."
+        }
+      ]
+    },
+    {
+      "id": "unweighted",
+      "kind": "choice",
+      "prompt": "You want the fewest number of moves between two squares on a grid where every move costs the same. Which algorithm?",
+      "options": [
+        "DFS",
+        "BFS",
+        "Dijkstra with a heap",
+        "Sort the cells by distance"
+      ],
+      "answer": 1,
+      "explanation": "With equal edge costs, BFS reaches every node by the fewest edges first, so the first time it reaches the target is a shortest path. DFS can find a long path first.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which search explores in rings of increasing distance?"
+        }
+      ]
+    },
+    {
+      "id": "weighted",
+      "kind": "choice",
+      "prompt": "Roads have different lengths (all positive). You want the shortest total distance between two towns. Which algorithm?",
+      "options": [
+        "BFS",
+        "DFS",
+        "Dijkstra's algorithm",
+        "Topological sort"
+      ],
+      "answer": 2,
+      "explanation": "BFS counts edges, not lengths. Dijkstra always expands the closest unfinished node, using a min-heap, which is correct for non-negative weights.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Is fewest roads the same as shortest distance?"
+        }
+      ]
+    },
+    {
+      "id": "bfs-distance",
+      "kind": "number",
+      "prompt": "Undirected graph with edges A–B, A–C, B–D, C–D, C–E, D–F, E–F, F–G (the widget's example). How many edges are on a shortest path from A to G?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "BFS from A: distance 1 is B and C, distance 2 is D and E, distance 3 is F, distance 4 is G. So **4** edges, e.g. A → B → D → F → G.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Work out which nodes are 1 edge from A, then 2, and so on."
+        },
+        {
+          "level": "pattern",
+          "text": "That is BFS: rings of increasing distance."
+        }
+      ]
+    },
+    {
+      "id": "why-visited",
+      "kind": "choice",
+      "prompt": "What happens if you run BFS on a graph with a cycle but forget the visited set?",
+      "options": [
+        "Nothing: BFS handles cycles on its own.",
+        "Nodes get added to the queue again and again; it can loop forever or do far more work.",
+        "It becomes DFS.",
+        "It finds a longer path but still stops."
+      ],
+      "answer": 1,
+      "explanation": "Without remembering what was seen, a cycle like A–B–C–A keeps feeding nodes back into the queue. Mark a node as seen when you add it to the queue.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Picture a triangle A–B–C. What stops you going round it forever?"
+        }
+      ]
+    },
+    {
+      "id": "components",
+      "kind": "number",
+      "prompt": "Nodes 1 to 7, with edges 1–2, 2–3 and 4–5. How many connected components are there?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "{1, 2, 3}, {4, 5}, {6} and {7}: **4**. Nodes with no edges are components on their own. Count them by starting a search from each unvisited node.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Don't forget nodes that have no edges at all."
+        }
+      ]
+    },
+    {
+      "id": "topo",
+      "kind": "choice",
+      "prompt": "Given courses and their prerequisites, you must output an order to take them all, or report that it is impossible. Which technique?",
+      "options": [
+        "Dijkstra",
+        "Topological sort (e.g. Kahn's algorithm)",
+        "Binary search",
+        "A max-heap of course numbers"
+      ],
+      "answer": 1,
+      "explanation": "Prerequisites form a directed graph. A topological order puts each course after its prerequisites. If a cycle stops some courses ever being ready, it is impossible.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What kind of graph do prerequisites form, and what order do you need?"
+        }
+      ]
+    },
+    {
+      "id": "islands-cost",
+      "kind": "text",
+      "prompt": "Counting islands in an m × n grid with BFS or DFS: what is the time complexity? (Use m and n.)",
+      "accept": [
+        "O(m*n)",
+        "O(mn)",
+        "O(nm)",
+        "O(n*m)"
+      ],
+      "placeholder": "e.g. O(m + n)",
+      "explanation": "Each of the m × n cells is visited at most once, and checks at most 4 neighbours: O(m × n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many cells are there, and how often is each one visited?"
+        }
+      ]
+    },
+    {
+      "id": "sparse",
+      "kind": "choice",
+      "prompt": "A social network has 1,000,000 users who each have about 200 friends. Matrix or adjacency list?",
+      "options": [
+        "Matrix: edge checks are O(1).",
+        "Adjacency list: a matrix would need 10¹² cells, almost all empty.",
+        "Either: they use the same space.",
+        "Neither: use a sorted array."
+      ],
+      "answer": 1,
+      "explanation": "V² = 10¹² cells is far too much. The list stores about V + E ≈ 10⁸ entries. Sparse graphs almost always use lists. A hash set per node still gives fast \"are these two friends?\" checks.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Work out V² for a million users."
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write `numIslands(grid)`: the grid holds `'1'` (land) and `'0'` (water). An island is land connected up, down, left or right. Return how many islands there are.\n\nThen answer:\n\n- Why is this a graph problem?\n- What are the time and space costs?",
+    "starter": {
+      "ts": "function numIslands(grid: string[][]): number {\n  // your code here\n}",
+      "py": "def num_islands(grid):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Each land cell is a node; its land neighbours are its edges."
+      },
+      {
+        "level": "pattern",
+        "text": "Connected components: start a search from each unvisited land cell, and count the searches."
+      },
+      {
+        "level": "approach",
+        "text": "Loop over every cell. When you find unvisited land, add 1 to the count and BFS or DFS from it, marking all the land you reach as visited."
+      }
+    ],
+    "reference": {
+      "ts": "function numIslands(grid: string[][]): number {\n  const rows = grid.length\n  const cols = rows ? grid[0].length : 0\n  const seen = new Set<string>()\n  let islands = 0\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (grid[r][c] !== '1' || seen.has(`${r},${c}`)) continue\n      islands++\n      // Explore the whole island with an explicit stack (DFS)\n      const stack: [number, number][] = [[r, c]]\n      seen.add(`${r},${c}`)\n      while (stack.length) {\n        const [y, x] = stack.pop()!\n        for (const [dy, dx] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {\n          const ny = y + dy\n          const nx = x + dx\n          const key = `${ny},${nx}`\n          if (ny >= 0 && ny < rows && nx >= 0 && nx < cols && grid[ny][nx] === '1' && !seen.has(key)) {\n            seen.add(key)\n            stack.push([ny, nx])\n          }\n        }\n      }\n    }\n  }\n  return islands\n}",
+      "py": "def num_islands(grid):\n    rows = len(grid)\n    cols = len(grid[0]) if rows else 0\n    seen = set()\n    islands = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] != '1' or (r, c) in seen:\n                continue\n            islands += 1\n            # Explore the whole island with an explicit stack (DFS)\n            stack = [(r, c)]\n            seen.add((r, c))\n            while stack:\n                y, x = stack.pop()\n                for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                    ny, nx = y + dy, x + dx\n                    if 0 <= ny < rows and 0 <= nx < cols and grid[ny][nx] == '1' and (ny, nx) not in seen:\n                        seen.add((ny, nx))\n                        stack.append((ny, nx))\n    return islands"
+    },
+    "explanation": "The cells are nodes and the land neighbours are edges, so each island is a **connected component**. Every cell is visited at most once and checks 4 neighbours: **O(m × n) time**. The seen set and the stack can hold every cell: **O(m × n) space**. An explicit stack avoids hitting the recursion limit on a huge island. Marking cells as `'0'` in place instead of using a set saves memory, but changes the input, so say so if you do it.",
+    "selfCheck": [
+      "I count one island per search I start, not per land cell.",
+      "I mark a cell as seen when I add it to the stack or queue, so nothing is added twice.",
+      "I check the grid bounds before reading a neighbour.",
+      "I said O(m × n) time and space."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Forgetting the visited set in a graph search.",
+      "fix": "Cycles and multiple routes will loop or repeat work. Mark nodes when you first add them to the frontier."
+    },
+    {
+      "mistake": "Using BFS for weighted shortest paths.",
+      "fix": "BFS counts edges. With varying non-negative weights, use Dijkstra with a min-heap."
+    },
+    {
+      "mistake": "Using DFS to find a shortest path.",
+      "fix": "DFS can find a long path first. For fewest edges, use BFS."
+    },
+    {
+      "mistake": "Building an adjacency matrix for a large sparse graph.",
+      "fix": "V² space explodes. Use an adjacency list, a hash map from node to neighbours."
+    },
+    {
+      "mistake": "Adding only one direction for an undirected edge.",
+      "fix": "Add both `a → b` and `b → a`."
+    },
+    {
+      "mistake": "Recursing DFS over a big grid in Python.",
+      "fix": "Deep recursion can hit the limit. Use an explicit stack or BFS with a deque."
+    }
+  ]
+}

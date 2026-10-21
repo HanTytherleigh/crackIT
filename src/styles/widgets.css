@@ -766,3 +766,32 @@
 .heap-array {
   grid-template-columns: repeat(8, 1fr);
 }
+
+/* Graph */
+.graph-svg {
+  touch-action: manipulation;
+}
+.graph-svg.is-editing {
+  cursor: crosshair;
+}
+.graph-edge {
+  stroke: var(--border);
+  stroke-width: 2.5;
+  transition-property: stroke;
+}
+.graph-edge.is-tree { stroke: var(--secondary); }
+.graph-edge.is-active { stroke: var(--warm); stroke-width: 3.5; }
+.graph-edge.is-path { stroke: var(--accent); stroke-width: 5; }
+.graph-node { cursor: pointer; outline: none; }
+.graph-node circle { fill: var(--surface); stroke: var(--muted); stroke-width: 2.5; transition-property: fill, stroke; }
+.graph-node text { fill: var(--text); font-weight: 700; font-size: 13px; font-family: var(--font-body); pointer-events: none; }
+.graph-node:focus-visible circle { stroke: var(--focus); stroke-width: 4; }
+.graph-node.is-selected circle { stroke: var(--warm); stroke-width: 4; }
+.graph-node.is-pending circle { stroke: var(--secondary); stroke-dasharray: 3 2; }
+.graph-node.is-visited circle { fill: var(--accent); stroke: var(--accent); }
+.graph-node.is-visited text { fill: var(--on-accent); }
+.graph-node.is-current circle { fill: var(--warm); stroke: var(--warm); }
+.graph-node.is-current text { fill: var(--bg); }
+.graph-node.is-path circle { fill: var(--accent); stroke: var(--text); stroke-width: 3; }
+.graph-node.is-path text { fill: var(--on-accent); }
+.graph-svg .graph-node text.graph-dist { fill: var(--secondary); font-size: 11px; }
