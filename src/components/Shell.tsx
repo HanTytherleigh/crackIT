@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink, Link, useMatch } from 'react-router-dom'
+import { UpdatePrompt } from './UpdatePrompt'
 import { HomeIcon, LearnIcon, PatternsIcon, ProgressIcon, ReviewIcon, SettingsIcon } from './Icons'
 
 const tabs = [
@@ -61,6 +62,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <main id="main" tabIndex={-1}>
           {children}
         </main>
+        <UpdatePrompt />
       </div>
 
       {!inLesson && (

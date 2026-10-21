@@ -174,3 +174,33 @@
   width: 24px;
   height: 24px;
 }
+
+/* "New version" banner, above the tab bar on mobile */
+.update-prompt {
+  position: fixed;
+  z-index: 20;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + var(--space-3));
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+  background: var(--raised);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+}
+.update-prompt p {
+  margin: 0 0 var(--space-3);
+  font-weight: 560;
+}
+.shell.focus-mode .update-prompt {
+  bottom: calc(env(safe-area-inset-bottom) + var(--space-3));
+}
+@media (min-width: 900px) {
+  .update-prompt {
+    bottom: var(--space-5);
+    left: auto;
+    right: var(--space-5);
+  }
+}

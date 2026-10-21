@@ -75,7 +75,7 @@ export function Prose({ text, className }: { text: string; className?: string })
             return <pre key={i} className="code-plain"><code>{b.text}</code></pre>
           case 'table':
             return (
-              <div key={i} className="table-wrap" tabIndex={0} role="region" aria-label="Table">
+              <div key={i} className="table-wrap" tabIndex={0} role="region" aria-label={`Table: ${b.head.join(', ').replace(/[*`]/g, '')}`}>
                 <table>
                   <thead>
                     <tr>{b.head.map((h, j) => <th key={j} scope="col"><Inline text={h} /></th>)}</tr>

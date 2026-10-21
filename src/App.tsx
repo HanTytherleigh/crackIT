@@ -1,20 +1,21 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Shell } from './components/Shell'
 import { HomeScreen } from './screens/HomeScreen'
 import { LearnScreen } from './screens/LearnScreen'
 import { ModuleScreen } from './screens/ModuleScreen'
-import { LessonScreen } from './screens/LessonScreen'
-import { PatternsScreen } from './screens/PatternsScreen'
-import { PatternDetailScreen } from './screens/patterns/PatternDetailScreen'
-import { SignalDrillScreen } from './screens/patterns/SignalDrillScreen'
-import { LookalikeDrillScreen } from './screens/patterns/LookalikeDrillScreen'
-import { ComplexityDrillScreen } from './screens/patterns/ComplexityDrillScreen'
-import { ReviewScreen } from './screens/ReviewScreen'
-import { ProgressScreen } from './screens/ProgressScreen'
-import { SettingsScreen } from './screens/SettingsScreen'
 import { NotFoundScreen } from './screens/NotFoundScreen'
 import { applySettingsToDocument, useSettings } from './state/settings'
+// Screens beyond Home and Learn load on demand, keeping the first download small.
+const LessonScreen = lazy(() => import('./screens/LessonScreen').then((m) => ({ default: m.LessonScreen })))
+const PatternsScreen = lazy(() => import('./screens/PatternsScreen').then((m) => ({ default: m.PatternsScreen })))
+const PatternDetailScreen = lazy(() => import('./screens/patterns/PatternDetailScreen').then((m) => ({ default: m.PatternDetailScreen })))
+const SignalDrillScreen = lazy(() => import('./screens/patterns/SignalDrillScreen').then((m) => ({ default: m.SignalDrillScreen })))
+const LookalikeDrillScreen = lazy(() => import('./screens/patterns/LookalikeDrillScreen').then((m) => ({ default: m.LookalikeDrillScreen })))
+const ComplexityDrillScreen = lazy(() => import('./screens/patterns/ComplexityDrillScreen').then((m) => ({ default: m.ComplexityDrillScreen })))
+const ReviewScreen = lazy(() => import('./screens/ReviewScreen').then((m) => ({ default: m.ReviewScreen })))
+const ProgressScreen = lazy(() => import('./screens/ProgressScreen').then((m) => ({ default: m.ProgressScreen })))
+const SettingsScreen = lazy(() => import('./screens/SettingsScreen').then((m) => ({ default: m.SettingsScreen })))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -32,6 +33,7 @@ export function App() {
     <HashRouter>
       <ScrollToTop />
       <Shell>
+        <Suspense fallback={<div className="page"><p className="muted" role="status">Loading…</p></div>}>
         <Routes>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/learn" element={<LearnScreen />} />
@@ -47,6 +49,7 @@ export function App() {
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="*" element={<NotFoundScreen />} />
         </Routes>
+        </Suspense>
       </Shell>
     </HashRouter>
   )

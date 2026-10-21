@@ -24,6 +24,7 @@ export function ComplexityDrillScreen() {
   return (
     <DrillShell title="Complexity prediction" lead="Read the approach and predict its time complexity before you see the answer." index={index} count={drill.items.length} onMove={move}>
       <CheckCard
+        headingLevel={2}
         key={item.id}
         check={complexityAsCheck(item)}
         index={index}

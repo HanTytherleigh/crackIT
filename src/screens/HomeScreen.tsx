@@ -3,7 +3,7 @@ import { ProgressMap } from '../components/ProgressMap'
 import { getModule, modules } from '../content/modules'
 import { useProgress } from '../state/progress'
 import { dueCards, nextDue, SESSION_LIMIT } from '../lib/scheduler'
-import { describeDay } from './ReviewScreen'
+import { describeDay } from '../lib/dates'
 
 const EXPORT_REMINDER_DAYS = 14
 

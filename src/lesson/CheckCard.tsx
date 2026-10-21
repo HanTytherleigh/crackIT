@@ -10,9 +10,11 @@ import { Inline, Prose } from '../components/Prose'
  * One question. Attempt before reveal: hints and the "show answer" button only
  * appear after a first attempt, and a revealed answer no longer counts as a pass.
  */
-export function CheckCard({ check, index, label, record, hintsShown, onAnswer, onReveal, onHint, revealedNote = 'This one will come back in review.' }: {
+export function CheckCard({ check, index, label, record, hintsShown, onAnswer, onReveal, onHint, revealedNote = 'This one will come back in review.', headingLevel = 3 }: {
   check: Check
   index: number
+  /** 3 inside a lesson step (under its h2); 2 when the card sits directly under the page's h1. */
+  headingLevel?: 2 | 3
   /** Replaces the "Question n" label, e.g. with the topic name in Review. */
   label?: string
   revealedNote?: string
@@ -23,6 +25,7 @@ export function CheckCard({ check, index, label, record, hintsShown, onAnswer, o
   onHint: () => void
 }) {
   const id = useId()
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
   const [answer, setAnswer] = useState(record?.lastAnswer ?? '')
   const attempted = (record?.attempts ?? 0) > 0
   const solved = !!record?.correct
@@ -36,7 +39,7 @@ export function CheckCard({ check, index, label, record, hintsShown, onAnswer, o
 
   return (
     <section className="card check" aria-labelledby={`${id}-q ${id}-p`}>
-      <h3 id={`${id}-q`} className="check-num">{label ?? `Question ${index + 1}`}</h3>
+      <Heading id={`${id}-q`} className="check-num">{label ?? `Question ${index + 1}`}</Heading>
       {/* Prompts can hold more than one block, such as a tree drawn in a code fence. */}
       <div id={`${id}-p`}>
         <Prose text={check.prompt} className="check-prompt" />

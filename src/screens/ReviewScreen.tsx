@@ -7,6 +7,7 @@ import { masteryOf, recheckPassed, topicKey, type CheckRecord } from '../lib/pro
 import { dueCards, interleave, nextDue, parseCardId, SESSION_LIMIT, type Grade } from '../lib/scheduler'
 import { complexityAsCheck, loadComplexityDrill, loadPatterns, loadSignalDrill, signalAsCheck } from '../content/patterns'
 import type { ReviewCard } from '../lib/progressModel'
+import { describeDay } from '../lib/dates'
 import { useProgress } from '../state/progress'
 import { CheckCard } from '../lesson/CheckCard'
 
@@ -21,15 +22,6 @@ type Item = {
 
 const isPatternCard = (c: ReviewCard) => c.id.startsWith('drill:')
 type Answer = { record: CheckRecord; hints: number }
-
-const dayFmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
-
-export function describeDay(date: Date, now = new Date()): string {
-  const days = Math.round((date.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86_400_000)
-  if (days <= 0) return 'today'
-  if (days === 1) return 'tomorrow'
-  return dayFmt.format(date)
-}
 
 export function ReviewScreen() {
   const [params] = useSearchParams()
@@ -185,6 +177,7 @@ function Session({ initial }: { initial: Item[] }) {
       {item.retry && <p className="muted small">One more try at this one. It won't change its schedule.</p>}
 
       <CheckCard
+        headingLevel={2}
         key={pos}
         check={item.check}
         index={0}
