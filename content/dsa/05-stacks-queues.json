@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "id": "stacks-queues",
+  "moduleId": "dsa",
+  "title": "Stacks and queues",
+  "summary": "LIFO, FIFO, and spotting the hidden stack.",
+  "estimatedMinutes": 18,
+  "prerequisites": [
+    "arrays-strings",
+    "linked-lists"
+  ],
+  "recallPrompts": [
+    {
+      "id": "lifo-fifo",
+      "prompt": "What is the difference between a stack and a queue? Give an everyday example of each."
+    },
+    {
+      "id": "brackets",
+      "prompt": "How would you check whether a string of brackets like `{[()]}` is balanced?"
+    },
+    {
+      "id": "queue-impl",
+      "prompt": "Why is removing from the front of a Python list or JavaScript array slow, and what would you use instead for a queue?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "A **stack** is a pile of plates: you add to the top and take from the top, so the last plate on is the first off. A **queue** is the line at a coffee shop: you join at the back and are served from the front, so the first in is the first out.",
+    "sections": [
+      {
+        "id": "stack",
+        "heading": "Stacks: last in, first out",
+        "body": "A **stack** supports `push` (add to the top), `pop` (remove from the top) and `peek` (look at the top). All three are **O(1)**.\n\nA dynamic array is a perfect stack, as long as you only touch the **end**: `append` and `pop` in Python, `push` and `pop` in JavaScript, `ArrayDeque` in Java and Kotlin. Java's old `Stack` class is best avoided.\n\nStacks fit any problem where the **most recent unfinished thing** must be dealt with first.",
+        "widget": "stack-queue"
+      },
+      {
+        "id": "queue",
+        "heading": "Queues: first in, first out",
+        "body": "A **queue** supports `enqueue` (add at the back) and `dequeue` (remove from the front), both **O(1)** when built properly.\n\nThe trap: removing from the **front of an array** shifts every other item, which is O(n). Python's `list.pop(0)` does exactly that, and JavaScript's `shift()` can too. Use:\n\n- Python: `collections.deque`, with `append` and `popleft`.\n- Java and Kotlin: `ArrayDeque`.\n- Or a **ring buffer**: an array with a front index and a size, where indexes wrap around. That is what the widget's queue mode shows.\n\nA **deque** (double-ended queue) allows O(1) adds and removes at both ends. It can act as a stack or a queue."
+      },
+      {
+        "id": "hidden-stacks",
+        "heading": "Spotting the hidden stack",
+        "body": "Many problems are stack problems in disguise. Look for **nesting**, **undo**, or **going back to the most recent point**:\n\n- **Matching brackets and tags.** The most recent opener must close first.\n- **Undo, and the browser's back button.** Reverse the most recent action first.\n- **Function calls.** The call stack holds each unfinished call. Recursion *is* a stack, which is why deep recursion overflows.\n- **Depth-first search.** Explore one path fully, then backtrack.\n- **Evaluating expressions**, like `3 4 + 2 *` in postfix.\n\nQueues show up wherever **order of arrival** matters: breadth-first search, task schedulers, print queues, message buffers.\n\nTry the widget's Brackets mode with `([)]`. It fails because `)` arrives while `[` is the most recent opener."
+      },
+      {
+        "id": "monotonic",
+        "heading": "Monotonic stacks",
+        "body": "A **monotonic stack** keeps its items in increasing (or decreasing) order by popping anything that breaks the order before pushing.\n\nIt answers \"what is the next greater element to the right?\" for every item in **O(n)**. Each item is pushed once and popped at most once, even though there is a loop inside a loop. The same idea solves daily temperatures, stock spans and the largest rectangle in a histogram.\n\nThe signal: for each item, find the **nearest** item to one side that is bigger or smaller.",
+        "code": {
+          "ts": "// For each value, the next greater value to its right (or -1)\nfunction nextGreater(values: number[]): number[] {\n  const result = new Array(values.length).fill(-1)\n  const stack: number[] = [] // indexes still waiting for an answer\n  values.forEach((v, i) => {\n    while (stack.length && values[stack.at(-1)!] < v) {\n      result[stack.pop()!] = v\n    }\n    stack.push(i)\n  })\n  return result\n}",
+          "py": "# For each value, the next greater value to its right (or -1)\ndef next_greater(values):\n    result = [-1] * len(values)\n    stack = []  # indexes still waiting for an answer\n    for i, v in enumerate(values):\n        while stack and values[stack[-1]] < v:\n            result[stack.pop()] = v\n        stack.append(i)\n    return result"
+        }
+      }
+    ]
+  },
+  "widgets": [
+    "stack-queue"
+  ],
+  "explainBack": {
+    "prompt": "Explain stacks and queues, how to build each so every operation is O(1), and how to recognise a problem that needs a stack. Use bracket matching as your example.",
+    "rubric": [
+      {
+        "id": "lifo",
+        "point": "A stack is last in, first out: push and pop at the top, both O(1)."
+      },
+      {
+        "id": "fifo",
+        "point": "A queue is first in, first out: add at the back, remove from the front."
+      },
+      {
+        "id": "front",
+        "point": "Removing from the front of an array is O(n), so use a deque or a ring buffer."
+      },
+      {
+        "id": "signals",
+        "point": "Stack signals: nesting, undo, and handling the most recent item first."
+      },
+      {
+        "id": "brackets",
+        "point": "Brackets: push openers; each closer must match the top; the stack must be empty at the end."
+      },
+      {
+        "id": "uses",
+        "point": "The call stack and DFS use stacks; BFS and schedulers use queues."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "which-lifo",
+      "kind": "choice",
+      "prompt": "Which structure is **last in, first out**?",
+      "options": [
+        "Queue",
+        "Stack",
+        "Hash set",
+        "Deque used from both ends"
+      ],
+      "answer": 1,
+      "explanation": "A stack: the most recently pushed item is the first one popped, like plates on a pile.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Think of a pile of plates."
+        }
+      ]
+    },
+    {
+      "id": "stack-trace",
+      "kind": "number",
+      "prompt": "On an empty stack: push 1, push 2, push 3, pop, push 4, pop. What value does the **second** pop return?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "The first pop takes 3 (the top). Then 4 is pushed on top of [1, 2], so the second pop returns **4**.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Write the stack out after each operation."
+        }
+      ]
+    },
+    {
+      "id": "queue-trace",
+      "kind": "number",
+      "prompt": "On an empty queue: enqueue 1, enqueue 2, enqueue 3, dequeue, enqueue 4, dequeue. What value does the **second** dequeue return?",
+      "answer": 2,
+      "tolerance": 0,
+      "explanation": "Queues serve in arrival order. The first dequeue gives 1, the second gives **2**. The 4 joins at the back and waits.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which item has been waiting longest at each dequeue?"
+        }
+      ]
+    },
+    {
+      "id": "pop-front",
+      "kind": "choice",
+      "prompt": "You use a Python list as a queue with `queue.pop(0)`. What is the problem, and the fix?",
+      "options": [
+        "No problem: pop(0) is O(1).",
+        "pop(0) shifts every remaining item, which is O(n). Use collections.deque and popleft().",
+        "Lists can't hold more than a few thousand items.",
+        "pop(0) returns the last item, not the first."
+      ],
+      "answer": 1,
+      "explanation": "Removing index 0 shifts every other item left, so a loop of n dequeues is O(n²). `deque.popleft()` is O(1).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Think back to deleting index 0 in the arrays topic."
+        }
+      ]
+    },
+    {
+      "id": "bfs-structure",
+      "kind": "choice",
+      "prompt": "Breadth-first search explores nodes level by level. Which structure holds the nodes waiting to be explored?",
+      "options": [
+        "A stack",
+        "A queue",
+        "A hash set",
+        "A sorted array"
+      ],
+      "answer": 1,
+      "explanation": "A queue: nodes found first are explored first, which keeps the search level by level. A stack would give depth-first search instead.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Should the oldest discovered node, or the newest, be explored next?"
+        }
+      ]
+    },
+    {
+      "id": "undo",
+      "kind": "choice",
+      "prompt": "An editor's Undo button reverses the most recent change first. Which structure fits?",
+      "options": [
+        "Queue",
+        "Stack",
+        "Heap",
+        "Hash map"
+      ],
+      "answer": 1,
+      "explanation": "Undo reverses the most recent action first: last in, first out, which is a stack. (Redo is often a second stack.)",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which change should Undo reverse: the oldest or the newest?"
+        }
+      ]
+    },
+    {
+      "id": "mismatch",
+      "kind": "choice",
+      "prompt": "Why is `([)]` not balanced, even though it has one of each opener and closer?",
+      "options": [
+        "It has an odd number of characters.",
+        "When `)` arrives, the most recent unclosed opener is `[`, not `(`.",
+        "Square brackets can't go inside round ones.",
+        "It is balanced."
+      ],
+      "answer": 1,
+      "explanation": "Each closer must match the **most recent** unclosed opener, the top of the stack. At `)` the top is `[`, so it fails. Counting alone can't spot this, but a stack can.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What is on top of the stack when `)` arrives?"
+        }
+      ]
+    },
+    {
+      "id": "max-depth",
+      "kind": "number",
+      "prompt": "Checking `{[()()]}` with a stack, what is the most items the stack ever holds at once?",
+      "answer": 3,
+      "tolerance": 0,
+      "explanation": "After `{`, `[` and `(` the stack holds 3. `)` pops back to 2, the next `(` makes 3 again, and then everything closes. The maximum is **3**: the nesting depth.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Track the stack size as you read each character."
+        }
+      ]
+    },
+    {
+      "id": "bracket-big-o",
+      "kind": "text",
+      "prompt": "What is the Big O of checking a bracket string of length n with a stack?",
+      "accept": [
+        "O(n)",
+        "n"
+      ],
+      "placeholder": "e.g. O(n²)",
+      "explanation": "Each character is pushed or popped once, at O(1) each, so O(n) time, with up to O(n) space for the stack.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How much work does each character cause?"
+        }
+      ]
+    },
+    {
+      "id": "monotonic-cost",
+      "kind": "choice",
+      "prompt": "The next-greater-element code has a `while` loop inside a `for` loop. Why is it still O(n)?",
+      "options": [
+        "The while loop always runs at most once.",
+        "Each index is pushed once and popped at most once, so the total inner work across the whole run is at most n.",
+        "Stacks make nested loops free.",
+        "It isn't: it is O(n²)."
+      ],
+      "answer": 1,
+      "explanation": "Count total work, not work per iteration. There are n pushes and at most n pops altogether, so the inner loop runs at most n times **in total**: O(n). This is amortised analysis again.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many times can a single index be popped?"
+        },
+        {
+          "level": "pattern",
+          "text": "Amortised counting: total pops ≤ total pushes."
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Implement a **queue using two stacks**: `enqueue(x)` and `dequeue()`, using only push, pop and is-empty on the stacks. This is a classic interview question.\n\nThen answer:\n\n- What does a single dequeue cost in the worst case?\n- Why is dequeue still **amortised O(1)**?",
+    "starter": {
+      "ts": "class TwoStackQueue {\n  private inbox: number[] = []\n  private outbox: number[] = []\n  enqueue(x: number): void {\n    // your code here\n  }\n  dequeue(): number | undefined {\n    // your code here\n  }\n}",
+      "py": "class TwoStackQueue:\n    def __init__(self):\n        self.inbox = []\n        self.outbox = []\n\n    def enqueue(self, x):\n        # your code here\n        pass\n\n    def dequeue(self):\n        # your code here\n        pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Pouring one stack into another reverses its order."
+      },
+      {
+        "level": "pattern",
+        "text": "One stack takes new items; the other serves them, reversed."
+      },
+      {
+        "level": "approach",
+        "text": "enqueue pushes onto inbox. dequeue: if outbox is empty, pop everything from inbox onto outbox; then pop from outbox."
+      }
+    ],
+    "reference": {
+      "ts": "class TwoStackQueue {\n  private inbox: number[] = []\n  private outbox: number[] = []\n\n  enqueue(x: number): void {\n    this.inbox.push(x)\n  }\n\n  dequeue(): number | undefined {\n    if (this.outbox.length === 0) {\n      while (this.inbox.length) this.outbox.push(this.inbox.pop()!)\n    }\n    return this.outbox.pop()\n  }\n}",
+      "py": "class TwoStackQueue:\n    def __init__(self):\n        self.inbox = []\n        self.outbox = []\n\n    def enqueue(self, x):\n        self.inbox.append(x)\n\n    def dequeue(self):\n        if not self.outbox:\n            while self.inbox:\n                self.outbox.append(self.inbox.pop())\n        return self.outbox.pop() if self.outbox else None"
+    },
+    "explanation": "Pouring inbox into outbox reverses it, so the oldest item ends up on top of outbox. A dequeue that has to pour is **O(n)**, but each item is moved from inbox to outbox **only once** in its life. Spread over all operations that is **amortised O(1)**, the same argument as dynamic arrays and the monotonic stack.",
+    "selfCheck": [
+      "I only pour when outbox is empty. Pouring every time would break the order.",
+      "enqueue is a single push.",
+      "I explained amortised O(1): each item moves between the stacks once."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Using `list.pop(0)` or `array.shift()` as a queue.",
+      "fix": "That can be O(n) per dequeue. Use `collections.deque`, `ArrayDeque`, or a ring buffer."
+    },
+    {
+      "mistake": "Checking brackets by counting openers and closers.",
+      "fix": "Counts can't catch `([)]`. Order matters, so use a stack."
+    },
+    {
+      "mistake": "Popping or peeking an empty stack.",
+      "fix": "Check that it isn't empty first. In bracket problems, a closer with an empty stack means invalid."
+    },
+    {
+      "mistake": "Forgetting the final check in bracket matching.",
+      "fix": "If the stack isn't empty at the end, something was left open: `((()` is invalid."
+    },
+    {
+      "mistake": "Calling a nested-loop monotonic stack O(n²).",
+      "fix": "Count the total pushes and pops: each item is pushed once and popped at most once, so it is O(n)."
+    },
+    {
+      "mistake": "Mixing up which structure drives BFS and DFS.",
+      "fix": "BFS uses a queue (level by level). DFS uses a stack, or recursion, which is a stack."
+    }
+  ]
+}
