@@ -510,3 +510,53 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Linked list */
+.ll-node rect {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 2;
+  transition-property: stroke, fill;
+}
+.ll-node.is-curr rect {
+  stroke: var(--warm);
+}
+.ll-node.is-floating rect {
+  stroke: var(--secondary);
+  stroke-dasharray: 4 3;
+}
+.ll-divider,
+.ll-null {
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.ll-value {
+  fill: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 650;
+}
+.ll-edge {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  transition-property: stroke;
+}
+.ll-edge.is-changed {
+  stroke: var(--warm);
+  stroke-width: 2.6;
+}
+.ll-arrowhead {
+  fill: var(--muted);
+}
+.ll-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--muted);
+}
+.ll-head { fill: var(--accent); }
+.ll-curr { fill: var(--warm); }
+.ll-prev { fill: var(--secondary); }
+.ll-next { fill: var(--error); }
+.ll-new { fill: var(--secondary); }

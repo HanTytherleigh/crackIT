@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "id": "linked-lists",
+  "moduleId": "dsa",
+  "title": "Linked lists",
+  "summary": "Nodes, pointers, and rewiring them safely.",
+  "estimatedMinutes": 20,
+  "prerequisites": [
+    "big-o",
+    "arrays-strings"
+  ],
+  "recallPrompts": [
+    {
+      "id": "vs-array",
+      "prompt": "How is a linked list stored differently from an array, and what does that make fast or slow?"
+    },
+    {
+      "id": "reverse",
+      "prompt": "How would you reverse a singly linked list in place? Which pointers do you need?"
+    },
+    {
+      "id": "middle",
+      "prompt": "How could you find the middle node of a linked list in one pass, without knowing its length?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "A linked list is a **treasure hunt**. Each clue (node) holds a prize (value) and tells you where the next clue is hidden (next pointer). You can add a clue anywhere just by changing what one clue says, but to reach the tenth clue you have to follow the first nine.",
+    "sections": [
+      {
+        "id": "nodes",
+        "heading": "Nodes and pointers",
+        "body": "A linked list is a chain of **nodes**. Each node holds a value and a **reference to the next node**. The list itself is just a pointer to the first node, the **head**. The last node points to `null`.\n\nThe nodes can live anywhere in memory, so there is no address formula. To reach position k you start at the head and follow k pointers: **O(k)**, so O(n).\n\nThe pay-off is that nothing ever shifts. Once you hold a pointer to a node, inserting or removing next to it is a couple of pointer changes: **O(1)**.",
+        "code": {
+          "ts": "class ListNode {\n  constructor(\n    public value: number,\n    public next: ListNode | null = null,\n  ) {}\n}\n\n// 3 → 7 → 1 → null\nconst head = new ListNode(3, new ListNode(7, new ListNode(1)))",
+          "py": "class ListNode:\n    def __init__(self, value, next=None):\n        self.value = value\n        self.next = next\n\n# 3 → 7 → 1 → None\nhead = ListNode(3, ListNode(7, ListNode(1)))"
+        }
+      },
+      {
+        "id": "vs-arrays",
+        "heading": "Linked list or array?",
+        "body": "| Operation | Array | Singly linked list |\n|---|---|---|\n| Read position k | O(1) | O(k) |\n| Insert or delete at the front | O(n) | O(1) |\n| Insert or delete after a node you hold | O(n) | O(1) |\n| Append at the end | O(1) amortised | O(1) with a tail pointer, else O(n) |\n| Search for a value | O(n) | O(n) |\n\nArrays usually win in practice, because their items sit together in memory and the CPU cache loves that. Each linked node also stores an extra pointer.\n\nLinked lists earn their place when you insert and remove at the ends or in the middle a lot, as in queues, LRU caches and undo histories. They are also the building block for trees and graphs."
+      },
+      {
+        "id": "rewiring",
+        "heading": "Rewiring safely",
+        "body": "Every linked-list bug is the same bug: **overwriting a pointer before saving what it pointed to**. Once nothing points to the rest of the list, it is gone.\n\nTo insert a new node after `curr`:\n\n- first `node.next = curr.next` (the new node grabs the rest of the list),\n- then `curr.next = node`.\n\nThe other way round, `curr.next = node` throws the rest of the list away.\n\nTry each operation in the widget and watch which arrow changes on each step.",
+        "widget": "linked-list"
+      },
+      {
+        "id": "reverse",
+        "heading": "Reversing in place",
+        "body": "Reversal is the classic interview warm-up. Walk the list with three pointers, `prev`, `curr` and `next`. At each node:\n\n- **save** `next = curr.next`,\n- **flip** `curr.next = prev`,\n- **advance** `prev = curr`, then `curr = next`.\n\nWhen `curr` reaches null, `prev` is the new head. Each node is visited once: **O(n) time, O(1) extra space**.\n\nSay the three steps out loud while you code. Interviewers listen for the save step."
+      },
+      {
+        "id": "fast-slow",
+        "heading": "Fast and slow pointers",
+        "body": "Move one pointer **two steps** at a time and another **one step**.\n\n- **Middle node.** When the fast pointer reaches the end, the slow one is in the middle. One pass, no length needed.\n- **Cycle detection** (Floyd's algorithm). If the list loops back on itself, the fast pointer eventually laps the slow one and they meet. If fast reaches null, there is no cycle. O(n) time, O(1) space, where a set of visited nodes would use O(n) space.\n\nThis pattern also finds the k-th node from the end: start one pointer k steps ahead, then move both together.",
+        "code": {
+          "ts": "function middle(head: ListNode): ListNode {\n  let slow = head\n  let fast: ListNode | null = head\n  while (fast !== null && fast.next !== null) {\n    slow = slow.next!\n    fast = fast.next.next\n  }\n  return slow\n}",
+          "py": "def middle(head):\n    slow = fast = head\n    while fast is not None and fast.next is not None:\n        slow = slow.next\n        fast = fast.next.next\n    return slow"
+        }
+      },
+      {
+        "id": "dummy",
+        "heading": "Doubly linked lists and the dummy head",
+        "body": "A **doubly linked list** gives each node a `prev` pointer too. You can then walk backwards and delete a node you hold in O(1) without finding its predecessor. That is how LRU caches pair a hash map with a list.\n\nA **dummy (sentinel) head** is a placeholder node in front of the real head. Then \"insert at the front\" and \"delete the first node\" stop being special cases, because every real node has a node before it. Return `dummy.next` at the end. It removes a whole class of null-pointer bugs from merge and delete problems."
+      }
+    ]
+  },
+  "widgets": [
+    "linked-list"
+  ],
+  "explainBack": {
+    "prompt": "Explain how a linked list differs from an array, why reaching position k is O(k) but inserting next to a node you hold is O(1), how to reverse a list in place, and how fast and slow pointers find the middle.",
+    "rubric": [
+      {
+        "id": "nodes",
+        "point": "Nodes hold a value and a pointer to the next node; the list is a pointer to the head."
+      },
+      {
+        "id": "access",
+        "point": "There is no address formula, so reaching position k means following k pointers: O(k)."
+      },
+      {
+        "id": "insert",
+        "point": "Inserting or deleting next to a node you hold is O(1): no shifting, just pointer changes."
+      },
+      {
+        "id": "order",
+        "point": "Save or link the rest of the list before overwriting a next pointer, or it is lost."
+      },
+      {
+        "id": "reverse",
+        "point": "Reverse with prev, curr and next: save, flip, advance. O(n) time, O(1) space."
+      },
+      {
+        "id": "fast-slow",
+        "point": "Fast moves two steps and slow one; when fast ends, slow is at the middle (and they meet if there is a cycle)."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "access-k",
+      "kind": "choice",
+      "prompt": "What is the Big O of reading the k-th value of a singly linked list?",
+      "options": [
+        "O(1)",
+        "O(log k)",
+        "O(k)",
+        "O(k²)"
+      ],
+      "answer": 2,
+      "explanation": "There is no address formula. You start at the head and follow k pointers, so it is O(k), which is O(n) in the worst case.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How do you get from the head to node k?"
+        }
+      ]
+    },
+    {
+      "id": "insert-head",
+      "kind": "choice",
+      "prompt": "What is the Big O of inserting a new value at the **front** of a singly linked list?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n²)"
+      ],
+      "answer": 0,
+      "explanation": "Point the new node at the old head, then move head to the new node. That is two pointer changes and nothing shifts: O(1). The same operation on an array is O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Does any existing node need to move?"
+        }
+      ]
+    },
+    {
+      "id": "insert-order",
+      "kind": "choice",
+      "prompt": "You hold `curr` and want to insert `node` right after it. Which order is correct?",
+      "options": [
+        "`curr.next = node`, then `node.next = curr.next`",
+        "`node.next = curr.next`, then `curr.next = node`",
+        "Either order works.",
+        "`node.next = curr`, then `curr.next = node`"
+      ],
+      "answer": 1,
+      "explanation": "The new node must grab the rest of the list first. Setting `curr.next = node` first loses the only pointer to the rest, and then `node.next = curr.next` just points the node at itself.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "After the first line runs, can you still reach the old `curr.next`?"
+        }
+      ]
+    },
+    {
+      "id": "reverse-head",
+      "kind": "number",
+      "prompt": "The list 1 → 2 → 3 → 4 → 5 is reversed in place. What value is the new head?",
+      "answer": 5,
+      "tolerance": 0,
+      "explanation": "Reversal flips every arrow, so the old tail, 5, becomes the head: 5 → 4 → 3 → 2 → 1.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which node has nothing pointing to it after every arrow is flipped?"
+        }
+      ]
+    },
+    {
+      "id": "reverse-cost",
+      "kind": "choice",
+      "prompt": "What are the time and extra space costs of reversing a singly linked list in place with three pointers?",
+      "options": [
+        "O(n) time, O(n) space",
+        "O(n) time, O(1) space",
+        "O(n²) time, O(1) space",
+        "O(log n) time, O(1) space"
+      ],
+      "answer": 1,
+      "explanation": "Each node is visited once and its pointer flipped, so O(n) time. Only three extra pointers are used, whatever the length, so O(1) extra space.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many extra variables does it need, and does that grow with n?"
+        }
+      ]
+    },
+    {
+      "id": "save-next",
+      "kind": "choice",
+      "prompt": "In the reversal loop, why must you save `next = curr.next` **before** setting `curr.next = prev`?",
+      "options": [
+        "It makes the loop faster.",
+        "Once curr.next is overwritten, nothing else points to the rest of the list, so you couldn't continue.",
+        "Python and JavaScript require it.",
+        "So that prev is never null."
+      ],
+      "answer": 1,
+      "explanation": "`curr.next` is the only route to the rest of the list. Flip it first and the remaining nodes are unreachable.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "After the flip, what does curr.next point to, and how would you reach the next node?"
+        }
+      ]
+    },
+    {
+      "id": "middle-node",
+      "kind": "number",
+      "prompt": "List 1 → 2 → 3 → 4 → 5 → 6 → 7. Slow and fast both start at the head; each round, slow moves 1 and fast moves 2, while fast and fast.next aren't null. What value is slow on at the end?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "After round 1 slow is on 2 and fast on 3. After round 2, slow 3 and fast 5. After round 3, slow 4 and fast 7. Fast.next is null, so stop: slow is on **4**, the middle.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Write down where both pointers are after each round."
+        },
+        {
+          "level": "pattern",
+          "text": "Fast and slow pointers: fast covers twice the distance."
+        }
+      ]
+    },
+    {
+      "id": "cycle",
+      "kind": "choice",
+      "prompt": "How can you tell whether a linked list has a cycle using O(1) extra space?",
+      "options": [
+        "Store every visited node in a set.",
+        "Count the nodes and compare with the length.",
+        "Move a fast pointer 2 steps and a slow pointer 1 step: they meet if and only if there is a cycle.",
+        "Reverse the list and compare."
+      ],
+      "answer": 2,
+      "explanation": "Floyd's algorithm. In a cycle the fast pointer gains one step per round, so it must catch the slow one. Without a cycle, fast hits null. The set approach works too, but uses O(n) space.",
+      "hints": [
+        {
+          "level": "pattern",
+          "text": "Fast and slow pointers."
+        }
+      ]
+    },
+    {
+      "id": "delete-given-prev",
+      "kind": "text",
+      "prompt": "You already hold a pointer to the node **before** the one you want to delete. What is the Big O of the delete?",
+      "accept": [
+        "O(1)",
+        "1"
+      ],
+      "placeholder": "e.g. O(n)",
+      "explanation": "One pointer change, `prev.next = prev.next.next`, removes it: O(1). Finding prev in the first place is what usually costs O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many pointers need to change?"
+        }
+      ]
+    },
+    {
+      "id": "dummy-head",
+      "kind": "choice",
+      "prompt": "What is the main benefit of a dummy (sentinel) head node?",
+      "options": [
+        "It makes the list doubly linked.",
+        "Every real node then has a node before it, so changes at the front need no special case.",
+        "It makes reading position k O(1).",
+        "It stores the list's length."
+      ],
+      "answer": 1,
+      "explanation": "With a placeholder in front, inserting or deleting the first real node works like any other position. Return `dummy.next` as the head at the end.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What is special about changing the first node of a list?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write a function that reverses a singly linked list **in place** and returns the new head. Handle an empty list.\n\nThen answer:\n\n- What are the time and extra space costs?\n- What goes wrong if you leave out the line that saves `next`?",
+    "starter": {
+      "ts": "function reverse(head: ListNode | null): ListNode | null {\n  // your code here\n}",
+      "py": "def reverse(head):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "You need to remember the previous node as well as the current one."
+      },
+      {
+        "level": "pattern",
+        "text": "Three pointers: prev, curr, next. Save, flip, advance."
+      },
+      {
+        "level": "approach",
+        "text": "prev = null, curr = head. While curr isn't null: next = curr.next; curr.next = prev; prev = curr; curr = next. Return prev."
+      }
+    ],
+    "reference": {
+      "ts": "function reverse(head: ListNode | null): ListNode | null {\n  let prev: ListNode | null = null\n  let curr = head\n  while (curr !== null) {\n    const next = curr.next\n    curr.next = prev\n    prev = curr\n    curr = next\n  }\n  return prev\n}",
+      "py": "def reverse(head):\n    prev = None\n    curr = head\n    while curr is not None:\n        nxt = curr.next\n        curr.next = prev\n        prev = curr\n        curr = nxt\n    return prev"
+    },
+    "explanation": "Each node is visited once: **O(n) time**. Three pointers regardless of length: **O(1) extra space**. An empty list skips the loop and returns null. Without saving `next`, the flip overwrites the only route onward, so the loop stops after one node and the rest of the list is lost.",
+    "selfCheck": [
+      "I save next before flipping curr.next.",
+      "I return prev, not head or curr.",
+      "An empty list returns null without crashing.",
+      "I said O(n) time and O(1) extra space."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Overwriting `curr.next` before saving it.",
+      "fix": "Save the rest of the list first. In reversal: save, flip, advance."
+    },
+    {
+      "mistake": "Returning `head` after reversing.",
+      "fix": "The old head is now the tail. Return `prev`."
+    },
+    {
+      "mistake": "Forgetting the empty-list and one-node cases.",
+      "fix": "Check `head is None` and `head.next is None`, or use a dummy head so the front isn't special."
+    },
+    {
+      "mistake": "Calling linked-list insert O(1) without saying where.",
+      "fix": "It is O(1) **once you hold the node**. Finding position k first is O(k)."
+    },
+    {
+      "mistake": "Reading `fast.next.next` without checking `fast.next`.",
+      "fix": "Loop while `fast and fast.next` are both non-null."
+    },
+    {
+      "mistake": "Assuming linked lists beat arrays for most work.",
+      "fix": "Arrays have O(1) indexing and cache-friendly memory. Choose a linked list for frequent insertions and removals at known positions."
+    }
+  ]
+}
