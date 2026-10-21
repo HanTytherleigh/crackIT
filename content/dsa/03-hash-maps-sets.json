@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "id": "hash-maps-sets",
+  "moduleId": "dsa",
+  "title": "Hash maps and sets",
+  "summary": "Constant-time lookup, hashing, collisions, resizing.",
+  "estimatedMinutes": 22,
+  "prerequisites": [
+    "big-o",
+    "arrays-strings"
+  ],
+  "recallPrompts": [
+    {
+      "id": "how-fast",
+      "prompt": "How can a hash map find a key in about O(1) time, when a list needs O(n)? What does it do with the key?"
+    },
+    {
+      "id": "collision",
+      "prompt": "What is a collision in a hash table, and what can the table do about one?"
+    },
+    {
+      "id": "two-sum",
+      "prompt": "Given an **unsorted** array, how would you find two numbers that add up to a target in a single pass?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "A hash map is a **cloakroom with numbered pegs**. You don't search every coat: the attendant turns your name into a peg number and goes straight there. If two names map to the same peg, the coats share it, and the attendant checks the few coats on that peg.",
+    "sections": [
+      {
+        "id": "hashing",
+        "heading": "From key to bucket",
+        "body": "A hash map stores entries in an **array of buckets**. To find where a key lives, it:\n\n- runs a **hash function** that turns the key into a big number, then\n- takes that number **mod the bucket count** to get an index.\n\nArray indexing is O(1), so if computing the hash is cheap, finding the bucket is O(1). Nothing else in the table is looked at.\n\nA good hash function is **deterministic** (the same key always gives the same number), **fast**, and **spreads keys evenly** across the buckets. The widget uses a deliberately weak one: it adds up the character codes. That's easy to check by hand, but anagrams like \"cat\" and \"act\" always collide.",
+        "widget": "hash-table"
+      },
+      {
+        "id": "collisions",
+        "heading": "Collisions: chaining and probing",
+        "body": "There are far more possible keys than buckets, so two keys will sometimes land in the same bucket. That is a **collision**, and every hash table has a plan for it.\n\n**Separate chaining.** Each bucket holds a small list. Colliding keys join the list, and a lookup walks that one short list. Java's `HashMap` works this way.\n\n**Open addressing (linear probing).** Every bucket holds one key. If yours is taken, try the next slot, then the next, until you find a free one. A lookup follows the same path until it finds the key or hits an empty slot. Python's `dict` uses open addressing, with a cleverer probe sequence.\n\nEither way, a lookup only looks at the few keys that collided. That is why it is **O(1) on average**."
+      },
+      {
+        "id": "load-factor",
+        "heading": "Load factor and resizing",
+        "body": "The **load factor** is keys ÷ buckets. As it rises, collisions rise, and lookups slow down.\n\nSo the table keeps it low. Past a limit (0.75 is Java's default; Python resizes dicts at about two thirds full), it allocates **twice as many buckets** and **rehashes** every key. Every key has to be placed again, because `hash mod m` changes when m changes.\n\nA resize is O(n), but doubling makes it rare, just like a dynamic array. So inserts are **amortised O(1)**."
+      },
+      {
+        "id": "worst-case",
+        "heading": "Average O(1), worst case O(n)",
+        "body": "If every key lands in the **same bucket**, a lookup has to check them all: **O(n)**. That happens with a bad hash function, or with inputs crafted to collide.\n\n| Operation | Average | Worst |\n|---|---|---|\n| Insert | O(1) amortised | O(n) |\n| Lookup | O(1) | O(n) |\n| Delete | O(1) | O(n) |\n\nIn interviews, say \"O(1) on average\". If asked, explain that the worst case is O(n) when keys collide."
+      },
+      {
+        "id": "keys",
+        "heading": "What can be a key",
+        "body": "A key's hash must **never change** while it is in the table, or the table will look in the wrong bucket.\n\n- Python only lets **hashable** values be keys: strings, numbers and tuples work, lists don't.\n- In JavaScript, a plain object turns keys into strings. A `Map` compares object keys by identity, not by contents.\n- In Java and Kotlin, a key class must override `equals` **and** `hashCode` together. Kotlin's `data class` does both for you.\n\nEqual keys must give equal hashes. Different keys may share a hash: that is just a collision."
+      },
+      {
+        "id": "sets-and-patterns",
+        "heading": "Sets, and the patterns to know",
+        "body": "A **set** is a hash map with keys and no values. It answers \"have I seen this?\" in O(1) on average, where `x in list` costs O(n).\n\nThree patterns come up constantly:\n\n- **Seen-before lookup.** Two-sum on unsorted data: for each number, check whether `target − number` is already in a map of values to indexes. That is one pass, O(n).\n- **Counting.** Word frequencies, anagram checks, majority element: count with a map in O(n).\n- **De-duplication.** Put items in a set to keep each one once.\n\nThe trade-off is **memory**. These patterns use O(n) extra space to save time. If the order of keys matters, remember that Java's `HashMap` keeps no order, while Python dicts and JavaScript `Map`s keep insertion order. For sorted keys, use a tree map, at O(log n) per operation.",
+        "code": {
+          "ts": "// Count each word in one pass: O(n)\nconst counts = new Map<string, number>()\nfor (const w of words) {\n  counts.set(w, (counts.get(w) ?? 0) + 1)\n}\n\n// Seen-before: is any value repeated? O(n) with a set\nconst seen = new Set<number>()\nlet hasDuplicate = false\nfor (const x of nums) {\n  if (seen.has(x)) {\n    hasDuplicate = true\n    break\n  }\n  seen.add(x)\n}",
+          "py": "# Count each word in one pass: O(n)\ncounts = {}\nfor w in words:\n    counts[w] = counts.get(w, 0) + 1\n\n# Seen-before: is any value repeated? O(n) with a set\nseen = set()\nhas_duplicate = False\nfor x in nums:\n    if x in seen:\n        has_duplicate = True\n        break\n    seen.add(x)"
+        }
+      }
+    ]
+  },
+  "widgets": [
+    "hash-table"
+  ],
+  "explainBack": {
+    "prompt": "Explain how a hash map finds a key quickly, what happens on a collision, why tables resize, and why lookup is O(1) on average but O(n) in the worst case. Then explain how a map solves two-sum on unsorted data in one pass.",
+    "rubric": [
+      {
+        "id": "hash-mod",
+        "point": "The key is hashed to a number, then taken mod the bucket count to pick an array slot."
+      },
+      {
+        "id": "collision",
+        "point": "Collisions are handled by chaining (a list per bucket) or probing (try the next slot)."
+      },
+      {
+        "id": "load",
+        "point": "Load factor = keys ÷ buckets; past a limit the table doubles and rehashes, amortised O(1)."
+      },
+      {
+        "id": "worst",
+        "point": "O(1) on average, but O(n) if many keys land in the same bucket."
+      },
+      {
+        "id": "keys",
+        "point": "Keys must have a stable hash, so mutable values like lists can't be keys."
+      },
+      {
+        "id": "two-sum",
+        "point": "Two-sum: for each value, look up target − value among the values already seen, then store it."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "lookup-average",
+      "kind": "choice",
+      "prompt": "What is the **average** time to look up a key in a hash map holding n keys?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n log n)"
+      ],
+      "answer": 0,
+      "explanation": "The hash picks the bucket directly, and with a sensible load factor only a few keys share it. So it is O(1) on average.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Does a lookup look at every key, or just one bucket?"
+        }
+      ]
+    },
+    {
+      "id": "lookup-worst",
+      "kind": "choice",
+      "prompt": "Every key in a hash map happens to land in the same bucket. What does a lookup cost now?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "It can't happen"
+      ],
+      "answer": 2,
+      "explanation": "All n keys share one chain or one probe run, so a lookup may compare against all of them: O(n). That is the worst case.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many keys might the lookup have to compare against?"
+        }
+      ]
+    },
+    {
+      "id": "toy-bucket",
+      "kind": "number",
+      "prompt": "Using the toy hash from the widget (add up the character codes: c = 99, a = 97, t = 116), which bucket does \"cat\" go to in a table of 8 buckets?",
+      "answer": 0,
+      "tolerance": 0,
+      "explanation": "99 + 97 + 116 = 312, and 312 mod 8 = 0, because 312 = 39 × 8. So bucket **0**.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "First add the three codes together."
+        },
+        {
+          "level": "approach",
+          "text": "Then find the remainder after dividing by 8."
+        }
+      ]
+    },
+    {
+      "id": "load-factor",
+      "kind": "number",
+      "prompt": "A hash table holds 6 keys in 8 buckets. What is its load factor?",
+      "answer": 0.75,
+      "tolerance": 0.001,
+      "explanation": "Load factor = keys ÷ buckets = 6 ÷ 8 = **0.75**. One more key would push it past Java's default limit and trigger a resize.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Load factor is one number divided by another."
+        }
+      ]
+    },
+    {
+      "id": "probe-slot",
+      "kind": "number",
+      "prompt": "An empty table of 8 slots uses linear probing. Three keys are inserted in order, and they hash to slots 3, 3 and 4. Which slot does the **third** key end up in?",
+      "answer": 5,
+      "tolerance": 0,
+      "explanation": "The first key takes slot 3. The second also hashes to 3, so it probes on to 4. The third hashes to 4, which is now taken, so it probes on to **5**.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Place them one at a time. Where does the second key go?"
+        },
+        {
+          "level": "pattern",
+          "text": "Linear probing: if a slot is taken, try the next one."
+        }
+      ]
+    },
+    {
+      "id": "mutable-key",
+      "kind": "choice",
+      "prompt": "Why can't a Python list be used as a dictionary key?",
+      "options": [
+        "Lists are too slow to hash.",
+        "Lists are mutable, so their hash could change while they are in the dict and the dict would look in the wrong bucket.",
+        "Dict keys must be strings.",
+        "Lists can contain duplicates."
+      ],
+      "answer": 1,
+      "explanation": "If a key changed after it was stored, its hash would change and lookups would go to the wrong bucket. Python only allows hashable, effectively immutable keys. Use a tuple instead.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What would happen to a stored key's bucket if the key changed?"
+        }
+      ]
+    },
+    {
+      "id": "two-sum-approach",
+      "kind": "choice",
+      "prompt": "Find two numbers in an **unsorted** array that add up to a target. What is the best approach for time?",
+      "options": [
+        "Check every pair: O(n²)",
+        "Sort, then use two pointers: O(n log n)",
+        "One pass with a hash map from value to index, checking for target − value: O(n)",
+        "Binary search for each value: O(n log n) without sorting"
+      ],
+      "answer": 2,
+      "explanation": "For each value, check whether its complement is already in the map, then add the value. One pass is O(n) time, using O(n) extra space. (Binary search needs sorted data, so that last option doesn't work as written.)",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "For each number, what other number would complete the pair?"
+        },
+        {
+          "level": "pattern",
+          "text": "Seen-before lookup with a hash map."
+        }
+      ]
+    },
+    {
+      "id": "count-big-o",
+      "kind": "text",
+      "prompt": "What is the Big O of counting how often each of n words appears, using a hash map?",
+      "accept": [
+        "O(n)",
+        "n"
+      ],
+      "placeholder": "e.g. O(n log n)",
+      "explanation": "Each word costs one O(1) average map update, so n words take O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What does each word cost, and how many words are there?"
+        }
+      ]
+    },
+    {
+      "id": "set-vs-list",
+      "kind": "choice",
+      "prompt": "Inside a loop over n items you check `if x in seen`. Why should `seen` be a set rather than a list?",
+      "options": [
+        "Sets keep items in order.",
+        "Membership in a set is O(1) on average, but O(n) in a list, which would make the loop O(n²).",
+        "Lists can't hold numbers.",
+        "Sets use less memory than lists."
+      ],
+      "answer": 1,
+      "explanation": "`x in list` scans the list, so doing it n times is O(n²). `x in set` is O(1) on average, so the loop stays O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How does `in` find an item in a list?"
+        }
+      ]
+    },
+    {
+      "id": "anagram",
+      "kind": "choice",
+      "prompt": "What is a good O(n) way to check whether two strings are anagrams, like \"listen\" and \"silent\"?",
+      "options": [
+        "Compare every letter of one with every letter of the other.",
+        "Count each letter of both strings in a map and compare the counts.",
+        "Check whether they have the same length.",
+        "Compare their toy hashes."
+      ],
+      "answer": 1,
+      "explanation": "Counting letters with a map is O(n), and anagrams have identical counts. Sorting both and comparing also works, in O(n log n). The toy hash is a trap: different strings can share a hash, so equal hashes prove nothing.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What do two anagrams have in common?"
+        },
+        {
+          "level": "pattern",
+          "text": "Counting with a hash map."
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write two-sum for an **unsorted** array: return the indexes of two different items that add up to the target, or `null` / `None`. Use a single pass and a hash map.\n\nThen answer:\n\n- What are the time and extra space costs?\n- Why do you check for the complement **before** adding the current number?",
+    "starter": {
+      "ts": "function twoSum(nums: number[], target: number): [number, number] | null {\n  // your code here\n}",
+      "py": "def two_sum(nums, target):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "For nums[i], which value would complete the pair?"
+      },
+      {
+        "level": "pattern",
+        "text": "Seen-before lookup: a map from value to index."
+      },
+      {
+        "level": "approach",
+        "text": "Loop once. Compute need = target − nums[i]. If need is in the map, return [map[need], i]. Otherwise store map[nums[i]] = i."
+      }
+    ],
+    "reference": {
+      "ts": "function twoSum(nums: number[], target: number): [number, number] | null {\n  const indexOf = new Map<number, number>()\n  for (let i = 0; i < nums.length; i++) {\n    const need = target - nums[i]\n    const j = indexOf.get(need)\n    if (j !== undefined) return [j, i]\n    indexOf.set(nums[i], i)\n  }\n  return null\n}",
+      "py": "def two_sum(nums, target):\n    index_of = {}\n    for i, x in enumerate(nums):\n        need = target - x\n        if need in index_of:\n            return index_of[need], i\n        index_of[x] = i\n    return None"
+    },
+    "explanation": "One pass with O(1) average lookups: **O(n) time** and **O(n) extra space** for the map. Checking before adding stops an item pairing with itself: with target 6 and a single 3, you don't want [0, 0]. Compared with sorting and two pointers, this trades memory for time, and it keeps the original indexes.",
+    "selfCheck": [
+      "I look up target − value before storing the current value.",
+      "My map goes from value to index, so I can return indexes.",
+      "I said O(n) time and O(n) extra space."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Saying hash map lookup is O(1) with no caveat.",
+      "fix": "Say O(1) **on average**. The worst case is O(n) when many keys collide."
+    },
+    {
+      "mistake": "Using `x in some_list` inside a loop.",
+      "fix": "That is O(n) per check, so O(n²) overall. Use a set for O(1) average membership."
+    },
+    {
+      "mistake": "Assuming equal hashes mean equal keys.",
+      "fix": "Different keys can share a hash: that is a collision. The table always confirms with an equality check."
+    },
+    {
+      "mistake": "Using a mutable value as a key, or changing a key after inserting it.",
+      "fix": "Its bucket would no longer match its hash. Use immutable keys, like tuples in Python and `data class` values in Kotlin."
+    },
+    {
+      "mistake": "Relying on a hash map's iteration order.",
+      "fix": "Java's `HashMap` keeps no order. Python dicts and JavaScript `Map`s keep insertion order. Use a sorted structure when you need sorted keys."
+    },
+    {
+      "mistake": "Adding the current number before checking for its complement in two-sum.",
+      "fix": "It can then pair with itself. Check first, then add."
+    }
+  ]
+}

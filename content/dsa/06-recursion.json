@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "id": "recursion",
+  "moduleId": "dsa",
+  "title": "Recursion",
+  "summary": "Base cases, the call stack, and repeated work.",
+  "estimatedMinutes": 22,
+  "prerequisites": [
+    "big-o",
+    "stacks-queues"
+  ],
+  "recallPrompts": [
+    {
+      "id": "two-parts",
+      "prompt": "What two parts does every recursive function need, and what goes wrong without each?"
+    },
+    {
+      "id": "call-stack",
+      "prompt": "When a function calls itself, where does the computer keep track of the calls that haven't finished yet?"
+    },
+    {
+      "id": "fib-slow",
+      "prompt": "Why is the simple recursive Fibonacci function so slow for large n, and how could you fix it?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "Recursion is a **stack of nested to-do notes**. To finish \"work out fact(4)\" you write a note saying \"first work out fact(3)\" and put it on top. You keep doing that until a note is simple enough to answer straight away. Then you answer the notes from the top down, each one using the answer from the note above it.",
+    "sections": [
+      {
+        "id": "two-parts",
+        "heading": "Base case and recursive case",
+        "body": "A recursive function solves a problem by solving a **smaller version of the same problem**. It needs two parts:\n\n- **A base case**: an input small enough to answer directly, like `fact(1) = 1`.\n- **A recursive case** that calls itself on a **smaller** input and builds the answer from it, like `fact(n) = n × fact(n − 1)`.\n\nEvery call must move **towards** the base case. Leave out the base case, or step away from it, and the calls never stop.\n\nTo write one, **trust the recursive call**. Assume `fact(n − 1)` already works, and only ask how to turn its answer into `fact(n)`. This leap of faith is how people actually reason about recursion: don't trace every call in your head.",
+        "code": {
+          "ts": "function fact(n: number): number {\n  if (n <= 1) return 1        // base case\n  return n * fact(n - 1)      // smaller problem, then combine\n}",
+          "py": "def fact(n):\n    if n <= 1:\n        return 1               # base case\n    return n * fact(n - 1)     # smaller problem, then combine"
+        }
+      },
+      {
+        "id": "call-stack",
+        "heading": "The call stack",
+        "body": "Each call gets a **stack frame** holding its arguments, its local variables and where to return to. Frames are pushed when a call starts and popped when it returns: the call stack from the stacks topic.\n\nFor `fact(4)`, the stack grows to `fact(4) → fact(3) → fact(2) → fact(1)`. The base case returns, then each frame finishes in reverse order, last in, first out.\n\nSo recursion costs **space**: one frame per unfinished call. The **depth** of the recursion is its extra space, O(n) for `fact(n)`. Too deep, and you get a **stack overflow**. Python raises `RecursionError` at its default limit of about 1,000 frames.\n\nStep through the widget and watch frames go on and come off.",
+        "widget": "call-stack"
+      },
+      {
+        "id": "repeated-work",
+        "heading": "Repeated work",
+        "body": "`fib(n) = fib(n − 1) + fib(n − 2)` looks innocent, but each call makes **two** more calls. The calls form a tree that roughly doubles at each level, so the time is **exponential**, about O(2ⁿ).\n\nMost of that work is **repeated**. `fib(5)` makes 15 calls and works out `fib(2)` three separate times. `fib(40)` makes over 300 million calls.\n\nThe fix is **memoisation**: store each answer the first time it is computed, and look it up after that. Then each `fib(k)` is computed once, so `fib(n)` takes **O(n)** time and O(n) space. Turn on Memo in the widget and compare the call counts.\n\nThis is the doorway to **dynamic programming**: overlapping subproblems, solved once each."
+      },
+      {
+        "id": "cost",
+        "heading": "Counting the cost",
+        "body": "To find the Big O of a recursive function, picture its **recursion tree**:\n\n- **Time** = number of calls × work per call. A chain like `fact` makes n calls with O(1) each, so O(n). A doubling tree like `fib` is O(2ⁿ).\n- **Space** = the deepest chain of unfinished calls, because only one path is on the stack at a time. Even plain `fib(n)` has depth n, so it uses O(n) space.\n\nHalving the input each call (like binary search or fast power) gives a depth of **log n**. Splitting into two halves and doing O(n) work to combine (merge sort) gives **O(n log n)**: log n levels with O(n) work each.",
+        "code": {
+          "ts": "// O(log n): halve the exponent each call\nfunction power(x: number, n: number): number {\n  if (n === 0) return 1\n  const half = power(x, Math.floor(n / 2))\n  return n % 2 === 0 ? half * half : half * half * x\n}",
+          "py": "# O(log n): halve the exponent each call\ndef power(x, n):\n    if n == 0:\n        return 1\n    half = power(x, n // 2)\n    return half * half if n % 2 == 0 else half * half * x"
+        }
+      },
+      {
+        "id": "iteration",
+        "heading": "Recursion or a loop?",
+        "body": "Anything recursive can be written as a loop with your own stack, and the other way round.\n\nRecursion is clearer for naturally nested problems: trees, divide and conquer, and backtracking (try a choice, recurse, undo, try the next). Loops avoid the frame overhead and the depth limit.\n\nSome languages optimise **tail calls**, where the recursive call is the very last thing a function does, into a loop: Kotlin with `tailrec`, for example. Python and most JavaScript engines don't, so deep recursion there will overflow. If the input could be large, say so in an interview and offer the iterative version."
+      }
+    ]
+  },
+  "widgets": [
+    "call-stack"
+  ],
+  "explainBack": {
+    "prompt": "Explain how recursion works, using factorial: the base case, the recursive case, and what the call stack does. Then explain why naive Fibonacci is exponential and how memoisation fixes it.",
+    "rubric": [
+      {
+        "id": "base",
+        "point": "A base case answers small inputs directly, so the calls stop."
+      },
+      {
+        "id": "smaller",
+        "point": "The recursive case calls itself on a smaller input and combines the result."
+      },
+      {
+        "id": "frames",
+        "point": "Each call pushes a frame on the call stack; frames pop in reverse order as calls return."
+      },
+      {
+        "id": "space",
+        "point": "Recursion depth is extra space; too deep causes a stack overflow."
+      },
+      {
+        "id": "exponential",
+        "point": "Naive fib makes two calls each time and repeats the same subproblems: about O(2ⁿ)."
+      },
+      {
+        "id": "memo",
+        "point": "A memo stores each answer once, cutting fib to O(n) time."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "needs",
+      "kind": "choice",
+      "prompt": "What must every recursive function have to be guaranteed to finish?",
+      "options": [
+        "A loop inside it.",
+        "A base case, and recursive calls that always move towards it.",
+        "Exactly two recursive calls.",
+        "A memo."
+      ],
+      "answer": 1,
+      "explanation": "Without a base case, or if calls don't get closer to it, the calls never stop and the stack overflows.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What makes the chain of calls stop?"
+        }
+      ]
+    },
+    {
+      "id": "fact-depth",
+      "kind": "number",
+      "prompt": "With base case `n <= 1`, what is the greatest number of `fact` frames on the call stack at once while computing `fact(4)`?",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "fact(4) calls fact(3), which calls fact(2), which calls fact(1). That is **4** frames before the base case starts returning.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "List the calls that are waiting when fact(1) runs."
+        }
+      ]
+    },
+    {
+      "id": "fib-calls",
+      "kind": "number",
+      "prompt": "How many calls in total does the plain recursive `fib(5)` make, counting the first call? (Base case `n <= 1`.)",
+      "answer": 15,
+      "tolerance": 0,
+      "explanation": "calls(n) = calls(n − 1) + calls(n − 2) + 1, with calls(0) = calls(1) = 1. That gives 3, 5, 9 and then **15** for n = 5.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Draw the tree for fib(3) first and count its nodes."
+        },
+        {
+          "level": "approach",
+          "text": "calls(n) = calls(n − 1) + calls(n − 2) + 1, starting from calls(0) = calls(1) = 1."
+        }
+      ]
+    },
+    {
+      "id": "fib2-repeats",
+      "kind": "number",
+      "prompt": "In that plain `fib(5)` run, how many separate times is `fib(2)` called?",
+      "answer": 3,
+      "tolerance": 0,
+      "explanation": "fib(5) calls fib(4) and fib(3). fib(4) calls fib(3) and fib(2). Each fib(3) calls fib(2). That is **3** times: repeated work.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many fib(3) calls are there, and what does each one call?"
+        }
+      ]
+    },
+    {
+      "id": "fib-big-o",
+      "kind": "choice",
+      "prompt": "What is the time complexity of the plain recursive Fibonacci?",
+      "options": [
+        "O(n)",
+        "O(n²)",
+        "O(n log n)",
+        "Exponential, about O(2ⁿ)"
+      ],
+      "answer": 3,
+      "explanation": "Each call branches into two, so the number of calls grows roughly by a constant factor each time n goes up by one: exponential.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Roughly how does the number of calls change when n goes up by one?"
+        }
+      ]
+    },
+    {
+      "id": "memo-big-o",
+      "kind": "text",
+      "prompt": "What is the time complexity of Fibonacci **with** memoisation?",
+      "accept": [
+        "O(n)",
+        "n"
+      ],
+      "placeholder": "e.g. O(2^n)",
+      "explanation": "Each fib(k) for k from 0 to n is computed once, then looked up. That is n values at O(1) each: O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many different arguments can fib be called with?"
+        }
+      ]
+    },
+    {
+      "id": "overflow",
+      "kind": "choice",
+      "prompt": "A recursive function over a list of 100,000 items crashes with `RecursionError` in Python. What is the most likely cause?",
+      "options": [
+        "The list is too big to hold in memory.",
+        "The recursion goes 100,000 calls deep, past the call stack limit.",
+        "Recursion can't handle lists.",
+        "The base case returns the wrong value."
+      ],
+      "answer": 1,
+      "explanation": "One frame per item means a depth of 100,000, well past Python's default limit of about 1,000. Use a loop, or a recursion that halves the input so the depth is log n.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many frames are on the stack at the deepest point?"
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "kind": "choice",
+      "prompt": "A recursive sum of a list makes one call per item, one inside the next. What is its extra space?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n²)"
+      ],
+      "answer": 2,
+      "explanation": "All n calls are on the stack at once before the base case returns, so the stack takes O(n) space. A loop would use O(1).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How deep does the stack get?"
+        }
+      ]
+    },
+    {
+      "id": "return-order",
+      "kind": "choice",
+      "prompt": "`fact(3)` calls `fact(2)`, which calls `fact(1)`. In what order do they **return**?",
+      "options": [
+        "fact(3), fact(2), fact(1)",
+        "fact(1), fact(2), fact(3)",
+        "All at the same time",
+        "fact(2), fact(1), fact(3)"
+      ],
+      "answer": 1,
+      "explanation": "The call stack is last in, first out. The last call made, fact(1), returns first, then fact(2), then fact(3).",
+      "hints": [
+        {
+          "level": "pattern",
+          "text": "The call stack is a stack."
+        }
+      ]
+    },
+    {
+      "id": "power",
+      "kind": "choice",
+      "prompt": "The `power(x, n)` function above halves n at each call. What is its time complexity?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n²)"
+      ],
+      "answer": 1,
+      "explanation": "n halves every call, so there are about log₂ n calls, each doing O(1) work: O(log n). Multiplying x by itself n times would be O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many times can you halve n before reaching 0?"
+        },
+        {
+          "level": "pattern",
+          "text": "Halving the input: the guessing game again."
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write a recursive function that counts the ways to climb a staircase of n steps, taking **1 or 2 steps** at a time. For example, there are 3 ways to climb 3 steps: 1+1+1, 1+2 and 2+1.\n\nFirst write the plain recursive version, then add memoisation.\n\nThen answer:\n\n- What are the base cases?\n- What are the time costs of the plain and memoised versions?",
+    "starter": {
+      "ts": "function climbWays(n: number, memo = new Map<number, number>()): number {\n  // your code here\n}",
+      "py": "def climb_ways(n, memo=None):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Your very last move was either a 1-step or a 2-step. Where were you standing just before it?"
+      },
+      {
+        "level": "pattern",
+        "text": "It has the same shape as Fibonacci: ways(n) = ways(n − 1) + ways(n − 2)."
+      },
+      {
+        "level": "approach",
+        "text": "Base cases: ways(0) = 1 (already at the top) and ways(1) = 1. Check the memo first, compute, store, return."
+      }
+    ],
+    "reference": {
+      "ts": "function climbWays(n: number, memo = new Map<number, number>()): number {\n  if (n <= 1) return 1\n  if (memo.has(n)) return memo.get(n)!\n  const ways = climbWays(n - 1, memo) + climbWays(n - 2, memo)\n  memo.set(n, ways)\n  return ways\n}",
+      "py": "def climb_ways(n, memo=None):\n    if memo is None:\n        memo = {}\n    if n <= 1:\n        return 1\n    if n in memo:\n        return memo[n]\n    memo[n] = climb_ways(n - 1, memo) + climb_ways(n - 2, memo)\n    return memo[n]"
+    },
+    "explanation": "The last move was a 1-step (from n − 1) or a 2-step (from n − 2), so ways(n) = ways(n − 1) + ways(n − 2), with ways(0) = ways(1) = 1. Plain recursion repeats subproblems, so it is **exponential**. With the memo each n is solved once: **O(n) time**, plus O(n) space for the memo and the stack. Python note: never write `memo={}` as a default argument, because the same dict would be shared between calls.",
+    "selfCheck": [
+      "My base cases stop the recursion for n = 0 and n = 1 (or n = 1 and n = 2).",
+      "I check the memo before recursing and store the answer before returning.",
+      "I said exponential for the plain version and O(n) with the memo."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Leaving out the base case, or recursing on an input that doesn't get smaller.",
+      "fix": "Write the base case first, and check that every call moves towards it."
+    },
+    {
+      "mistake": "Tracing every call in your head.",
+      "fix": "Trust the recursive call: assume it works for smaller inputs, and just get the combining step right."
+    },
+    {
+      "mistake": "Forgetting that recursion uses memory.",
+      "fix": "Depth = extra space. A chain of n calls is O(n) space, and very deep chains overflow."
+    },
+    {
+      "mistake": "Calling plain recursive Fibonacci O(n).",
+      "fix": "It repeats subproblems and is exponential. Only the memoised or iterative version is O(n)."
+    },
+    {
+      "mistake": "Using a mutable default argument for the memo in Python (`memo={}`).",
+      "fix": "That dict is shared across every call to the function. Default to `None` and create the dict inside."
+    },
+    {
+      "mistake": "Assuming every language turns tail recursion into a loop.",
+      "fix": "Python and most JavaScript engines don't. For very deep inputs, write the loop."
+    }
+  ]
+}

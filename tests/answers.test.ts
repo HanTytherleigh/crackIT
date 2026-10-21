@@ -24,6 +24,7 @@ describe('parseNumber', () => {
   it('accepts commas and spaces', () => {
     expect(parseNumber('1,000,000')).toBe(1_000_000)
     expect(parseNumber(' 28 ')).toBe(28)
+    expect(parseNumber('.75')).toBe(0.75)
   })
   it('rejects words', () => {
     expect(parseNumber('about 20')).toBeUndefined()

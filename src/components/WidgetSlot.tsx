@@ -22,6 +22,16 @@ const widgets: Partial<Record<WidgetId, LazyExoticComponent<ComponentType>>> = {
   'growth-plotter': lazy(() => import('../widgets/GrowthPlotter')),
   'binary-search-stepper': lazy(() => import('../widgets/BinarySearchStepper')),
   'complexity-reader': lazy(() => import('../widgets/ComplexityReader')),
+  'array-ops': lazy(() => import('../widgets/ArrayOps')),
+  'two-pointers': lazy(() => import('../widgets/TwoPointers')),
+  'hash-table': lazy(() => import('../widgets/HashTable')),
+  'linked-list': lazy(() => import('../widgets/LinkedList')),
+  'stack-queue': lazy(() => import('../widgets/StackQueue')),
+  'call-stack': lazy(() => import('../widgets/CallStack')),
+  'tree-traversal': lazy(() => import('../widgets/TreeTraversal')),
+  heap: lazy(() => import('../widgets/Heap')),
+  graph: lazy(() => import('../widgets/GraphWidget')),
+  'dp-table': lazy(() => import('../widgets/DPTable')),
 }
 
 /** Embeds an interactive widget by id, or a placeholder while that widget is still being built. */

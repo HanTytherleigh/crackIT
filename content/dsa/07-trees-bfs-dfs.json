@@ -1,0 +1,339 @@
+{
+  "schemaVersion": 1,
+  "id": "trees-bfs-dfs",
+  "moduleId": "dsa",
+  "title": "Trees, BFS and DFS",
+  "summary": "Traversal orders and the stack or queue behind them.",
+  "estimatedMinutes": 24,
+  "prerequisites": [
+    "recursion",
+    "stacks-queues"
+  ],
+  "recallPrompts": [
+    {
+      "id": "bst",
+      "prompt": "What rule makes a binary tree a **binary search tree**, and why does that make searching fast?"
+    },
+    {
+      "id": "orders",
+      "prompt": "Name the ways to traverse a binary tree. How do pre-order, in-order and post-order differ?"
+    },
+    {
+      "id": "bfs-dfs",
+      "prompt": "What is the difference between depth-first and breadth-first search, and which data structure drives each?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "A tree is a **family tree** or a **folder structure**: one root at the top, each item with children below it, and no loops. **Depth-first** is exploring one folder all the way down before backing out. **Breadth-first** is looking at everything one level down, then everything two levels down.",
+    "sections": [
+      {
+        "id": "terms",
+        "heading": "Tree vocabulary",
+        "body": "A **tree** is nodes connected by edges, with one **root** and no cycles. Each node has a **parent** (except the root) and some **children**. Nodes with no children are **leaves**.\n\nA **binary tree** gives each node at most two children, `left` and `right`. The **depth** of a node is how far it is from the root. The **height** of a tree is the length of its longest root-to-leaf path. This lesson counts **levels**, so the tree below has 4 levels.\n\n```\n        8\n      /   \\\n     3     10\n    / \\      \\\n   1   6      14\n      / \\     /\n     4   7   13\n```\n\nTrees show up everywhere: the DOM, file systems, JSON, org charts, expression parsers, and the search indexes inside databases.",
+        "code": {
+          "ts": "class TreeNode {\n  constructor(\n    public value: number,\n    public left: TreeNode | null = null,\n    public right: TreeNode | null = null,\n  ) {}\n}",
+          "py": "class TreeNode:\n    def __init__(self, value, left=None, right=None):\n        self.value = value\n        self.left = left\n        self.right = right"
+        }
+      },
+      {
+        "id": "bst",
+        "heading": "Binary search trees",
+        "body": "A **binary search tree (BST)** keeps an ordering rule at every node: everything in the **left** subtree is smaller, everything in the **right** subtree is larger.\n\nSo a search is a guessing game: compare with the node, then go left or right, discarding a whole subtree each time. Search, insert and delete cost **O(h)**, where h is the height.\n\n- **Balanced** (roughly equal sides): h ≈ log n, so operations are **O(log n)**.\n- **Skewed**: insert 1, 2, 3, 4, 5 in order and every node hangs to the right. h = n, and it is no better than a linked list: **O(n)**.\n\nSelf-balancing trees (red-black, AVL) rotate nodes to stay O(log n). Java's `TreeMap` is a red-black tree. You won't need to code one, but you should know why they exist."
+      },
+      {
+        "id": "dfs",
+        "heading": "Depth-first: pre, in and post-order",
+        "body": "**Depth-first search (DFS)** follows one branch all the way down before backtracking. With recursion that is three lines: handle the node, recurse left, recurse right. The **order** of those lines gives the three traversals:\n\n- **Pre-order** (node, left, right): 8, 3, 1, 6, 4, 7, 10, 14, 13. Visits parents before children. Used to copy or serialise a tree.\n- **In-order** (left, node, right): 1, 3, 4, 6, 7, 8, 10, 13, 14. On a BST this comes out **sorted**.\n- **Post-order** (left, right, node): 1, 4, 7, 6, 3, 13, 14, 10, 8. Visits children before parents. Used to delete a tree or compute sizes and heights bottom-up.\n\nRecursion uses the call stack, so DFS **is** a stack: you can write it with your own explicit stack instead. Its extra space is O(h).\n\nPick an order in the widget and watch where the visit line sits in the code.",
+        "widget": "tree-traversal"
+      },
+      {
+        "id": "bfs",
+        "heading": "Breadth-first: level order",
+        "body": "**Breadth-first search (BFS)** visits the tree level by level: 8, then 3 and 10, then 1, 6 and 14, then 4, 7 and 13.\n\nIt uses a **queue**. Take a node from the front, visit it, and add its children to the back. Children wait behind everything already queued, which keeps the levels in order. Use a real queue (`collections.deque`, `ArrayDeque`), not `list.pop(0)`.\n\nBFS finds the **shallowest** match first, so it is the tool for \"minimum depth\", \"level averages\", \"right side view\", and shortest paths when every edge counts the same. Its extra space is the widest level, up to about n/2 for a full tree.\n\nBoth BFS and DFS visit every node once: **O(n)** time."
+      },
+      {
+        "id": "recursive-thinking",
+        "heading": "Thinking recursively about trees",
+        "body": "Most tree questions have the same shape: **answer for the left subtree, answer for the right subtree, then combine at this node**. The empty tree is the base case.\n\n- **Height**: `1 + max(height(left), height(right))`, with `height(null) = 0`.\n- **Size**: `1 + size(left) + size(right)`.\n- **Invert (mirror) a tree**: swap the left and right children, then invert each.\n- **Validate a BST**: pass down the allowed `(low, high)` range. Comparing a node only with its direct children isn't enough.\n\nThis is post-order thinking: children first, then combine. Say it out loud in an interview: \"If I know the answer for both subtrees, how do I get it for this node?\"",
+        "code": {
+          "ts": "function height(node: TreeNode | null): number {\n  if (node === null) return 0\n  return 1 + Math.max(height(node.left), height(node.right))\n}",
+          "py": "def height(node):\n    if node is None:\n        return 0\n    return 1 + max(height(node.left), height(node.right))"
+        }
+      }
+    ]
+  },
+  "widgets": [
+    "tree-traversal"
+  ],
+  "explainBack": {
+    "prompt": "Explain what a binary search tree is and why its operations are O(log n) only when it's balanced. Then explain the three depth-first orders and breadth-first search, and which data structure each uses.",
+    "rubric": [
+      {
+        "id": "bst-rule",
+        "point": "BST rule: smaller values go in the left subtree, larger in the right, at every node."
+      },
+      {
+        "id": "height",
+        "point": "Operations cost O(h): log n when balanced, n when skewed (e.g. sorted inserts)."
+      },
+      {
+        "id": "orders",
+        "point": "Pre-order visits node, left, right; in-order left, node, right; post-order left, right, node."
+      },
+      {
+        "id": "sorted",
+        "point": "In-order traversal of a BST gives the values in sorted order."
+      },
+      {
+        "id": "dfs-stack",
+        "point": "DFS uses a stack (often the call stack, via recursion)."
+      },
+      {
+        "id": "bfs-queue",
+        "point": "BFS uses a queue and visits level by level, finding the shallowest node first."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "inorder",
+      "kind": "choice",
+      "prompt": "What is the **in-order** traversal of this tree?\n\n```\n        8\n      /   \\\n     3     10\n    / \\      \\\n   1   6      14\n      / \\     /\n     4   7   13\n```",
+      "options": [
+        "8, 3, 1, 6, 4, 7, 10, 14, 13",
+        "1, 3, 4, 6, 7, 8, 10, 13, 14",
+        "1, 4, 7, 6, 3, 13, 14, 10, 8",
+        "8, 3, 10, 1, 6, 14, 4, 7, 13"
+      ],
+      "answer": 1,
+      "explanation": "In-order is left, node, right. For a BST that means ascending order: 1, 3, 4, 6, 7, 8, 10, 13, 14. The other options are pre-order, post-order and level order.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "In-order visits the left subtree, then the node, then the right subtree."
+        },
+        {
+          "level": "pattern",
+          "text": "On a binary search tree, in-order has a special property."
+        }
+      ]
+    },
+    {
+      "id": "preorder",
+      "kind": "choice",
+      "prompt": "Same tree. What is the **pre-order** traversal?\n\n```\n        8\n      /   \\\n     3     10\n    / \\      \\\n   1   6      14\n      / \\     /\n     4   7   13\n```",
+      "options": [
+        "8, 3, 1, 6, 4, 7, 10, 14, 13",
+        "1, 3, 4, 6, 7, 8, 10, 13, 14",
+        "8, 3, 10, 1, 6, 14, 4, 7, 13",
+        "1, 4, 7, 6, 3, 13, 14, 10, 8"
+      ],
+      "answer": 0,
+      "explanation": "Pre-order is node, left, right: 8, then all of 3's subtree (3, 1, 6, 4, 7), then 10's subtree (10, 14, 13).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Pre-order always visits the root first. Then where does it go?"
+        }
+      ]
+    },
+    {
+      "id": "bfs-order",
+      "kind": "choice",
+      "prompt": "Same tree. What does **breadth-first** (level order) visit?\n\n```\n        8\n      /   \\\n     3     10\n    / \\      \\\n   1   6      14\n      / \\     /\n     4   7   13\n```",
+      "options": [
+        "8, 3, 1, 6, 4, 7, 10, 14, 13",
+        "8, 3, 10, 1, 6, 14, 4, 7, 13",
+        "1, 3, 4, 6, 7, 8, 10, 13, 14",
+        "8, 10, 3, 14, 6, 1, 13, 7, 4"
+      ],
+      "answer": 1,
+      "explanation": "Level by level, left to right: 8 / 3, 10 / 1, 6, 14 / 4, 7, 13.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Read the tree row by row."
+        }
+      ]
+    },
+    {
+      "id": "search-steps",
+      "kind": "number",
+      "prompt": "Searching that BST for 7, starting at the root, how many nodes do you compare against, including 7 itself?\n\n```\n        8\n      /   \\\n     3     10\n    / \\      \\\n   1   6      14\n      / \\     /\n     4   7   13\n```",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "7 < 8 so go left to 3. 7 > 3 so go right to 6. 7 > 6 so go right to 7. Found: **4** comparisons (8, 3, 6, 7). The other five nodes are never looked at.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "At each node, is 7 smaller or bigger?"
+        }
+      ]
+    },
+    {
+      "id": "levels",
+      "kind": "number",
+      "prompt": "How many **levels** does that tree have?\n\n```\n        8\n      /   \\\n     3     10\n    / \\      \\\n   1   6      14\n      / \\     /\n     4   7   13\n```",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "8 / 3, 10 / 1, 6, 14 / 4, 7, 13: **4** levels. That is `height(root)` with height(null) = 0. Counted in edges instead, the height would be 3, so say which convention you are using.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Count the rows."
+        }
+      ]
+    },
+    {
+      "id": "skewed",
+      "kind": "choice",
+      "prompt": "You insert 1, 2, 3, 4, 5, in that order, into an empty BST that never rebalances. What is searching it like?",
+      "options": [
+        "O(log n): BSTs are always logarithmic.",
+        "O(n): every node goes to the right, so the tree is really a linked list.",
+        "O(1): the values are sorted.",
+        "O(n log n)."
+      ],
+      "answer": 1,
+      "explanation": "Each new value is bigger, so it always goes right. The height becomes n and a search may visit every node. That is why self-balancing trees exist.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Draw it. Where does each new value go?"
+        }
+      ]
+    },
+    {
+      "id": "bfs-structure",
+      "kind": "choice",
+      "prompt": "Which data structure gives level-order (BFS) traversal?",
+      "options": [
+        "A stack",
+        "A queue",
+        "A hash set",
+        "A sorted array"
+      ],
+      "answer": 1,
+      "explanation": "A queue: first in, first out. Children are added to the back, so a whole level is handled before the next one starts. A stack would give DFS.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Should the node found first, or found last, be explored next?"
+        }
+      ]
+    },
+    {
+      "id": "postorder-use",
+      "kind": "choice",
+      "prompt": "You need each node's subtree size, which depends on its children's sizes. Which traversal fits?",
+      "options": [
+        "Pre-order",
+        "In-order",
+        "Post-order",
+        "Level order"
+      ],
+      "answer": 2,
+      "explanation": "Post-order handles both children before the node, so their answers are ready when you combine them: size = 1 + size(left) + size(right).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Do you need the children's answers before or after visiting the node?"
+        }
+      ]
+    },
+    {
+      "id": "traversal-cost",
+      "kind": "text",
+      "prompt": "What is the time complexity of any full traversal (pre, in, post or level order) of a tree with n nodes?",
+      "accept": [
+        "O(n)",
+        "n"
+      ],
+      "placeholder": "e.g. O(log n)",
+      "explanation": "Each node is visited exactly once, with O(1) work per visit: O(n). Don't confuse this with a single BST search, which only follows one path.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many times is each node visited?"
+        }
+      ]
+    },
+    {
+      "id": "validate-bst",
+      "kind": "choice",
+      "prompt": "To check a tree is a valid BST, someone checks only that every node is bigger than its left child and smaller than its right child. Why can that wrongly pass?",
+      "options": [
+        "It can't: that check is enough.",
+        "A node deep in the left subtree could still be bigger than an ancestor. Each node must sit inside the (low, high) range set by all its ancestors.",
+        "It forgets to check leaves.",
+        "It should use BFS instead."
+      ],
+      "answer": 1,
+      "explanation": "For example, 8 with left child 3, where 3 has right child 9: each parent-child pair looks fine, but 9 is in 8's left subtree. Pass down bounds: everything left of 8 must be below 8.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Can you build a small tree where every parent-child pair is fine, but the whole tree isn't?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write `isValidBST(root)`: return true if every node's value is strictly greater than everything in its left subtree, and strictly less than everything in its right subtree.\n\nThen answer:\n\n- Why isn't comparing each node with its children enough?\n- What are the time and space costs?",
+    "starter": {
+      "ts": "function isValidBST(root: TreeNode | null): boolean {\n  // your code here\n}",
+      "py": "def is_valid_bst(root):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Every node has a range it must fall inside, set by its ancestors."
+      },
+      {
+        "level": "pattern",
+        "text": "DFS that passes information down: (node, low, high)."
+      },
+      {
+        "level": "approach",
+        "text": "check(node, low, high): an empty node is fine. The value must satisfy low < value < high. Then check the left with (low, value) and the right with (value, high). Start with (−∞, +∞)."
+      }
+    ],
+    "reference": {
+      "ts": "function isValidBST(root: TreeNode | null): boolean {\n  const check = (node: TreeNode | null, low: number, high: number): boolean => {\n    if (node === null) return true\n    if (node.value <= low || node.value >= high) return false\n    return check(node.left, low, node.value) && check(node.right, node.value, high)\n  }\n  return check(root, -Infinity, Infinity)\n}",
+      "py": "def is_valid_bst(root):\n    def check(node, low, high):\n        if node is None:\n            return True\n        if not (low < node.value < high):\n            return False\n        return check(node.left, low, node.value) and check(node.right, node.value, high)\n    return check(root, float('-inf'), float('inf'))"
+    },
+    "explanation": "Each node is checked against the tightest bounds from all its ancestors, which catches a 9 hiding in 8's left subtree. Each node is visited once: **O(n) time**, and **O(h) space** for the recursion (log n balanced, n skewed). Another approach: an in-order traversal must come out strictly increasing.",
+    "selfCheck": [
+      "I pass bounds down instead of only comparing with the children.",
+      "Equal values are rejected, matching the strict rule.",
+      "I said O(n) time and O(h) space."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Saying BST operations are always O(log n).",
+      "fix": "They are O(h). That is log n when balanced and n when skewed."
+    },
+    {
+      "mistake": "Validating a BST by comparing each node only with its children.",
+      "fix": "Pass down (low, high) bounds, or check that an in-order traversal is strictly increasing."
+    },
+    {
+      "mistake": "Mixing up the DFS orders.",
+      "fix": "The name says where the **node** goes: **pre** = before its children, **in** = between them, **post** = after them."
+    },
+    {
+      "mistake": "Using a stack for level order.",
+      "fix": "Level order needs a queue. A stack gives depth-first order."
+    },
+    {
+      "mistake": "Forgetting the null base case.",
+      "fix": "Start every recursive tree function with `if node is None`. It handles leaves and the empty tree."
+    },
+    {
+      "mistake": "Mixing up height conventions.",
+      "fix": "Say whether you count nodes (levels) or edges. A single node has height 1 by levels, 0 by edges."
+    }
+  ]
+}

@@ -1,0 +1,344 @@
+{
+  "schemaVersion": 1,
+  "id": "arrays-strings",
+  "moduleId": "dsa",
+  "title": "Arrays and strings",
+  "summary": "Contiguous memory, indexing, shifting, two pointers.",
+  "estimatedMinutes": 22,
+  "prerequisites": [
+    "big-o"
+  ],
+  "recallPrompts": [
+    {
+      "id": "index-vs-insert",
+      "prompt": "Why is reading `arr[i]` O(1), but inserting at the front of an array O(n)?"
+    },
+    {
+      "id": "append-cost",
+      "prompt": "Appending to a Python list or JavaScript array is usually called O(1). What happens when the array is full?"
+    },
+    {
+      "id": "pair-sum",
+      "prompt": "Given a **sorted** array, how could you find two numbers that add up to a target without checking every pair?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "An array is a **row of numbered cinema seats**. You can walk straight to seat 37 without passing the others, because the numbers tell you exactly where it is. But to squeeze a friend into seat 3, everyone from seat 3 onwards has to shuffle one along.",
+    "sections": [
+      {
+        "id": "contiguous",
+        "heading": "One block of memory",
+        "body": "An array stores its items **side by side** in one block of memory. The computer knows where the block starts and how big each item is, so it can work out any address directly:\n\n`address of arr[i] = start + i × item size`\n\nThat is one multiplication and one addition, whatever i is. So reading or writing `arr[i]` is **O(1)**.\n\nThe catch is the same side-by-side layout. There are no gaps, so inserting or deleting in the middle means **shifting** every item after that point.\n\n| Operation | Cost |\n|---|---|\n| Read or write `arr[i]` | O(1) |\n| Append at the end | O(1) amortised |\n| Remove from the end | O(1) |\n| Insert or delete at index i | O(n − i), so O(n) |\n| Search an unsorted array | O(n) |\n| Search a sorted array | O(log n) |\n\nRun an insert at index 0, then one at the end, and compare the moves.",
+        "widget": "array-ops"
+      },
+      {
+        "id": "dynamic-arrays",
+        "heading": "Dynamic arrays and amortised O(1)",
+        "body": "Python lists, JavaScript arrays, Java's `ArrayList` and Kotlin's `MutableList` are **dynamic arrays**. They keep spare capacity at the end, so most appends just write into a free slot.\n\nWhen the block is full, the array allocates a new block, usually **twice the size**, and copies everything across. That one append is O(n).\n\nSo why call append O(1)? Count the copies while growing from 1 slot to n: 1 + 2 + 4 + … + n/2, which is less than **n**. Spread over n appends, that is under one extra copy each. This is **amortised O(1)**: a rare expensive step, paid for by many cheap ones.\n\nIn an interview, say \"amortised O(1)\" rather than plain \"O(1)\". It shows you know about the resize."
+      },
+      {
+        "id": "strings",
+        "heading": "Strings are arrays you can't change",
+        "body": "A string is an array of characters, so `s[i]` is O(1) and the length is known. In Python, JavaScript, Java and Kotlin, strings are also **immutable**: you can't change one in place.\n\nThat matters in loops. `s += c` builds a **brand new string** and copies everything so far. Do that n times and the copying adds up to 1 + 2 + … + n, which is **O(n²)**.\n\nThe fix is to collect the pieces and join once at the end, which is O(n): a list and `''.join(parts)` in Python, an array and `.join('')` in JavaScript, or a `StringBuilder` in Java and Kotlin.\n\nSlicing copies too: `s[a:b]` costs O(b − a), not O(1).",
+        "code": {
+          "ts": "// O(n²): each += copies the whole string so far\nlet slow = ''\nfor (const word of words) slow += word\n\n// O(n): collect, then join once\nconst parts: string[] = []\nfor (const word of words) parts.push(word)\nconst fast = parts.join('')",
+          "py": "# O(n²): each += copies the whole string so far\nslow = ''\nfor word in words:\n    slow += word\n\n# O(n): collect, then join once\nparts = []\nfor word in words:\n    parts.append(word)\nfast = ''.join(parts)"
+        }
+      },
+      {
+        "id": "two-pointers",
+        "heading": "Two pointers",
+        "body": "Many array problems get faster when you keep **two indexes** and move them towards each other, or one behind the other.\n\n**Pair sum on a sorted array.** Put `left` at the start and `right` at the end, then look at their sum:\n\n- Too small? Only a bigger number can help, so move `left` right.\n- Too big? Only a smaller number can help, so move `right` left.\n- Equal? Found it.\n\nEvery step rules out one value for good, so it takes at most n − 1 steps: **O(n)** instead of the O(n²) of checking every pair. It only works because the array is **sorted**, which tells you which pointer to move.\n\nThe same idea reverses an array in place, or checks a palindrome by comparing the two ends and moving inwards.",
+        "widget": "two-pointers"
+      },
+      {
+        "id": "sliding-window",
+        "heading": "Sliding window",
+        "body": "A **sliding window** is two pointers that move the same way, marking a run of consecutive items.\n\n**Fixed size.** To find the biggest sum of k items in a row, summing each window from scratch costs O(n × k). Instead, sum the first window, then slide: **subtract the item leaving and add the item entering**. Each slide is O(1), so the whole scan is **O(n)**.\n\n**Variable size.** For problems like \"the longest substring with no repeated letters\", grow the window on the right. When it breaks the rule, shrink it from the left until it is valid again. Each index enters once and leaves once, so it is still O(n).\n\nSignals that you need a window: *contiguous*, *substring*, *subarray*, *k in a row*, *longest or shortest run*."
+      },
+      {
+        "id": "space",
+        "heading": "In place or extra space",
+        "body": "Interviewers often ask about **space** as well as time. Reversing with two pointers swaps items **in place**, using **O(1)** extra space. Building a reversed copy uses **O(n)** extra space.\n\nNeither is wrong. Say which one you are doing, and offer the other if memory matters."
+      }
+    ]
+  },
+  "widgets": [
+    "array-ops",
+    "two-pointers"
+  ],
+  "explainBack": {
+    "prompt": "Explain why arrays have fast reads but slow inserts, why appending is called amortised O(1), why building a string with `+=` in a loop can be slow, and how two pointers find a pair sum in a sorted array in O(n).",
+    "rubric": [
+      {
+        "id": "address",
+        "point": "Items sit side by side, so the address of arr[i] is computed directly: O(1) access."
+      },
+      {
+        "id": "shift",
+        "point": "Inserting or deleting in the middle shifts the later items: O(n)."
+      },
+      {
+        "id": "amortised",
+        "point": "A full dynamic array doubles and copies; the copies average out to O(1) per append."
+      },
+      {
+        "id": "immutable",
+        "point": "Strings are immutable, so += copies each time: O(n²) in a loop; join or a builder is O(n)."
+      },
+      {
+        "id": "pointers",
+        "point": "Two pointers from both ends move based on the sum; sorted order tells you which one to move."
+      },
+      {
+        "id": "window",
+        "point": "A sliding window reuses the previous sum, subtracting the leaving item and adding the entering one."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "insert-front",
+      "kind": "choice",
+      "prompt": "What is the Big O of inserting a value at index 0 of an array holding n items?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n²)"
+      ],
+      "answer": 2,
+      "explanation": "Every one of the n items has to shift one slot right to make room, so it is O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What has to happen to the item already in slot 0?"
+        }
+      ]
+    },
+    {
+      "id": "shift-count",
+      "kind": "number",
+      "prompt": "An array holds 10 items in slots 0 to 9. How many items move when you insert a new value at index 2?",
+      "answer": 8,
+      "tolerance": 0,
+      "explanation": "The items in slots 2 to 9 each move one slot right: that is 10 − 2 = **8** moves.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which slots hold items that sit at or after index 2?"
+        }
+      ]
+    },
+    {
+      "id": "append-amortised",
+      "kind": "choice",
+      "prompt": "Which best describes appending to a Python list or JavaScript array?",
+      "options": [
+        "Always O(1)",
+        "Always O(n)",
+        "O(1) amortised: usually O(1), occasionally O(n) when it resizes",
+        "O(log n)"
+      ],
+      "answer": 2,
+      "explanation": "Most appends write into spare capacity. When full, it doubles and copies everything (O(n)), but doubling makes those copies rare enough to average out to O(1) per append.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "What happens when there is no free slot left?"
+        }
+      ]
+    },
+    {
+      "id": "doubling-copies",
+      "kind": "number",
+      "prompt": "A dynamic array starts with capacity 1 and doubles whenever it is full. How many item copies happen in total while appending 16 items?",
+      "answer": 15,
+      "tolerance": 0,
+      "explanation": "It resizes when full at 1, 2, 4 and 8 items, copying 1 + 2 + 4 + 8 = **15** items. That is fewer copies than appends, which is why the average is O(1).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "At which sizes is the array full when the next append arrives?"
+        },
+        {
+          "level": "approach",
+          "text": "Add up the item counts at each resize: 1, then 2, then 4, then 8."
+        }
+      ]
+    },
+    {
+      "id": "string-concat",
+      "kind": "choice",
+      "prompt": "Why can building a long string with `s += piece` inside a loop be slow?",
+      "options": [
+        "String comparison is slow.",
+        "Strings are immutable, so each += builds a new string and copies everything so far.",
+        "Loops over strings are always O(n²).",
+        "Adding to a string needs a hash lookup."
+      ],
+      "answer": 1,
+      "explanation": "Each `+=` copies the whole string built so far. Over n steps that is 1 + 2 + … + n copies, or O(n²). Collecting the pieces and joining once is O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Can a Python or JavaScript string be changed in place?"
+        }
+      ]
+    },
+    {
+      "id": "pair-sum-big-o",
+      "kind": "text",
+      "prompt": "What is the Big O of the two-pointer pair-sum scan on a sorted array of n items?",
+      "accept": [
+        "O(n)",
+        "n"
+      ],
+      "placeholder": "e.g. O(n²)",
+      "explanation": "Each step moves one pointer inwards and rules out one value, so there are at most n − 1 steps: O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many values does each step rule out for good?"
+        }
+      ]
+    },
+    {
+      "id": "which-pointer",
+      "kind": "choice",
+      "prompt": "Sorted array `[1, 3, 4, 6, 9]`, target 13. The pointers are on 1 and 9, whose sum is 10. What should happen next?",
+      "options": [
+        "Move left one step right",
+        "Move right one step left",
+        "Move both pointers",
+        "Stop: no pair exists"
+      ],
+      "answer": 0,
+      "explanation": "10 is too small, so you need a bigger number. Only moving `left` right can give one, because `right` is already on the biggest value. (Then 3 + 9 = 12, then 4 + 9 = 13.)",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Is 10 too big or too small?"
+        },
+        {
+          "level": "pattern",
+          "text": "To make the sum bigger, swap in a bigger number. Which end has the bigger numbers still to try?"
+        }
+      ]
+    },
+    {
+      "id": "window-max",
+      "kind": "number",
+      "prompt": "What is the largest sum of 3 consecutive items in `[2, 1, 5, 1, 3, 2]`?",
+      "answer": 9,
+      "tolerance": 0,
+      "explanation": "The windows sum to 8, 7, 9 and 6. The best is 5 + 1 + 3 = **9**. Each slide subtracts the item leaving and adds the item entering.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Start with 2 + 1 + 5, then slide one step at a time."
+        },
+        {
+          "level": "pattern",
+          "text": "Fixed sliding window: new sum = old sum − leaving + entering."
+        }
+      ]
+    },
+    {
+      "id": "window-naive",
+      "kind": "text",
+      "prompt": "If you summed every window of size k from scratch in an array of n items, what would the Big O be? (Use n and k.)",
+      "accept": [
+        "O(n*k)",
+        "O(nk)",
+        "O(kn)",
+        "O(k*n)"
+      ],
+      "placeholder": "e.g. O(n + k)",
+      "explanation": "There are about n windows, and summing each costs k, so it is O(n × k). The sliding window brings it down to O(n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Roughly how many windows are there, and what does each one cost?"
+        }
+      ]
+    },
+    {
+      "id": "pop-end",
+      "kind": "choice",
+      "prompt": "What is the Big O of removing the **last** item of an array (`pop()`)?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "It depends on the item's value"
+      ],
+      "answer": 0,
+      "explanation": "Nothing comes after the last item, so nothing shifts. The length just goes down by one: O(1). Removing from the **front** is the O(n) one.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Which items have to move after removing the last one?"
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write a function that takes a **sorted** array and a target, and returns the indexes of two items that add up to the target, or `null` / `None` if none do. Use two pointers, not nested loops.\n\nThen answer:\n\n- What is its Big O in time and in extra space?\n- Why would it give wrong answers on an unsorted array?",
+    "starter": {
+      "ts": "function pairWithSum(sorted: number[], target: number): [number, number] | null {\n  // your code here\n}",
+      "py": "def pair_with_sum(sorted_list, target):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "Where should the two pointers start?"
+      },
+      {
+        "level": "pattern",
+        "text": "Two pointers moving inwards, guided by whether the sum is too small or too big."
+      },
+      {
+        "level": "approach",
+        "text": "left = 0, right = n − 1. While left < right: if the sum equals the target, return both. If it is too small, left += 1. Otherwise right -= 1. Return null when they meet."
+      }
+    ],
+    "reference": {
+      "ts": "function pairWithSum(sorted: number[], target: number): [number, number] | null {\n  let left = 0\n  let right = sorted.length - 1\n  while (left < right) {\n    const sum = sorted[left] + sorted[right]\n    if (sum === target) return [left, right]\n    if (sum < target) left++\n    else right--\n  }\n  return null\n}",
+      "py": "def pair_with_sum(sorted_list, target):\n    left, right = 0, len(sorted_list) - 1\n    while left < right:\n        total = sorted_list[left] + sorted_list[right]\n        if total == target:\n            return left, right\n        if total < target:\n            left += 1\n        else:\n            right -= 1\n    return None"
+    },
+    "explanation": "Each loop moves one pointer inwards, so it runs at most n − 1 times: **O(n)** time and **O(1)** extra space. On unsorted data, \"too small, so move left\" no longer guarantees a bigger value, so it can skip past the real pair. For unsorted input, a hash set gives O(n) instead, which comes up in the next topic.",
+    "selfCheck": [
+      "The loop condition is left < right, so an item is never paired with itself.",
+      "I return as soon as the sum matches, and return null or None when the pointers meet.",
+      "I said O(n) time, O(1) extra space, and explained why sorting matters."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Saying append is always O(1).",
+      "fix": "It is **amortised** O(1). A full array resizes in O(n), but doubling makes that rare enough to average out."
+    },
+    {
+      "mistake": "Building a string with `+=` in a loop and calling it O(n).",
+      "fix": "Each `+=` copies the string so far, so it can be O(n²). Collect the pieces and `join`, or use a `StringBuilder`."
+    },
+    {
+      "mistake": "Using two pointers for pair sum on unsorted data.",
+      "fix": "The moves rely on sorted order. Sort first (O(n log n)) or use a hash set (O(n))."
+    },
+    {
+      "mistake": "Treating slicing as free.",
+      "fix": "`arr[a:b]` and `s[a:b]` copy b − a items, so slicing inside a loop can quietly add a factor of n."
+    },
+    {
+      "mistake": "Off-by-one window sizes.",
+      "fix": "A window from `left` to `right` inclusive holds `right − left + 1` items. Check it on a tiny example."
+    },
+    {
+      "mistake": "Deleting from a list while looping forwards over it.",
+      "fix": "Later items shift down and get skipped. Loop backwards, or build a new list of the items to keep."
+    }
+  ]
+}

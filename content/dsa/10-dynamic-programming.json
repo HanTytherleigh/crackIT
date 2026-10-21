@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "id": "dynamic-programming",
+  "moduleId": "dsa",
+  "title": "Dynamic programming",
+  "summary": "Overlapping subproblems and filling the table.",
+  "estimatedMinutes": 25,
+  "prerequisites": [
+    "recursion",
+    "arrays-strings"
+  ],
+  "recallPrompts": [
+    {
+      "id": "what",
+      "prompt": "In your own words, what is dynamic programming, and how is it related to the Fibonacci memo from the recursion topic?"
+    },
+    {
+      "id": "ingredients",
+      "prompt": "What property must a problem have for dynamic programming to help?"
+    },
+    {
+      "id": "greedy",
+      "prompt": "To make 6p from coins of 1p, 3p and 4p using as few coins as possible, would \"always take the biggest coin that fits\" work? Why or why not?"
+    }
+  ],
+  "mentalModel": {
+    "analogy": "DP is **writing your working in a notebook**. Instead of re-solving the same small sum every time it comes up, you solve each small sum once, write the answer in a table, and build bigger answers by looking up smaller ones. The table is the notebook. Filling it in the right order means every answer you need is already written down.",
+    "sections": [
+      {
+        "id": "two-ingredients",
+        "heading": "When DP applies",
+        "body": "Dynamic programming solves a problem by combining answers to **smaller subproblems**, solving each subproblem **once**. It works when a problem has two properties:\n\n- **Overlapping subproblems**: the same smaller problems come up again and again, as `fib(3)` did inside `fib(5)`.\n- **Optimal substructure**: the best answer to the whole is built from best answers to the parts.\n\nIf the subproblems don't overlap (as in merge sort), plain divide and conquer is enough. If a simple local choice is always right, a **greedy** algorithm is enough. DP is for when you must consider every choice, but the choices share sub-results."
+      },
+      {
+        "id": "recipe",
+        "heading": "A recipe for any DP problem",
+        "body": "Work through these out loud. It is what interviewers want to hear:\n\n- **State**: what does `dp[i]` (or `dp[i][j]`) mean, in words? \"dp[c] = fewest coins to make amount c.\"\n- **Recurrence**: how is a state built from smaller states? \"dp[c] = 1 + min(dp[c − coin]) over each coin.\"\n- **Base cases**: the smallest states, answered directly. \"dp[0] = 0.\"\n- **Order**: fill states so everything a cell reads is already filled. Small to large.\n- **Answer**: which cell holds it? \"dp[amount].\"\n\nThen the cost is **number of states × work per state**."
+      },
+      {
+        "id": "top-down-bottom-up",
+        "heading": "Top-down and bottom-up",
+        "body": "There are two ways to write the same DP:\n\n- **Top-down (memoisation)**: write the natural recursion, then cache results. It only computes the states it actually needs, but it pays for recursion and can hit depth limits.\n- **Bottom-up (tabulation)**: fill a table in a loop, from the base cases upwards. No recursion, and often you only need the last row or two, which cuts the space.\n\nFibonacci bottom-up needs only the previous two values: **O(n) time, O(1) space**.\n\nThe widget fills three classic tables. Watch which cells each new cell reads: that is the recurrence made visible.",
+        "widget": "dp-table"
+      },
+      {
+        "id": "classics",
+        "heading": "The classics",
+        "body": "- **Climbing stairs / Fibonacci**: `dp[i] = dp[i − 1] + dp[i − 2]`. O(n).\n- **Coin change** (fewest coins): `dp[c] = 1 + min(dp[c − coin])`. O(amount × coins).\n- **0/1 knapsack**: for each item and capacity, either skip the item (`dp[i − 1][c]`) or take it (`value + dp[i − 1][c − weight]`). O(n × W).\n- **Longest common subsequence**: letters match → `1 + dp[i − 1][j − 1]`, otherwise `max(up, left)`. O(m × n). This is the basis of `diff` tools.\n- **Grid paths**: paths to a cell = paths from above + paths from the left.\n\nTo recover the actual choice (which items, which letters), **trace back** through the filled table from the answer cell. The widget does that for the knapsack and LCS."
+      },
+      {
+        "id": "spotting",
+        "heading": "Spotting a DP problem",
+        "body": "Signals in the problem statement:\n\n- \"**How many ways** …\"\n- \"**Minimum / maximum** cost, length, profit …\"\n- \"**Longest / shortest** subsequence, path …\"\n- \"**Can you** reach / make / partition …?\"\n- Choices at each step whose effects carry forward (take or skip, go right or down).\n\nIf you catch yourself writing a recursion that calls itself on the same arguments more than once, add a memo. You have just written DP.\n\nCompare with **greedy**: it makes the locally best choice and never looks back. That works for some coin systems (UK coins), but fails for coins of 1, 3 and 4 with amount 6. Greedy takes 4 + 1 + 1 (3 coins), while DP finds 3 + 3 (2 coins).",
+        "code": {
+          "ts": "// Fewest coins to make each amount, bottom-up\nfunction coinChange(coins: number[], amount: number): number {\n  const dp = new Array(amount + 1).fill(Infinity)\n  dp[0] = 0\n  for (let c = 1; c <= amount; c++) {\n    for (const coin of coins) {\n      if (coin <= c) dp[c] = Math.min(dp[c], dp[c - coin] + 1)\n    }\n  }\n  return dp[amount] === Infinity ? -1 : dp[amount]\n}",
+          "py": "# Fewest coins to make each amount, bottom-up\ndef coin_change(coins, amount):\n    dp = [0] + [float('inf')] * amount\n    for c in range(1, amount + 1):\n        for coin in coins:\n            if coin <= c:\n                dp[c] = min(dp[c], dp[c - coin] + 1)\n    return -1 if dp[amount] == float('inf') else dp[amount]"
+        }
+      }
+    ]
+  },
+  "widgets": [
+    "dp-table"
+  ],
+  "explainBack": {
+    "prompt": "Explain what dynamic programming is, when it applies, and the steps you take to design a DP solution. Use coin change or the knapsack as your example, and say how you'd get the cost.",
+    "rubric": [
+      {
+        "id": "overlap",
+        "point": "DP needs overlapping subproblems: the same smaller problems recur."
+      },
+      {
+        "id": "substructure",
+        "point": "And optimal substructure: the best whole answer is built from best sub-answers."
+      },
+      {
+        "id": "state",
+        "point": "Define the state in words, e.g. dp[c] = fewest coins for amount c."
+      },
+      {
+        "id": "recurrence",
+        "point": "Write the recurrence from smaller states, plus base cases and a fill order."
+      },
+      {
+        "id": "styles",
+        "point": "Top-down memoisation or bottom-up tabulation; both solve each state once."
+      },
+      {
+        "id": "cost",
+        "point": "Cost = number of states × work per state, e.g. O(amount × coins)."
+      }
+    ],
+    "passMark": 4
+  },
+  "checks": [
+    {
+      "id": "properties",
+      "kind": "choice",
+      "prompt": "Which two properties make a problem suitable for dynamic programming?",
+      "options": [
+        "Sorted input and a target value.",
+        "Overlapping subproblems and optimal substructure.",
+        "A graph with no cycles and positive weights.",
+        "Recursion and a base case."
+      ],
+      "answer": 1,
+      "explanation": "Overlapping subproblems mean caching pays off. Optimal substructure means you can build the best answer from best sub-answers. Recursion with a base case alone is just recursion.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Why did the Fibonacci memo help so much?"
+        }
+      ]
+    },
+    {
+      "id": "styles",
+      "kind": "choice",
+      "prompt": "What is the difference between top-down and bottom-up DP?",
+      "options": [
+        "Top-down is always faster.",
+        "Top-down recurses and caches results; bottom-up fills a table in a loop from the base cases up.",
+        "Bottom-up can't solve 2D problems.",
+        "Top-down doesn't need base cases."
+      ],
+      "answer": 1,
+      "explanation": "Both solve each state once, with the same Big O. Top-down follows the natural recursion and only computes the states it needs. Bottom-up avoids recursion and often allows space savings.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "One starts from the big problem, the other from the base cases."
+        }
+      ]
+    },
+    {
+      "id": "stairs",
+      "kind": "number",
+      "prompt": "How many ways are there to climb 5 stairs taking 1 or 2 steps at a time?",
+      "answer": 8,
+      "tolerance": 0,
+      "explanation": "ways(n) = ways(n − 1) + ways(n − 2), with ways(0) = ways(1) = 1: then 2, 3, 5, **8**.",
+      "hints": [
+        {
+          "level": "pattern",
+          "text": "It has the same shape as Fibonacci. Your last move was a 1-step or a 2-step."
+        }
+      ]
+    },
+    {
+      "id": "grid-paths",
+      "kind": "number",
+      "prompt": "In a 3 × 3 grid of cells, moving only right or down, how many paths go from the top-left cell to the bottom-right cell?",
+      "answer": 6,
+      "tolerance": 0,
+      "explanation": "Paths to a cell = paths from above + paths from the left. The first row and column are all 1. Then the middle row is 1, 2, 3 and the bottom row is 1, 3, **6**.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "How many ways are there to reach any cell in the top row?"
+        },
+        {
+          "level": "approach",
+          "text": "Fill the grid: each cell = the cell above + the cell to the left."
+        }
+      ]
+    },
+    {
+      "id": "knapsack-value",
+      "kind": "number",
+      "prompt": "Items as (weight, value): (1, 1), (3, 4), (4, 5), (5, 7). Capacity 7, each item used at most once. What is the best total value?",
+      "answer": 9,
+      "tolerance": 0,
+      "explanation": "Items 2 and 3, weights 3 + 4 = 7 and values 4 + 5 = **9**. The heaviest item (5, 7) plus (1, 1) gives only 8. The widget's knapsack table shows this.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Try a few combinations that fit within weight 7."
+        },
+        {
+          "level": "pattern",
+          "text": "0/1 knapsack: for each item, skip it or take it."
+        }
+      ]
+    },
+    {
+      "id": "lcs-length",
+      "kind": "number",
+      "prompt": "What is the length of the longest common subsequence of \"ABCBDAB\" and \"BDCAB\"? (Letters in order, but not necessarily next to each other.)",
+      "answer": 4,
+      "tolerance": 0,
+      "explanation": "One answer is \"BCAB\", length **4**. Others of the same length exist, such as \"BDAB\". The LCS table fills this in O(m × n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Try to find a 4-letter sequence that appears in order in both."
+        }
+      ]
+    },
+    {
+      "id": "greedy-fails",
+      "kind": "choice",
+      "prompt": "Coins are 1, 3 and 4. To make 6 with the fewest coins, why isn't \"always take the biggest coin that fits\" enough?",
+      "options": [
+        "It is enough: it gives the best answer.",
+        "Greedy takes 4 + 1 + 1 (3 coins), but 3 + 3 uses only 2. You must consider every choice: that is DP.",
+        "Greedy can't make 6 at all.",
+        "The coins aren't sorted."
+      ],
+      "answer": 1,
+      "explanation": "A locally best choice (the 4) leads to a worse total. DP tries each coin at each amount and keeps the best: dp[6] = 1 + min(dp[5], dp[3], dp[2]) = 1 + dp[3] = 2.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Work out what greedy picks, then look for a better combination."
+        }
+      ]
+    },
+    {
+      "id": "lcs-cost",
+      "kind": "text",
+      "prompt": "What is the time complexity of the LCS table for strings of lengths m and n?",
+      "accept": [
+        "O(m*n)",
+        "O(mn)",
+        "O(nm)",
+        "O(n*m)"
+      ],
+      "placeholder": "e.g. O(m + n)",
+      "explanation": "There are (m + 1) × (n + 1) cells, each filled in O(1): O(m × n).",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Number of states × work per state."
+        }
+      ]
+    },
+    {
+      "id": "fib-space",
+      "kind": "choice",
+      "prompt": "Bottom-up Fibonacci only ever reads the previous two values. What is the least extra space it needs?",
+      "options": [
+        "O(1)",
+        "O(log n)",
+        "O(n)",
+        "O(n²)"
+      ],
+      "answer": 0,
+      "explanation": "Keep two variables and roll them forward instead of a whole array: O(1) space. Look for this in any DP that only reads the previous row.",
+      "hints": [
+        {
+          "level": "nudge",
+          "text": "Do you need dp[0] once you are computing dp[10]?"
+        }
+      ]
+    },
+    {
+      "id": "signals",
+      "kind": "choice",
+      "prompt": "Which problem statement most strongly suggests dynamic programming?",
+      "options": [
+        "\"Return the k largest values.\"",
+        "\"Count the number of ways to decode this digit string into letters.\"",
+        "\"Check whether these brackets are balanced.\"",
+        "\"Find the shortest path in an unweighted grid.\""
+      ],
+      "answer": 1,
+      "explanation": "\"Count the number of ways\" with choices that carry forward (decode one digit or two) is a DP signal. The others are a heap, a stack and BFS.",
+      "hints": [
+        {
+          "level": "pattern",
+          "text": "\"How many ways\", \"minimum cost\", \"longest\": the classic DP wordings."
+        }
+      ]
+    }
+  ],
+  "handsOn": {
+    "prompt": "Write `coinChange(coins, amount)`: return the **fewest** coins that add up to `amount`, or −1 if it can't be made. Each coin can be used any number of times. Use bottom-up DP.\n\nThen answer:\n\n- What does dp[c] mean, and what is the recurrence?\n- What are the time and space costs?",
+    "starter": {
+      "ts": "function coinChange(coins: number[], amount: number): number {\n  // your code here\n}",
+      "py": "def coin_change(coins, amount):\n    # your code here\n    pass"
+    },
+    "hints": [
+      {
+        "level": "nudge",
+        "text": "If you knew the best answer for every smaller amount, how would you get the answer for this one?"
+      },
+      {
+        "level": "pattern",
+        "text": "Unbounded coin change: dp[c] = 1 + min over coins of dp[c − coin]."
+      },
+      {
+        "level": "approach",
+        "text": "dp[0] = 0; every other amount starts at infinity. For c from 1 to amount, for each coin ≤ c, dp[c] = min(dp[c], dp[c − coin] + 1). Return −1 if dp[amount] is still infinity."
+      }
+    ],
+    "reference": {
+      "ts": "function coinChange(coins: number[], amount: number): number {\n  const dp = new Array(amount + 1).fill(Infinity)\n  dp[0] = 0\n  for (let c = 1; c <= amount; c++) {\n    for (const coin of coins) {\n      if (coin <= c && dp[c - coin] + 1 < dp[c]) dp[c] = dp[c - coin] + 1\n    }\n  }\n  return dp[amount] === Infinity ? -1 : dp[amount]\n}",
+      "py": "def coin_change(coins, amount):\n    dp = [0] + [float('inf')] * amount\n    for c in range(1, amount + 1):\n        for coin in coins:\n            if coin <= c and dp[c - coin] + 1 < dp[c]:\n                dp[c] = dp[c - coin] + 1\n    return -1 if dp[amount] == float('inf') else dp[amount]"
+    },
+    "explanation": "**State**: dp[c] = fewest coins that make amount c. **Recurrence**: the last coin used was some coin, so dp[c] = 1 + min(dp[c − coin]). **Base case**: dp[0] = 0. **Order**: amounts small to large. There are amount + 1 states, each trying every coin: **O(amount × coins) time**, **O(amount) space**. Infinity marks \"can't be made\" and survives the `+ 1`, so unreachable amounts stay unreachable.",
+    "selfCheck": [
+      "I explained dp[c] in words before writing code.",
+      "dp[0] = 0, and everything else starts as infinity, not 0.",
+      "I return −1 when the amount can't be made.",
+      "I said O(amount × coins) time and O(amount) space."
+    ]
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Jumping into code without defining the state.",
+      "fix": "Say what dp[i] means in words first. Most DP bugs are an unclear state."
+    },
+    {
+      "mistake": "Filling cells in an order where a needed cell isn't ready yet.",
+      "fix": "Check that every cell the recurrence reads comes earlier in your loop order."
+    },
+    {
+      "mistake": "Initialising a minimum-DP table with 0.",
+      "fix": "Use infinity for \"not reachable yet\", or the minimum will wrongly stay at 0."
+    },
+    {
+      "mistake": "Trusting greedy because it worked on one example.",
+      "fix": "Look for a counter-example, such as coins 1, 3, 4 and amount 6. If greedy can fail, use DP."
+    },
+    {
+      "mistake": "Reporting a DP's cost without counting states.",
+      "fix": "Cost = number of states × work per state. Say both parts."
+    },
+    {
+      "mistake": "Keeping a whole 2D table when each row only reads the previous one.",
+      "fix": "Keep two rows, or one, and say the space drops, e.g. from O(n × W) to O(W)."
+    }
+  ]
+}
