@@ -476,3 +476,24 @@
 .notice {
   border-color: var(--warm);
 }
+
+/* Review session */
+.review-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.review-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--raised);
+  overflow: hidden;
+}
+.review-bar > div {
+  height: 100%;
+  background: var(--accent);
+  transition-property: width;
+}

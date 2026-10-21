@@ -13,6 +13,7 @@ import {
   type ProgressData,
   type TopicProgress,
 } from '../lib/progressModel'
+import { checkCardId, newCard, reviewCard, type Grade } from '../lib/scheduler'
 
 type Ref = { moduleId: string; topicId: string }
 
@@ -27,6 +28,9 @@ interface ProgressActions {
   saveExplainBack: (ref: Ref, record: Omit<ExplainBackRecord, 'submittedAt'>, passed: boolean, now?: Date) => void
   updateHandsOn: (ref: Ref, patch: Partial<HandsOnRecord>, now?: Date) => void
   markChecksPassed: (ref: Ref, now?: Date) => void
+  /** Reschedules a review card after it is answered in the Review queue. */
+  recordReview: (cardId: string, grade: Grade, now?: Date) => void
+  markRecheckPassed: (ref: Ref, now?: Date) => void
   markExported: (now?: Date) => void
   replaceAll: (data: ProgressData) => void
   resetAll: () => void
@@ -67,7 +71,11 @@ export const useProgress = create<ProgressStore>()(
         saveRecall: (ref, promptId, text, now = new Date()) =>
           patchTopic(ref, now, (t) => ({ recall: { ...t.recall, [promptId]: text } })),
 
-        recordCheck: (ref, checkId, answer, correct, now = new Date()) =>
+        recordCheck: (ref, checkId, answer, correct, now = new Date()) => {
+          // Every check you attempt becomes a review card, first due tomorrow.
+          const cardId = checkCardId(ref.moduleId, ref.topicId, checkId)
+          if (!get().review.cards[cardId])
+            set({ review: { cards: { ...get().review.cards, [cardId]: newCard(cardId, now) } } })
           patchTopic(ref, now, (t) => {
             const prev: CheckRecord = t.checks[checkId] ?? { attempts: 0, lastAnswer: '', correct: false, revealed: false }
             const next: CheckRecord = {
@@ -79,7 +87,8 @@ export const useProgress = create<ProgressStore>()(
               passedAt: prev.passedAt ?? (correct && !prev.revealed ? now.toISOString() : undefined),
             }
             return { checks: { ...t.checks, [checkId]: next } }
-          }),
+          })
+        },
 
         revealCheck: (ref, checkId, now = new Date()) =>
           patchTopic(ref, now, (t) => {
@@ -104,6 +113,15 @@ export const useProgress = create<ProgressStore>()(
 
         markChecksPassed: (ref, now = new Date()) =>
           patchTopic(ref, now, (t) => ({ checksPassedAt: t.checksPassedAt ?? now.toISOString() })),
+
+        recordReview: (cardId, grade, now = new Date()) => {
+          const card = get().review.cards[cardId]
+          if (!card) return
+          set({ review: { cards: { ...get().review.cards, [cardId]: reviewCard(card, grade, now) } } })
+        },
+
+        markRecheckPassed: (ref, now = new Date()) =>
+          patchTopic(ref, now, (t) => ({ recheckPassedAt: t.recheckPassedAt ?? now.toISOString() })),
 
         markExported: (now = new Date()) => set({ lastExportedAt: now.toISOString() }),
 

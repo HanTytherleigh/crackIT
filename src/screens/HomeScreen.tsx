@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { ProgressMap } from '../components/ProgressMap'
 import { getModule, modules } from '../content/modules'
 import { useProgress } from '../state/progress'
+import { dueCards, nextDue, SESSION_LIMIT } from '../lib/scheduler'
+import { describeDay } from './ReviewScreen'
 
 const EXPORT_REMINDER_DAYS = 14
 
@@ -10,6 +12,10 @@ export function HomeScreen() {
   const lastLesson = useProgress((s) => s.lastLesson)
   const lastExportedAt = useProgress((s) => s.lastExportedAt)
   const started = useProgress((s) => Object.keys(s.topics).length)
+  const cards = useProgress((s) => s.review.cards)
+  const now = new Date()
+  const due = dueCards(cards, now).length
+  const upcoming = nextDue(cards, now)
 
   const lastModule = getModule(lastLesson?.moduleId)
   const lastTopic = lastModule?.topics.find((t) => t.id === lastLesson?.topicId)
@@ -25,8 +31,21 @@ export function HomeScreen() {
 
       <section className="card stack" aria-labelledby="review-heading">
         <h2 id="review-heading">Today's review</h2>
-        <p className="muted">Nothing is due yet. Questions you answer in lessons come back here on a schedule, just before you would forget them.</p>
-        <Link to="/review" className="btn">Open review</Link>
+        {due > 0 ? (
+          <>
+            <p>
+              <strong>{due}</strong> {due === 1 ? 'question is' : 'questions are'} ready
+              {due > SESSION_LIMIT ? `. A session takes up to ${SESSION_LIMIT}, so it's fine to do it in parts.` : '.'}
+            </p>
+            <Link to="/review" className="btn btn-primary">Start review</Link>
+          </>
+        ) : upcoming ? (
+          <p className="muted">
+            All caught up. Next review is {describeDay(upcoming.date, now)}, with {upcoming.count} {upcoming.count === 1 ? 'question' : 'questions'}.
+          </p>
+        ) : (
+          <p className="muted">Nothing is due yet. Questions you answer in lessons come back here on a schedule, just before you would forget them.</p>
+        )}
       </section>
 
       <section className="card stack section-gap" aria-labelledby="continue-heading">
@@ -35,7 +54,7 @@ export function HomeScreen() {
           <strong>{resume.topic.title}</strong>
           <span className="muted"> · {resume.topic.summary}</span>
         </p>
-        <Link to={`/learn/${resume.module.id}/${resume.topic.id}`} className="btn btn-primary">
+        <Link to={`/learn/${resume.module.id}/${resume.topic.id}`} className={due > 0 ? 'btn' : 'btn btn-primary'}>
           {lastLesson ? 'Continue lesson' : 'Start lesson'}
         </Link>
       </section>

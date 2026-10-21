@@ -5,6 +5,7 @@ import { backupFileName, createBackup, parseBackup, summariseBackup, type Backup
 import { masteryLabel, masteryOf, topicKey, type TopicProgress } from '../lib/progressModel'
 import { snapshot, useProgress } from '../state/progress'
 import { settingsData, useSettings } from '../state/settings'
+import { dueCards, MAX_BOX } from '../lib/scheduler'
 
 const dateFmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 
@@ -64,6 +65,9 @@ export function ProgressScreen() {
   }
 
   const summary = pending && summariseBackup(pending)
+  const cards = Object.values(progress.review.cards)
+  const dueNow = dueCards(progress.review.cards, new Date()).length
+  const longTerm = cards.filter((c) => c.box >= 4).length
 
   return (
     <div className="page">
@@ -95,6 +99,33 @@ export function ProgressScreen() {
           </ul>
         </section>
       ))}
+
+      <section className="card stack section-gap" aria-labelledby="review-stats-heading">
+        <h2 id="review-stats-heading">Review cards</h2>
+        {cards.length === 0 ? (
+          <p className="muted">No review cards yet. Each check you answer in a lesson becomes one.</p>
+        ) : (
+          <>
+            <ul className="mastery-list">
+              <li><div className="mastery-row"><span>Cards in rotation</span><strong>{cards.length}</strong></div></li>
+              <li><div className="mastery-row"><span>Due now</span><strong>{dueNow}</strong></div></li>
+              <li><div className="mastery-row"><span>Well remembered (a week or more apart)</span><strong>{longTerm}</strong></div></li>
+            </ul>
+            <ol className="box-bars" aria-label="Cards in each Leitner box">
+              {Array.from({ length: MAX_BOX }, (_, i) => i + 1).map((box) => {
+                const count = cards.filter((c) => c.box === box).length
+                return (
+                  <li key={box} aria-label={`Box ${box}: ${count} ${count === 1 ? 'card' : 'cards'}`}>
+                    <span className="box-bar" style={{ height: `${cards.length ? Math.max(4, (count / cards.length) * 64) : 4}px` }} />
+                    <span className="small muted" aria-hidden="true">{box}</span>
+                  </li>
+                )
+              })}
+            </ol>
+            <p className="small muted">Boxes 1 to {MAX_BOX}: each box waits longer before a card comes back. A miss sends it back to box 1.</p>
+          </>
+        )}
+      </section>
 
       <section className="card stack section-gap" aria-labelledby="backup-heading">
         <h2 id="backup-heading">Back up your progress</h2>

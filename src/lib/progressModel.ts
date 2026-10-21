@@ -44,11 +44,11 @@ export interface TopicProgress {
   checksPassedAt?: string
   /** Set by the lesson once the explain-back rubric reaches its pass mark. */
   explainBackPassedAt?: string
-  /** Set by the review queue once the delayed re-check is passed (phase 4). */
+  /** Set by the review queue once the delayed re-check is passed. */
   recheckPassedAt?: string
 }
 
-/** A spaced-repetition card. The scheduler that fills these arrives in phase 4. */
+/** A spaced-repetition card, scheduled by src/lib/scheduler.ts. */
 export interface ReviewCard {
   id: string
   box: number
@@ -116,6 +116,24 @@ export const CHECK_PASS_SHARE = 0.8
 
 export function checksPassMark(totalChecks: number): number {
   return Math.ceil(totalChecks * CHECK_PASS_SHARE)
+}
+
+/** A delayed re-check has to happen at least this long after the lesson's checks were passed. */
+export const RECHECK_DELAY_MS = 20 * 60 * 60 * 1000
+
+/**
+ * The delayed re-check is passed once enough of the topic's review cards have been answered
+ * well (box 2 or higher) in a review held a day or so after the lesson's checks were passed.
+ */
+export function recheckPassed(
+  p: TopicProgress | undefined,
+  topicCards: ReviewCard[],
+  totalChecks: number,
+): boolean {
+  if (!p?.checksPassedAt) return false
+  const earliest = Date.parse(p.checksPassedAt) + RECHECK_DELAY_MS
+  const good = topicCards.filter((c) => c.box >= 2 && c.lastReviewedAt && Date.parse(c.lastReviewedAt) >= earliest)
+  return good.length >= checksPassMark(totalChecks)
 }
 
 export function masteryOf(p: TopicProgress | undefined): Mastery {

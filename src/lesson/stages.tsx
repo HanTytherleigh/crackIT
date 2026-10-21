@@ -271,7 +271,9 @@ export function WrapUpStage({ topic, progress }: StageProps) {
         <ul className="status-list">
           <li data-done={passed >= mark}>Checks: {passed} of {topic.checks.length} passed{passed >= mark ? '' : `, ${mark} needed`}</li>
           <li data-done={explained}>Explain-back: {explained ? 'passed' : progress?.explainBack ? 'not passed yet' : 'not done yet'}</li>
-          <li data-done={!!progress?.recheckPassedAt}>Delayed re-check: {progress?.recheckPassedAt ? 'passed' : 'comes back in Review after a day or more'}</li>
+          <li data-done={!!progress?.recheckPassedAt}>
+            Delayed re-check: {progress?.recheckPassedAt ? 'passed' : 'your questions come back in Review from tomorrow'}
+          </li>
         </ul>
         <p className="muted small">A topic only becomes solid once all three are done. Coming back later is part of the method, not a failure.</p>
       </section>

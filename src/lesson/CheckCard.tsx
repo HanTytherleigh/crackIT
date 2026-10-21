@@ -10,9 +10,12 @@ import { Inline, Prose } from '../components/Prose'
  * One question. Attempt before reveal: hints and the "show answer" button only
  * appear after a first attempt, and a revealed answer no longer counts as a pass.
  */
-export function CheckCard({ check, index, record, hintsShown, onAnswer, onReveal, onHint }: {
+export function CheckCard({ check, index, label, record, hintsShown, onAnswer, onReveal, onHint, revealedNote = 'This one will come back in review.' }: {
   check: Check
   index: number
+  /** Replaces the "Question n" label, e.g. with the topic name in Review. */
+  label?: string
+  revealedNote?: string
   record: CheckRecord | undefined
   hintsShown: number
   onAnswer: (answer: string, correct: boolean) => void
@@ -34,7 +37,7 @@ export function CheckCard({ check, index, record, hintsShown, onAnswer, onReveal
   return (
     <section className="card check" aria-labelledby={`${id}-q`}>
       <h3 id={`${id}-q`} className="check-prompt">
-        <span className="check-num">Question {index + 1}</span>
+        <span className="check-num">{label ?? `Question ${index + 1}`}</span>
         <Inline text={check.prompt} />
       </h3>
       {check.code && <CodeBlock snippet={check.code} />}
@@ -76,7 +79,7 @@ export function CheckCard({ check, index, record, hintsShown, onAnswer, onReveal
 
       <div aria-live="polite">
         {attempted && !finished && <p className="feedback feedback-retry">Not quite. Have another go, or open a hint.</p>}
-        {solved && <p className="feedback feedback-ok">{record?.passedAt ? 'Correct.' : 'Correct, after seeing the answer. This one will come back in review.'}</p>}
+        {solved && <p className="feedback feedback-ok">{record?.passedAt ? 'Correct.' : `Correct, after seeing the answer. ${revealedNote}`}</p>}
         {record?.revealed && !solved && (
           <p className="feedback feedback-reveal">
             Answer: <strong><Inline text={displayAnswer(check)} /></strong>
