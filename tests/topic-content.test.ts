@@ -5,10 +5,14 @@ import { parseBlocks } from '../src/components/Prose'
 
 const bigO = JSON.parse(readFileSync('content/dsa/01-big-o.json', 'utf8'))
 
+const topicFiles = readdirSync('content', { withFileTypes: true })
+  .filter((d) => d.isDirectory() && d.name !== 'drills')
+  .flatMap((d) => readdirSync(`content/${d.name}`).map((f) => `content/${d.name}/${f}`))
+
 describe('every topic file', () => {
-  for (const f of readdirSync('content/dsa')) {
+  for (const f of topicFiles) {
     it(`${f} matches the topic schema`, () => {
-      const r = topicSchema.safeParse(JSON.parse(readFileSync(`content/dsa/${f}`, 'utf8')))
+      const r = topicSchema.safeParse(JSON.parse(readFileSync(f, 'utf8')))
       expect(r.success, JSON.stringify(r.error?.issues)).toBe(true)
     })
   }

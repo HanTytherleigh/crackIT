@@ -9,10 +9,18 @@ describe('modules.json', () => {
     expect(modulesFileSchema.safeParse(modulesJson).success).toBe(true)
   })
 
-  it('has DSA as the only available module, with ten topics', () => {
-    const available = modulesJson.modules.filter((m: { status: string }) => m.status === 'available')
-    expect(available.map((m: { id: string }) => m.id)).toEqual(['dsa'])
-    expect(available[0].topics).toHaveLength(10)
+  it('has DSA available with ten written topics', () => {
+    const dsa = modulesJson.modules.find((m: { id: string }) => m.id === 'dsa')
+    expect(dsa.status).toBe('available')
+    expect(dsa.topics).toHaveLength(10)
+    expect(dsa.topics.every((t: { file?: string }) => t.file)).toBe(true)
+  })
+
+  it('lists eleven modules in the agreed order', () => {
+    expect(modulesJson.modules.map((m: { id: string }) => m.id)).toEqual([
+      'dsa', 'oop', 'databases', 'operating-systems', 'networking', 'software-engineering',
+      'security', 'system-design', 'architecture', 'discrete-maths', 'behavioural',
+    ])
   })
 })
 

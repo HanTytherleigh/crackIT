@@ -356,3 +356,6 @@ a.pattern-card:hover {
 .chip.chip-text span {
   font-family: var(--font-body);
 }
+.map-module + .map-module {
+  margin-top: var(--space-4);
+}

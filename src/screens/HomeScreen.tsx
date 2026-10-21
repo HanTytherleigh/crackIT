@@ -8,7 +8,8 @@ import { describeDay } from '../lib/dates'
 const EXPORT_REMINDER_DAYS = 14
 
 export function HomeScreen() {
-  const dsa = modules.find((m) => m.status === 'available')!
+  const available = modules.filter((m) => m.status === 'available')
+  const first = available[0]!
   const lastLesson = useProgress((s) => s.lastLesson)
   const lastExportedAt = useProgress((s) => s.lastExportedAt)
   const started = useProgress((s) => Object.keys(s.topics).length)
@@ -19,7 +20,7 @@ export function HomeScreen() {
 
   const lastModule = getModule(lastLesson?.moduleId)
   const lastTopic = lastModule?.topics.find((t) => t.id === lastLesson?.topicId)
-  const resume = lastModule && lastTopic ? { module: lastModule, topic: lastTopic } : { module: dsa, topic: dsa.topics[0]! }
+  const resume = lastModule && lastTopic ? { module: lastModule, topic: lastTopic } : { module: first, topic: first.topics[0]! }
 
   const daysSinceExport = lastExportedAt ? (Date.now() - Date.parse(lastExportedAt)) / 86_400_000 : Infinity
   const remindExport = started > 0 && daysSinceExport > EXPORT_REMINDER_DAYS
@@ -69,8 +70,12 @@ export function HomeScreen() {
 
       <section className="section-gap" aria-labelledby="map-heading">
         <h2 id="map-heading">Your map</h2>
-        <p className="muted">{dsa.title}</p>
-        <ProgressMap module={dsa} />
+        {available.map((m) => (
+          <div key={m.id} className="map-module">
+            <p className="muted">{m.title}</p>
+            <ProgressMap module={m} />
+          </div>
+        ))}
       </section>
     </div>
   )

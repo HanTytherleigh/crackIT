@@ -114,7 +114,9 @@ result = [
   },
 }
 
-const topics = readdirSync('content/dsa').map((f) => JSON.parse(readFileSync(`content/dsa/${f}`, 'utf8')))
+const topics = readdirSync('content', { withFileTypes: true })
+  .filter((d) => d.isDirectory() && d.name !== 'drills')
+  .flatMap((d) => readdirSync(`content/${d.name}`).map((f) => JSON.parse(readFileSync(`content/${d.name}/${f}`, 'utf8'))))
 const work = mkdtempSync(join(tmpdir(), 'crackit-ref-'))
 
 describe('hands-on reference answers', () => {

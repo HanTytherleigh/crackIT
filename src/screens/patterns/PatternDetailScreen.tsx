@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { patternName, usePatterns } from '../../content/patterns'
-import { getModule } from '../../content/modules'
+import { modules } from '../../content/modules'
 import { BackIcon } from '../../components/Icons'
 import { CodeBlock } from '../../components/CodeBlock'
 import { Prose } from '../../components/Prose'
@@ -12,7 +12,8 @@ export function PatternDetailScreen() {
   if (!patterns) return <div className="page"><p className="muted" role="status">Loading…</p></div>
   const p = patterns.find((x) => x.id === patternId)
   if (!p) return <NotFoundScreen />
-  const topic = getModule('dsa')?.topics.find((t) => t.id === p.topic)
+  const module = modules.find((m) => m.topics.some((t) => t.id === p.topic))
+  const topic = module?.topics.find((t) => t.id === p.topic)
 
   return (
     <div className="page">
@@ -58,9 +59,9 @@ export function PatternDetailScreen() {
         </ul>
       </section>
 
-      {topic && (
+      {module && topic && (
         <p className="section-gap">
-          <Link to={`/learn/dsa/${topic.id}`} className="btn">Revise the lesson: {topic.title}</Link>
+          <Link to={`/learn/${module!.id}/${topic.id}`} className="btn">Revise the lesson: {topic.title}</Link>
         </p>
       )}
     </div>
