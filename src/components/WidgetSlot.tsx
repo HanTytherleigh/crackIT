@@ -28,6 +28,7 @@ const widgets: Partial<Record<WidgetId, LazyExoticComponent<ComponentType>>> = {
   'linked-list': lazy(() => import('../widgets/LinkedList')),
   'stack-queue': lazy(() => import('../widgets/StackQueue')),
   'call-stack': lazy(() => import('../widgets/CallStack')),
+  'tree-traversal': lazy(() => import('../widgets/TreeTraversal')),
 }
 
 /** Embeds an interactive widget by id, or a placeholder while that widget is still being built. */

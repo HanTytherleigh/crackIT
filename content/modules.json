@@ -14,7 +14,7 @@
         { "id": "linked-lists", "title": "Linked lists", "summary": "Nodes, pointers, and rewiring them safely.", "file": "04-linked-lists.json" },
         { "id": "stacks-queues", "title": "Stacks and queues", "summary": "LIFO, FIFO, and spotting the hidden stack.", "file": "05-stacks-queues.json" },
         { "id": "recursion", "title": "Recursion", "summary": "Base cases, the call stack, and repeated work.", "file": "06-recursion.json" },
-        { "id": "trees-bfs-dfs", "title": "Trees, BFS and DFS", "summary": "Traversal orders and the stack or queue behind them." },
+        { "id": "trees-bfs-dfs", "title": "Trees, BFS and DFS", "summary": "Traversal orders and the stack or queue behind them.", "file": "07-trees-bfs-dfs.json" },
         { "id": "heaps", "title": "Heaps", "summary": "Priority queues, sift up and down, top-k." },
         { "id": "graphs", "title": "Graphs", "summary": "Representations, traversal, and shortest paths." },
         { "id": "dynamic-programming", "title": "Dynamic programming", "summary": "Overlapping subproblems and filling the table." }

@@ -35,11 +35,12 @@ export function CheckCard({ check, index, label, record, hintsShown, onAnswer, o
   }
 
   return (
-    <section className="card check" aria-labelledby={`${id}-q`}>
-      <h3 id={`${id}-q`} className="check-prompt">
-        <span className="check-num">{label ?? `Question ${index + 1}`}</span>
-        <Inline text={check.prompt} />
-      </h3>
+    <section className="card check" aria-labelledby={`${id}-q ${id}-p`}>
+      <h3 id={`${id}-q`} className="check-num">{label ?? `Question ${index + 1}`}</h3>
+      {/* Prompts can hold more than one block, such as a tree drawn in a code fence. */}
+      <div id={`${id}-p`}>
+        <Prose text={check.prompt} className="check-prompt" />
+      </div>
       {check.code && <CodeBlock snippet={check.code} />}
 
       <form onSubmit={submit} className="check-form">

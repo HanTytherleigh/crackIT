@@ -730,3 +730,36 @@
   margin: 0;
   accent-color: var(--accent);
 }
+.tree-node circle { fill: var(--surface); stroke: var(--border); }
+.tree-node text { fill: var(--text); }
+.tree-node.is-pending circle { stroke: var(--secondary); stroke-dasharray: 3 2; }
+.tree-node.is-visited circle { fill: var(--accent); stroke: var(--accent); }
+.tree-node.is-visited text { fill: var(--on-accent); }
+.tree-node.is-current circle { fill: var(--warm); stroke: var(--warm); }
+.tree-node.is-current text { fill: var(--bg); }
+.tree-node.is-moving circle { stroke: var(--warm); stroke-width: 3.5; }
+.trav-panels {
+  display: grid;
+  gap: var(--space-3);
+}
+.visit-order {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0;
+  margin: var(--space-1) 0 0;
+  min-height: 1.8em;
+}
+.visit-order li {
+  padding: 2px var(--space-2);
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.visit-order li + li::before {
+  content: '';
+}
