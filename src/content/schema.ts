@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { complexityModelIds, complexityModels } from '../widgets/complexityModels'
 
 // Schemas for everything under /content. The build runs scripts/validate-content.ts,
 // which parses every file with these and fails on the first error.
@@ -195,3 +196,48 @@ export type Hint = z.infer<typeof hintSchema>
 export type Check = z.infer<typeof checkSchema>
 export type Topic = z.infer<typeof topicSchema>
 
+
+// ---------------------------------------------------------------------------
+// Drill files: /content/drills/*.json
+
+export const bigOClasses = ['1', 'log n', 'n', 'n log n', 'n^2', 'n^3'] as const
+export type BigOClass = (typeof bigOClasses)[number]
+
+const lineMap = z.record(z.string(), z.array(z.number().int().min(1)).min(1))
+
+export const complexityItemSchema = z
+  .object({
+    id: idSchema,
+    title: z.string().min(1),
+    model: z.enum(complexityModelIds),
+    params: z.object({ k: z.number().int().min(1).max(20) }).optional(),
+    snippet: snippetSchema,
+    /** Which snippet lines each model event highlights. */
+    lines: z.object({ ts: lineMap, py: lineMap }),
+    answer: z.enum(bigOClasses),
+    dominant: z.object({ options: z.array(z.string().min(1)).min(2).max(4), answer: z.number().int().min(0) }),
+    explanation: prose,
+    trap: z.boolean(),
+  })
+  .superRefine((it, ctx) => {
+    if (it.dominant.answer >= it.dominant.options.length)
+      ctx.addIssue({ code: 'custom', message: `${it.id}: dominant answer index out of range` })
+    for (const lang of ['ts', 'py'] as const) {
+      const lineCount = it.snippet[lang].split('\n').length
+      for (const key of complexityModels[it.model].lines) {
+        const nums = it.lines[lang][key]
+        if (!nums) ctx.addIssue({ code: 'custom', message: `${it.id}: ${lang} has no line for model event "${key}"` })
+        else if (nums.some((n) => n > lineCount)) ctx.addIssue({ code: 'custom', message: `${it.id}: ${lang} line for "${key}" is past the end` })
+      }
+    }
+  })
+
+export const complexityDrillSchema = z.object({
+  schemaVersion: z.literal(1),
+  id: z.literal('complexity-reading'),
+  title: z.string().min(1),
+  items: z.array(complexityItemSchema).min(1),
+})
+
+export type ComplexityItem = z.infer<typeof complexityItemSchema>
+export type ComplexityDrill = z.infer<typeof complexityDrillSchema>

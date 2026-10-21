@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from 'react'
 import type { WidgetId } from '../content/schema'
 
 export const widgetTitles: Record<WidgetId, string> = {
@@ -16,13 +17,27 @@ export const widgetTitles: Record<WidgetId, string> = {
   'dp-table': 'DP table filler',
 }
 
-/** Embeds an interactive widget by id. Widgets are built from phase 3 onwards. */
+// Each widget is its own chunk, loaded when a lesson first shows it.
+const widgets: Partial<Record<WidgetId, LazyExoticComponent<ComponentType>>> = {
+  'growth-plotter': lazy(() => import('../widgets/GrowthPlotter')),
+  'binary-search-stepper': lazy(() => import('../widgets/BinarySearchStepper')),
+  'complexity-reader': lazy(() => import('../widgets/ComplexityReader')),
+}
+
+/** Embeds an interactive widget by id, or a placeholder while that widget is still being built. */
 export function WidgetSlot({ id }: { id: WidgetId }) {
+  const Widget = widgets[id]
+  if (!Widget)
+    return (
+      <div className="widget-slot" role="note">
+        <span className="badge">Interactive</span>
+        <p><strong>{widgetTitles[id]}</strong></p>
+        <p className="muted small">This widget is being built and will appear here.</p>
+      </div>
+    )
   return (
-    <div className="widget-slot" role="note">
-      <span className="badge">Interactive</span>
-      <p><strong>{widgetTitles[id]}</strong></p>
-      <p className="muted small">This widget is being built and will appear here.</p>
-    </div>
+    <Suspense fallback={<div className="widget-slot"><p className="muted small" role="status">Loading {widgetTitles[id].toLowerCase()}…</p></div>}>
+      <Widget />
+    </Suspense>
   )
 }

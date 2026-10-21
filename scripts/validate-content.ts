@@ -3,7 +3,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { ZodType } from 'zod'
-import { modulesFileSchema, topicSchema, type ModulesFile } from '../src/content/schema'
+import { complexityDrillSchema, modulesFileSchema, topicSchema, type ModulesFile } from '../src/content/schema'
 
 const errors: string[] = []
 
@@ -51,6 +51,15 @@ if (map) {
       for (const f of readdirSync(dir))
         if (f.endsWith('.json') && !referenced.has(f)) errors.push(`${join(dir, f)}: not referenced from content/modules.json`)
   }
+}
+
+// Drill files, each with its own schema.
+const drillSchemas: Record<string, ZodType<unknown>> = { 'complexity-reading.json': complexityDrillSchema }
+for (const f of readdirSync('content/drills')) {
+  if (!f.endsWith('.json')) continue
+  const schema = drillSchemas[f]
+  if (!schema) errors.push(`content/drills/${f}: no schema registered for this drill file`)
+  else load(join('content/drills', f), schema)
 }
 
 if (errors.length) {
